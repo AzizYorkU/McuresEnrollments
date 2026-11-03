@@ -402,14 +402,15 @@ dash.draw('sel-field', (el) => {
     el.textContent = s.word ? `${s.word} ${s.id === 'citizen' ? v : v.toLowerCase()}` : v.toLowerCase();
   }
 });
-// Field list: fields with York students first, with York's headcount and York's share of its students
-// in the field against the comparison group's share (green when York's is higher, red when lower).
+// Field list: fields with York students first, with York's headcount and York's growth in the field since 2012-13
+// against the comparison group's combined growth, the same figures as the Growth list and chart
+// (green when York grew faster, red when slower).
 dash.draw('field-select', (sel) => {
   const t = dash.data('totals');
-  const mix = dash.data('cmp_cip2');
+  const g = dash.data('group_totals');
   const p = P();
   sel.onchange = () => dash.setParams({ field: sel.value });
-  if (t.status !== 'ok' || mix.status !== 'ok') {
+  if (t.status !== 'ok' || g.status !== 'ok') {
     const cur = fieldCode(p) ? fieldOf(p) : ALL_F;
     sel.replaceChildren(...[ALL_F, cur].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(fieldName(f), f)));
     sel.value = cur;
@@ -417,19 +418,25 @@ dash.draw('field-select', (sel) => {
   }
   const fields = [...new Set(t.data.filter((r) => isCip2(r.field)).map((r) => r.field))].sort((a, b) => d3.ascending(fieldName(a), fieldName(b)));
   const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && isCip2(r.field))
-    .map((r) => [r.field, r.headcount]));
-  const share = new Map((bySel(mix.data).get(cmpKey(p)) ?? []).map((r) => [r.category, r]));
-  const tone = (f) => {
-    const r = share.get(f);
-    if (!r || r.york_share == null || r.peer_share == null || r.york_share === r.peer_share) return '';
-    return r.york_share > r.peer_share ? 'is-above' : 'is-below';
+    .map((r) => [r.field, r]));
+  const peers = new Map(g.data.filter((r) => r.group === p.group && r.level === p.level && r.year === p.year && isCip2(r.field))
+    .map((r) => [r.field, r.change_base]));
+  const growth = (f) => {
+    const y = york.get(f)?.change_base, pc = peers.get(f);
+    return y == null || pc == null ? null : { y, pc };
   };
-  const at = fields.filter((f) => york.get(f) > 0);
-  const not = fields.filter((f) => !(york.get(f) > 0));
+  const tone = (f) => {
+    const r = growth(f);
+    if (!r || r.y === r.pc) return '';
+    return r.y > r.pc ? 'is-above' : 'is-below';
+  };
+  const count = (f) => york.get(f)?.headcount ?? 0;
+  const at = fields.filter((f) => count(f) > 0);
+  const not = fields.filter((f) => !(count(f) > 0));
   const option = (f, withCount) => {
-    const r = share.get(f);
-    const pct = r && r.york_share != null && r.peer_share != null ? `  ·  ${fmtP(r.york_share)} vs ${fmtP(r.peer_share)}` : '';
-    const o = new Option(withCount ? `${fieldName(f)}  ·  York ${fmtN(york.get(f))}${pct}` : fieldName(f), f);
+    const r = growth(f);
+    const chg = r ? `  ·  since 2012-13: York ${fmtD(r.y)} vs peers ${fmtD(r.pc)}` : '';
+    const o = new Option(withCount ? `${fieldName(f)}  ·  York ${fmtN(count(f))}${chg}` : fieldName(f), f);
     o.className = withCount ? tone(f) : '';
     return o;
   };
@@ -439,11 +446,11 @@ dash.draw('field-select', (sel) => {
     og.append(...list.map((f) => option(f, withCount)));
     return og;
   };
-  sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length}): York’s share vs ${p.group}`, at, true),
-    group(`No York students (${not.length})`, not, false));
+  const head = p.year === FIRST ? `Fields with York students (${at.length})` : `Fields with York students (${at.length}): growth since 2012-13, York vs ${p.group}`;
+  sel.replaceChildren(new Option(ALL_F), group(head, at, true), group(`No York students (${not.length})`, not, false));
   sel.value = fieldCode(p) ? fieldOf(p) : ALL_F;
   sel.classList.remove('is-above', 'is-below');
-  const cur = fieldOf(p) !== ALL_F && york.get(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
+  const cur = fieldCode(p) && count(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
   if (cur) sel.classList.add(cur);
 });
 dash.draw('members', (el) => {

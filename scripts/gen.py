@@ -218,7 +218,7 @@ html = f"""<meta name="dash-one-writer">
         </select>
       </label>
       <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals cmp_cip2"></select></label>
+      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
       <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
       <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
       <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
@@ -257,7 +257,7 @@ html = f"""<meta name="dash-one-writer">
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
         </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s share of its students in that field against the comparison group’s: green where York’s is higher, red where lower. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
