@@ -348,7 +348,11 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('.ux .ux-reset')) dash.resetParams();
 });
 document.addEventListener('change', (e) => {
-  if (e.target.matches('.ux .ux-level')) dash.setParams({ level: e.target.value });
+  if (e.target.matches('.ux .ux-level')) {
+    // Year of study is undergraduate-only, so moving to Graduate clears it.
+    const clear = e.target.value === 'Graduate' && fieldOf(P()).startsWith('Year of study: ');
+    dash.setParams(clear ? { level: e.target.value, field: ALL_F } : { level: e.target.value });
+  }
 });
 document.addEventListener('input', (e) => {
   if (e.target.matches('.ux .ux-search')) dash.draw('dim-rows');
@@ -357,9 +361,28 @@ document.addEventListener('input', (e) => {
 const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'mix', 'gains', 'table'];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
 
+// Filters that change nothing on the open page are disabled, with the reason as a tooltip.
+const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
+function idleFilters(p) {
+  const page = pageOf(p);
+  const off = {};
+  if (page === 'share') off['f-group'] = 'The share of Ontario chart compares York with all of Ontario, not with a comparison group.';
+  if (BREAKDOWN_PAGES.includes(page)) {
+    for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = 'The breakdowns aren’t cross-tabulated with this filter, so it doesn’t change them.';
+    if (p.dim !== 'cip') off['f-field'] = 'Field of study only narrows the Detailed programs tab.';
+  }
+  if (p.level === 'Graduate' && !off['f-studyyear']) off['f-studyyear'] = 'Year of study is reported for undergraduates only.';
+  return off;
+}
+
 dash.onData(() => {
   const p = P();
   const page = pageOf(p);
+  const off = idleFilters(p);
+  document.querySelectorAll('.ux .ux-filters select').forEach((s) => {
+    s.disabled = s.id in off;
+    s.closest('.ux-field').title = off[s.id] ?? '';
+  });
   document.querySelectorAll('.ux .ux-navlink').forEach((b) => {
     if (b.dataset.page === page) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');

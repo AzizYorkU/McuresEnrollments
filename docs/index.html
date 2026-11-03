@@ -28,11 +28,13 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-msg { margin: 0; padding: var(--cds-pad-md) var(--cds-pad-lg); border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); color: var(--color-fg-muted); }
 
 .ux-filters { display: grid; gap: var(--cds-gap-sm); max-width: 72rem; }
-.ux-frow { display: grid; grid-template-columns: 5rem repeat(4, minmax(0, 1fr)); gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: end; }
+.ux-frow { display: grid; grid-template-columns: 5rem repeat(3, minmax(0, 1fr)) minmax(0, 2fr); gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: end; }
 .ux-frow + .ux-frow { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-gap-sm); }
 .ux-frow-h { margin: 0; align-self: center; padding-top: 1.1rem; font-size: var(--cds-font-size-caption); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--color-fg-muted); }
 .ux .ux-filters select { width: 100%; max-width: none; }
 .ux-reset-cell { justify-items: start; }
+.ux-field:has(select:disabled) { opacity: .45; cursor: not-allowed; }
+.ux .ux-filters select:disabled { cursor: not-allowed; }
 @media (max-width: 48rem) {
   .ux-frow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ux-frow-h { grid-column: 1 / -1; padding-top: 0; }
@@ -207,8 +209,8 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           </select>
         </label>
         <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
-        <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
         <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
+        <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
       </div>
       <div class="ux-frow" role="group" aria-labelledby="fh-student">
         <p class="ux-frow-h" id="fh-student">Student</p>
@@ -1432,7 +1434,11 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('.ux .ux-reset')) dash.resetParams();
 });
 document.addEventListener('change', (e) => {
-  if (e.target.matches('.ux .ux-level')) dash.setParams({ level: e.target.value });
+  if (e.target.matches('.ux .ux-level')) {
+    // Year of study is undergraduate-only, so moving to Graduate clears it.
+    const clear = e.target.value === 'Graduate' && fieldOf(P()).startsWith('Year of study: ');
+    dash.setParams(clear ? { level: e.target.value, field: ALL_F } : { level: e.target.value });
+  }
 });
 document.addEventListener('input', (e) => {
   if (e.target.matches('.ux .ux-search')) dash.draw('dim-rows');
@@ -1441,9 +1447,28 @@ document.addEventListener('input', (e) => {
 const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'mix', 'gains', 'table'];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
 
+// Filters that change nothing on the open page are disabled, with the reason as a tooltip.
+const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
+function idleFilters(p) {
+  const page = pageOf(p);
+  const off = {};
+  if (page === 'share') off['f-group'] = 'The share of Ontario chart compares York with all of Ontario, not with a comparison group.';
+  if (BREAKDOWN_PAGES.includes(page)) {
+    for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = 'The breakdowns aren’t cross-tabulated with this filter, so it doesn’t change them.';
+    if (p.dim !== 'cip') off['f-field'] = 'Field of study only narrows the Detailed programs tab.';
+  }
+  if (p.level === 'Graduate' && !off['f-studyyear']) off['f-studyyear'] = 'Year of study is reported for undergraduates only.';
+  return off;
+}
+
 dash.onData(() => {
   const p = P();
   const page = pageOf(p);
+  const off = idleFilters(p);
+  document.querySelectorAll('.ux .ux-filters select').forEach((s) => {
+    s.disabled = s.id in off;
+    s.closest('.ux-field').title = off[s.id] ?? '';
+  });
   document.querySelectorAll('.ux .ux-navlink').forEach((b) => {
     if (b.dataset.page === page) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
