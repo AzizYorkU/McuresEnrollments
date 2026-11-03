@@ -137,3 +137,5 @@
 .ux-field-select option.is-above, .ux-field-select.is-above { color: var(--color-ok); }
 .ux-field-select option.is-below, .ux-field-select.is-below { color: var(--color-bad); }
 .ux-field-select option, .ux-field-select optgroup { color: var(--color-fg); background: var(--color-panel); }
+.ux select.ux-subset { max-width: 16rem; }
+.ux-filter-note { margin-top: calc(-1 * var(--cds-gap-xs)); }

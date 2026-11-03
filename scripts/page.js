@@ -1,8 +1,8 @@
 dash.calc('totals', {
-  inputs: ['status', 'cip2'],
-  title: 'Totals by institution, field and year',
-  description: 'Headcount per institution, level and year, for all fields (domestic plus international) and for each field of study, with international share (all fields only), share of all Ontario students, and change from the previous year and from 2012-13.',
-  fn: (status, cip2) => {
+  inputs: ['status', 'cip2', 'gender', 'country', 'credential', 'studyyear'],
+  title: 'Totals by institution, filter and year',
+  description: 'Headcount per institution, level and year: for all students (domestic plus international), and for each field of study, gender, country of citizenship, credential and year of study (each from its own file, so they don’t combine), with international share (all students only), share of all Ontario students, and change from the previous year and from 2012-13.',
+  fn: (status, cip2, gender, country, credential, studyyear) => {
     const by = new Map();
     const add = (field, slice, n, intl) => {
       const key = field + '|' + slice;
@@ -13,6 +13,8 @@ dash.calc('totals', {
     };
     for (const r of status) add('All fields', r.slice, Number(r.headcount), r.category === 'International');
     for (const r of cip2) add(r.category, r.slice, Number(r.headcount), false);
+    for (const [prefix, rows] of [['Gender: ', gender], ['Citizenship: ', country], ['Credential: ', credential], ['Year of study: ', studyyear]])
+      for (const r of rows) add(prefix + r.category, r.slice, Number(r.headcount), false);
     const rows = [...by.values()];
     for (const t of rows) {
       const [institution, level, year] = t.slice.split('|');
@@ -125,7 +127,19 @@ const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
 const P = () => dash.params();
 const ALL_F = 'All fields';
 const fieldOf = (p) => p.field || ALL_F;
-const fieldCode = (p) => (fieldOf(p) === ALL_F ? null : fieldOf(p).split(' ')[0]);
+const isCip2 = (f) => /^\d\d /.test(f);
+const fieldCode = (p) => (isCip2(fieldOf(p)) ? fieldOf(p).split(' ')[0] : null);
+// One-file filters. The files aren't cross-tabulated, so one filter (these or field of study) applies at a time;
+// the active one is stored in the field param as prefix + category.
+const SUBSETS = [
+  { id: 'gender', prefix: 'Gender: ', all: 'All genders', word: '' },
+  { id: 'citizen', prefix: 'Citizenship: ', all: 'All countries', word: 'citizens of' },
+  { id: 'credential', prefix: 'Credential: ', all: 'All credentials', word: '' },
+  { id: 'studyyear', prefix: 'Year of study: ', all: 'All years of study', word: '' },
+];
+const subsetOf = (f) => SUBSETS.find((s) => f.startsWith(s.prefix));
+const titleCase = (v) => v.toLowerCase().replace(/(^|[\s(\-/,])([a-z])/g, (m, a, b) => a + b.toUpperCase());
+const catLabel = (s, v) => (s.id === 'citizen' ? titleCase(v) : v);
 const instKey = (inst, p) => `${fieldOf(p)}|${inst}|${p.level}|${p.year}`;
 const groupKey = (p) => `${p.group}|${fieldOf(p)}|${p.level}|${p.year}`;
 const cmpKey = (p) => `${p.group}|${p.level}|${p.year}`;
@@ -357,10 +371,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
   document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
-  const oneField = fieldOf(p) !== ALL_F;
-  document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !oneField; });
-  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField || p.dim === 'cip'; });
-  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = oneField; });
+  const filtered = fieldOf(p) !== ALL_F;
+  const cip2On = fieldCode(p) != null;
+  document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
+  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !filtered || (p.dim === 'cip' && cip2On); });
+  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = cip2On; });
   const d = dash.data('cmp_' + p.dim);
   const code = p.dim === 'cip' ? fieldCode(p) : null;
   const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0 && (!code || r.category.startsWith(code + '.')));
@@ -378,7 +393,13 @@ dash.draw('sel-year', (el) => { el.textContent = shortYear(P().year); });
 dash.draw('sel-group', (el) => { el.textContent = P().group; });
 dash.draw('sel-field', (el) => {
   const f = fieldOf(P());
-  el.textContent = f === ALL_F ? 'all fields' : f.replace(/^\d+ /, '');
+  const s = subsetOf(f);
+  if (f === ALL_F) el.textContent = 'all students';
+  else if (!s) el.textContent = f.replace(/^\d+ /, '');
+  else {
+    const v = catLabel(s, f.slice(s.prefix.length));
+    el.textContent = s.word ? `${s.word} ${s.id === 'citizen' ? v : v.toLowerCase()}` : v.toLowerCase();
+  }
 });
 // Field list: fields with York students first, with York's headcount and York's share of its students
 // in the field against the comparison group's share (green when York's is higher, red when lower).
@@ -388,12 +409,13 @@ dash.draw('field-select', (sel) => {
   const p = P();
   sel.onchange = () => dash.setParams({ field: sel.value });
   if (t.status !== 'ok' || mix.status !== 'ok') {
-    sel.replaceChildren(...[ALL_F, fieldOf(p)].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
-    sel.value = fieldOf(p);
+    const cur = fieldCode(p) ? fieldOf(p) : ALL_F;
+    sel.replaceChildren(...[ALL_F, cur].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
+    sel.value = cur;
     return;
   }
-  const fields = [...new Set(t.data.filter((r) => r.field !== ALL_F).map((r) => r.field))].sort(d3.ascending);
-  const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && r.field !== ALL_F)
+  const fields = [...new Set(t.data.filter((r) => isCip2(r.field)).map((r) => r.field))].sort(d3.ascending);
+  const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && isCip2(r.field))
     .map((r) => [r.field, r.headcount]));
   const share = new Map((bySel(mix.data).get(cmpKey(p)) ?? []).map((r) => [r.category, r]));
   const tone = (f) => {
@@ -418,7 +440,7 @@ dash.draw('field-select', (sel) => {
   };
   sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length}): York’s share vs ${p.group}`, at, true),
     group(`No York students (${not.length})`, not, false));
-  sel.value = fieldOf(p);
+  sel.value = fieldCode(p) ? fieldOf(p) : ALL_F;
   sel.classList.remove('is-above', 'is-below');
   const cur = fieldOf(p) !== ALL_F && york.get(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
   if (cur) sel.classList.add(cur);
@@ -438,13 +460,52 @@ dash.draw('group-select', (sel) => {
   sel.value = p.group;
   sel.onchange = () => dash.setParams({ group: sel.value });
 });
-dash.draw('year-select', (sel) => {
+// Gender, citizenship, credential and year of study lists: categories with York students first, largest first,
+// with York's headcount in the selected level and year. Picking one clears the other filters.
+const subsetIndex = memo((rows) => {
+  const m = new Map(); // prefix|level|year -> Map(field -> York headcount)
+  for (const r of rows) {
+    const s = subsetOf(r.field);
+    if (!s) continue;
+    const k = `${s.prefix}|${r.level}|${r.year}`;
+    if (!m.has(k)) m.set(k, new Map());
+    const cats = m.get(k);
+    cats.set(r.field, (cats.get(r.field) ?? 0) + (r.institution === FOCUS ? r.headcount : 0));
+  }
+  return m;
+});
+dash.draw('subset-select', (sel) => {
+  const s = SUBSETS.find((x) => x.id === sel.dataset.subset);
   const t = dash.data('totals');
   const p = P();
-  const years = t.status === 'ok' ? [...new Set(t.data.map((r) => r.year))].sort(d3.descending) : [p.year];
-  sel.replaceChildren(...years.map((y) => new Option(shortYear(y), y)));
-  sel.value = p.year;
-  sel.onchange = () => dash.setParams({ year: sel.value });
+  const cur = fieldOf(p).startsWith(s.prefix) ? fieldOf(p) : '';
+  sel.onchange = () => dash.setParams({ field: sel.value || ALL_F });
+  const label = (f) => catLabel(s, f.slice(s.prefix.length));
+  if (t.status !== 'ok') {
+    sel.replaceChildren(new Option(s.all, ''), ...(cur ? [new Option(label(cur), cur)] : []));
+    sel.value = cur;
+    return;
+  }
+  const cats = subsetIndex(t.data).get(`${s.prefix}|${p.level}|${p.year}`) ?? new Map();
+  const list = [...cats.keys()];
+  if (s.id === 'studyyear') list.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  else list.sort((a, b) => d3.descending(cats.get(a), cats.get(b)) || d3.ascending(a, b));
+  const at = list.filter((f) => cats.get(f) > 0);
+  const not = list.filter((f) => !(cats.get(f) > 0));
+  const item = (f, withCount) => new Option(withCount ? `${label(f)}  ·  York ${fmtN(cats.get(f))}` : label(f), f);
+  const group = (lbl, fs, withCount) => {
+    const og = document.createElement('optgroup');
+    og.label = lbl;
+    og.append(...fs.map((f) => item(f, withCount)));
+    return og;
+  };
+  const opts = [new Option(s.all, '')];
+  if (!list.length) opts.push(group('Not reported for this study level', [], false));
+  else if (not.length) opts.push(group(`With York students (${at.length})`, at, true), group(`No York students (${not.length})`, not, false));
+  else opts.push(...at.map((f) => item(f, true)));
+  if (cur && !cats.has(cur)) opts.push(new Option(label(cur), cur));
+  sel.replaceChildren(...opts);
+  sel.value = cur;
 });
 
 // Headline figures. Each reads one row of one source.

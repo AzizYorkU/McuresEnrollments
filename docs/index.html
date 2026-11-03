@@ -155,6 +155,8 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-field-select option.is-above, .ux-field-select.is-above { color: var(--color-ok); }
 .ux-field-select option.is-below, .ux-field-select.is-below { color: var(--color-bad); }
 .ux-field-select option, .ux-field-select optgroup { color: var(--color-fg); background: var(--color-panel); }
+.ux select.ux-subset { max-width: 16rem; }
+.ux-filter-note { margin-top: calc(-1 * var(--cds-gap-xs)); }
 
 </style>
 <div class="ux">
@@ -188,10 +190,14 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <option>Graduate</option>
         </select>
       </label>
-      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
       <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals cmp_cip2"></select></label>
+      <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
+      <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
+      <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
+      <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
       <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
+    <p class="ux-note ux-filter-note">Field of study, gender, citizenship, credential and year of study come from separate files that aren’t cross-tabulated, so one of them applies at a time: picking one clears the others. Year of study is reported for undergraduates only. Figures are for 2024-25; the trend charts cover every year from 2012-13.</p>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
@@ -217,7 +223,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
         <div class="ux-card ux-list-card" id="list-intl_share">
           <p class="ux-list-l">International share</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
-          <p class="ux-note ux-no-intl" hidden>Not reported by field of study. Pick All fields to see it.</p>
+          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
@@ -229,7 +235,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
         </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s share of its students in that field against the comparison group’s: green where York’s is higher, red where lower. Each chart has its own page in the menu.</p>
+      <p class="ux-note">2024-25 and the selected study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s share of its students in that field against the comparison group’s: green where York’s is higher, red where lower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
@@ -259,8 +265,8 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <button class="ux-tab ux-metric" data-metric="headcount" aria-pressed="false">Headcount</button>
           <button class="ux-tab ux-metric" data-metric="intl_share" aria-pressed="false">International share</button>
         </div>
-        <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
-        <p class="ux-note ux-no-intl" hidden>International share isn’t reported by field of study; pick All fields to rank on it.</p>
+        <p class="ux-note">2024-25 and the selected study level. A › marks a bar cut short to keep the others readable.</p>
+        <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
     </section>
@@ -268,7 +274,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     <section class="ux-page" data-page="institutions" id="institutions" hidden>
       <div class="ux-card" id="inst-card">
         <h2>Institutions in the comparison</h2>
-        <p class="ux-note">Selected year and study level. York is highlighted.</p>
+        <p class="ux-note">2024-25 and the selected study level. York is highlighted.</p>
         <div class="ux-scroll ux-scroll-tall">
           <table class="ux-table ux-inst-table" id="table-inst" data-rows="inst-rows" data-source="totals peer_groups" data-row-key="slice">
             <thead><tr>
@@ -286,7 +292,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 
     <section class="ux-page" data-page="mix gains table" id="breakdown" hidden>
       <div class="ux-break">
-        <p class="ux-msg ux-field-off" hidden>The field of study filter applies only to the Detailed programs tab: the other breakdowns aren’t reported by field.</p>
+        <p class="ux-msg ux-field-off" hidden>The filters above (other than study level and comparison group) don’t apply to the breakdowns, which aren’t cross-tabulated. The one exception: a field of study narrows the Detailed programs tab to that field.</p>
         <div class="ux-tabs" role="group" aria-label="Break down by">
           <button class="ux-tab ux-dimtab" data-dim="cip2" aria-pressed="false">Field of study</button>
           <button class="ux-tab ux-dimtab" data-dim="cip" aria-pressed="false">Detailed programs</button>
@@ -304,7 +310,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="cip2-mix" data-view="mix">
           <h3>Field of study: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_cip2"></div>
         </div>
@@ -346,7 +352,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="cip-mix" data-view="mix">
           <h3>Detailed programs: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the field, for its 12 largest programs, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the field, for its 12 largest programs, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_cip"></div>
         </div>
@@ -387,7 +393,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="country-mix" data-view="mix">
           <h3>Citizenship: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_country"></div>
         </div>
@@ -427,7 +433,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="age-mix" data-view="mix">
           <h3>Age: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_age"></div>
         </div>
@@ -467,7 +473,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="gender-mix" data-view="mix">
           <h3>Gender: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_gender"></div>
         </div>
@@ -507,7 +513,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="tongue-mix" data-view="mix">
           <h3>Mother tongue: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_tongue"></div>
         </div>
@@ -547,7 +553,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="credential-mix" data-view="mix">
           <h3>Credential: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_credential"></div>
         </div>
@@ -587,7 +593,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
       <div class="ux-dim-body">
         <div class="ux-card" id="studyyear-mix" data-view="mix">
           <h3>Year of study: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, 2024-25.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_studyyear"></div>
         </div>
@@ -625,7 +631,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     </div>
     </section>
 
-    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. With All fields, figures, growth, ranks and the institution table use the domestic/international file; with one field picked they use the field-of-study file, whose totals run slightly lower. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are listed in data/peer_groups.csv. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
+    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. With no filter, figures, growth, ranks and the institution table use the domestic/international file; with a field of study, gender, citizenship, credential or year of study picked they use that file, whose totals can run slightly lower. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are listed in data/peer_groups.csv. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
   </div>
 </div>
 </div>
@@ -1064,10 +1070,10 @@ dash.calc('cmp_studyyear', {
 });
 
 dash.calc('totals', {
-  inputs: ['status', 'cip2'],
-  title: 'Totals by institution, field and year',
-  description: 'Headcount per institution, level and year, for all fields (domestic plus international) and for each field of study, with international share (all fields only), share of all Ontario students, and change from the previous year and from 2012-13.',
-  fn: (status, cip2) => {
+  inputs: ['status', 'cip2', 'gender', 'country', 'credential', 'studyyear'],
+  title: 'Totals by institution, filter and year',
+  description: 'Headcount per institution, level and year: for all students (domestic plus international), and for each field of study, gender, country of citizenship, credential and year of study (each from its own file, so they don’t combine), with international share (all students only), share of all Ontario students, and change from the previous year and from 2012-13.',
+  fn: (status, cip2, gender, country, credential, studyyear) => {
     const by = new Map();
     const add = (field, slice, n, intl) => {
       const key = field + '|' + slice;
@@ -1078,6 +1084,8 @@ dash.calc('totals', {
     };
     for (const r of status) add('All fields', r.slice, Number(r.headcount), r.category === 'International');
     for (const r of cip2) add(r.category, r.slice, Number(r.headcount), false);
+    for (const [prefix, rows] of [['Gender: ', gender], ['Citizenship: ', country], ['Credential: ', credential], ['Year of study: ', studyyear]])
+      for (const r of rows) add(prefix + r.category, r.slice, Number(r.headcount), false);
     const rows = [...by.values()];
     for (const t of rows) {
       const [institution, level, year] = t.slice.split('|');
@@ -1190,7 +1198,19 @@ const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
 const P = () => dash.params();
 const ALL_F = 'All fields';
 const fieldOf = (p) => p.field || ALL_F;
-const fieldCode = (p) => (fieldOf(p) === ALL_F ? null : fieldOf(p).split(' ')[0]);
+const isCip2 = (f) => /^\d\d /.test(f);
+const fieldCode = (p) => (isCip2(fieldOf(p)) ? fieldOf(p).split(' ')[0] : null);
+// One-file filters. The files aren't cross-tabulated, so one filter (these or field of study) applies at a time;
+// the active one is stored in the field param as prefix + category.
+const SUBSETS = [
+  { id: 'gender', prefix: 'Gender: ', all: 'All genders', word: '' },
+  { id: 'citizen', prefix: 'Citizenship: ', all: 'All countries', word: 'citizens of' },
+  { id: 'credential', prefix: 'Credential: ', all: 'All credentials', word: '' },
+  { id: 'studyyear', prefix: 'Year of study: ', all: 'All years of study', word: '' },
+];
+const subsetOf = (f) => SUBSETS.find((s) => f.startsWith(s.prefix));
+const titleCase = (v) => v.toLowerCase().replace(/(^|[\s(\-/,])([a-z])/g, (m, a, b) => a + b.toUpperCase());
+const catLabel = (s, v) => (s.id === 'citizen' ? titleCase(v) : v);
 const instKey = (inst, p) => `${fieldOf(p)}|${inst}|${p.level}|${p.year}`;
 const groupKey = (p) => `${p.group}|${fieldOf(p)}|${p.level}|${p.year}`;
 const cmpKey = (p) => `${p.group}|${p.level}|${p.year}`;
@@ -1422,10 +1442,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
   document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
-  const oneField = fieldOf(p) !== ALL_F;
-  document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !oneField; });
-  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField || p.dim === 'cip'; });
-  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = oneField; });
+  const filtered = fieldOf(p) !== ALL_F;
+  const cip2On = fieldCode(p) != null;
+  document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
+  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !filtered || (p.dim === 'cip' && cip2On); });
+  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = cip2On; });
   const d = dash.data('cmp_' + p.dim);
   const code = p.dim === 'cip' ? fieldCode(p) : null;
   const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0 && (!code || r.category.startsWith(code + '.')));
@@ -1443,7 +1464,13 @@ dash.draw('sel-year', (el) => { el.textContent = shortYear(P().year); });
 dash.draw('sel-group', (el) => { el.textContent = P().group; });
 dash.draw('sel-field', (el) => {
   const f = fieldOf(P());
-  el.textContent = f === ALL_F ? 'all fields' : f.replace(/^\d+ /, '');
+  const s = subsetOf(f);
+  if (f === ALL_F) el.textContent = 'all students';
+  else if (!s) el.textContent = f.replace(/^\d+ /, '');
+  else {
+    const v = catLabel(s, f.slice(s.prefix.length));
+    el.textContent = s.word ? `${s.word} ${s.id === 'citizen' ? v : v.toLowerCase()}` : v.toLowerCase();
+  }
 });
 // Field list: fields with York students first, with York's headcount and York's share of its students
 // in the field against the comparison group's share (green when York's is higher, red when lower).
@@ -1453,12 +1480,13 @@ dash.draw('field-select', (sel) => {
   const p = P();
   sel.onchange = () => dash.setParams({ field: sel.value });
   if (t.status !== 'ok' || mix.status !== 'ok') {
-    sel.replaceChildren(...[ALL_F, fieldOf(p)].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
-    sel.value = fieldOf(p);
+    const cur = fieldCode(p) ? fieldOf(p) : ALL_F;
+    sel.replaceChildren(...[ALL_F, cur].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
+    sel.value = cur;
     return;
   }
-  const fields = [...new Set(t.data.filter((r) => r.field !== ALL_F).map((r) => r.field))].sort(d3.ascending);
-  const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && r.field !== ALL_F)
+  const fields = [...new Set(t.data.filter((r) => isCip2(r.field)).map((r) => r.field))].sort(d3.ascending);
+  const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && isCip2(r.field))
     .map((r) => [r.field, r.headcount]));
   const share = new Map((bySel(mix.data).get(cmpKey(p)) ?? []).map((r) => [r.category, r]));
   const tone = (f) => {
@@ -1483,7 +1511,7 @@ dash.draw('field-select', (sel) => {
   };
   sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length}): York’s share vs ${p.group}`, at, true),
     group(`No York students (${not.length})`, not, false));
-  sel.value = fieldOf(p);
+  sel.value = fieldCode(p) ? fieldOf(p) : ALL_F;
   sel.classList.remove('is-above', 'is-below');
   const cur = fieldOf(p) !== ALL_F && york.get(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
   if (cur) sel.classList.add(cur);
@@ -1503,13 +1531,52 @@ dash.draw('group-select', (sel) => {
   sel.value = p.group;
   sel.onchange = () => dash.setParams({ group: sel.value });
 });
-dash.draw('year-select', (sel) => {
+// Gender, citizenship, credential and year of study lists: categories with York students first, largest first,
+// with York's headcount in the selected level and year. Picking one clears the other filters.
+const subsetIndex = memo((rows) => {
+  const m = new Map(); // prefix|level|year -> Map(field -> York headcount)
+  for (const r of rows) {
+    const s = subsetOf(r.field);
+    if (!s) continue;
+    const k = `${s.prefix}|${r.level}|${r.year}`;
+    if (!m.has(k)) m.set(k, new Map());
+    const cats = m.get(k);
+    cats.set(r.field, (cats.get(r.field) ?? 0) + (r.institution === FOCUS ? r.headcount : 0));
+  }
+  return m;
+});
+dash.draw('subset-select', (sel) => {
+  const s = SUBSETS.find((x) => x.id === sel.dataset.subset);
   const t = dash.data('totals');
   const p = P();
-  const years = t.status === 'ok' ? [...new Set(t.data.map((r) => r.year))].sort(d3.descending) : [p.year];
-  sel.replaceChildren(...years.map((y) => new Option(shortYear(y), y)));
-  sel.value = p.year;
-  sel.onchange = () => dash.setParams({ year: sel.value });
+  const cur = fieldOf(p).startsWith(s.prefix) ? fieldOf(p) : '';
+  sel.onchange = () => dash.setParams({ field: sel.value || ALL_F });
+  const label = (f) => catLabel(s, f.slice(s.prefix.length));
+  if (t.status !== 'ok') {
+    sel.replaceChildren(new Option(s.all, ''), ...(cur ? [new Option(label(cur), cur)] : []));
+    sel.value = cur;
+    return;
+  }
+  const cats = subsetIndex(t.data).get(`${s.prefix}|${p.level}|${p.year}`) ?? new Map();
+  const list = [...cats.keys()];
+  if (s.id === 'studyyear') list.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  else list.sort((a, b) => d3.descending(cats.get(a), cats.get(b)) || d3.ascending(a, b));
+  const at = list.filter((f) => cats.get(f) > 0);
+  const not = list.filter((f) => !(cats.get(f) > 0));
+  const item = (f, withCount) => new Option(withCount ? `${label(f)}  ·  York ${fmtN(cats.get(f))}` : label(f), f);
+  const group = (lbl, fs, withCount) => {
+    const og = document.createElement('optgroup');
+    og.label = lbl;
+    og.append(...fs.map((f) => item(f, withCount)));
+    return og;
+  };
+  const opts = [new Option(s.all, '')];
+  if (!list.length) opts.push(group('Not reported for this study level', [], false));
+  else if (not.length) opts.push(group(`With York students (${at.length})`, at, true), group(`No York students (${not.length})`, not, false));
+  else opts.push(...at.map((f) => item(f, true)));
+  if (cur && !cats.has(cur)) opts.push(new Option(label(cur), cur));
+  sel.replaceChildren(...opts);
+  sel.value = cur;
 });
 
 // Headline figures. Each reads one row of one source.
