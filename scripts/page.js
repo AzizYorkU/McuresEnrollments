@@ -125,6 +125,7 @@ const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
 const P = () => dash.params();
 const ALL_F = 'All fields';
 const fieldOf = (p) => p.field || ALL_F;
+const fieldCode = (p) => (fieldOf(p) === ALL_F ? null : fieldOf(p).split(' ')[0]);
 const instKey = (inst, p) => `${fieldOf(p)}|${inst}|${p.level}|${p.year}`;
 const groupKey = (p) => `${p.group}|${fieldOf(p)}|${p.level}|${p.year}`;
 const cmpKey = (p) => `${p.group}|${p.level}|${p.year}`;
@@ -358,9 +359,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const oneField = fieldOf(p) !== ALL_F;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !oneField; });
-  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField; });
+  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField || p.dim === 'cip'; });
+  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = oneField; });
   const d = dash.data('cmp_' + p.dim);
-  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0);
+  const code = p.dim === 'cip' ? fieldCode(p) : null;
+  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0 && (!code || r.category.startsWith(code + '.')));
   document.querySelectorAll('.ux .ux-dim').forEach((s) => {
     const on = s.dataset.dim === p.dim;
     s.hidden = !on;
@@ -377,13 +380,29 @@ dash.draw('sel-field', (el) => {
   const f = fieldOf(P());
   el.textContent = f === ALL_F ? 'all fields' : f.replace(/^\d+ /, '');
 });
+// Field list: fields with York students in the selected year and level first, with York's headcount.
 dash.draw('field-select', (sel) => {
-  const g = dash.data('cip2');
+  const t = dash.data('totals');
   const p = P();
-  const names = g.status === 'ok' ? [...new Set(g.data.map((r) => r.category))].sort(d3.ascending) : [fieldOf(p)].filter((f) => f !== ALL_F);
-  sel.replaceChildren(new Option(ALL_F), ...names.map((n) => new Option(n, n)));
-  sel.value = fieldOf(p);
   sel.onchange = () => dash.setParams({ field: sel.value });
+  if (t.status !== 'ok') {
+    sel.replaceChildren(...[ALL_F, fieldOf(p)].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
+    sel.value = fieldOf(p);
+    return;
+  }
+  const fields = [...new Set(t.data.filter((r) => r.field !== ALL_F).map((r) => r.field))].sort(d3.ascending);
+  const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && r.field !== ALL_F)
+    .map((r) => [r.field, r.headcount]));
+  const at = fields.filter((f) => york.get(f) > 0);
+  const not = fields.filter((f) => !(york.get(f) > 0));
+  const group = (label, list, withCount) => {
+    const og = document.createElement('optgroup');
+    og.label = label;
+    og.append(...list.map((f) => new Option(withCount ? `${f}  ·  York ${fmtN(york.get(f))}` : f, f)));
+    return og;
+  };
+  sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length})`, at, true), group(`No York students (${not.length})`, not, false));
+  sel.value = fieldOf(p);
 });
 dash.draw('members', (el) => {
   if (!gate(el, ['peer_groups'])) return;
@@ -751,7 +770,12 @@ dash.draw('inst-rows', (tb) => {
 
 // Breakdown rows for the selected group, level and year, largest first.
 const TOP = 12;
-const selRows = (id) => (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+const selRows = (id) => {
+  const p = P();
+  const code = id === 'cmp_cip' ? fieldCode(p) : null;
+  return (bySel(dash.data(id).data).get(cmpKey(p)) ?? [])
+    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')));
+};
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
 // York's mix against the group's: paired bars of share.

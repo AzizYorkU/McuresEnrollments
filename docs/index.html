@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="theme.css">
 <script src="d3.min.js"></script>
 <script>
-window.DASH_SOURCES = {"status": "data/status.csv", "peer_groups": "data/peer_groups.csv", "cip2": "data/cip2.csv", "country": "data/country.csv", "age": "data/age.csv", "gender": "data/gender.csv", "tongue": "data/tongue.csv", "credential": "data/credential.csv", "studyyear": "data/studyyear.csv"};
+window.DASH_SOURCES = {"status": "data/status.csv", "peer_groups": "data/peer_groups.csv", "cip2": "data/cip2.csv", "cip": "data/cip.csv", "country": "data/country.csv", "age": "data/age.csv", "gender": "data/gender.csv", "tongue": "data/tongue.csv", "credential": "data/credential.csv", "studyyear": "data/studyyear.csv"};
 window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields"};
 </script>
 <script src="dash.js"></script>
@@ -186,7 +186,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
         </select>
       </label>
       <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="cip2"></select></label>
+      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals"></select></label>
       <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
@@ -283,9 +283,10 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 
     <section class="ux-page" data-page="mix gains table" id="breakdown" hidden>
       <div class="ux-break">
-        <p class="ux-msg ux-field-off" hidden>The field of study filter doesn’t apply here: these breakdowns aren’t reported by field. Use the Field of study tab to compare fields.</p>
+        <p class="ux-msg ux-field-off" hidden>The field of study filter applies only to the Detailed programs tab: the other breakdowns aren’t reported by field.</p>
         <div class="ux-tabs" role="group" aria-label="Break down by">
           <button class="ux-tab ux-dimtab" data-dim="cip2" aria-pressed="false">Field of study</button>
+          <button class="ux-tab ux-dimtab" data-dim="cip" aria-pressed="false">Detailed programs</button>
           <button class="ux-tab ux-dimtab" data-dim="country" aria-pressed="false">Citizenship</button>
           <button class="ux-tab ux-dimtab" data-dim="age" aria-pressed="false">Age</button>
           <button class="ux-tab ux-dimtab" data-dim="gender" aria-pressed="false">Gender</button>
@@ -321,6 +322,48 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
             <table class="ux-table" id="table-cip2" data-rows="dim-rows" data-source="cmp_cip2" data-row-key="key" data-default-sort="york">
               <thead><tr>
                 <th data-field="category"><button class="ux-sort" data-sort="category">Field of study (CIP series)</button></th>
+                <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+                <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+                <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+                <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+                <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+                <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+                <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+                <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+              </tr></thead>
+              <tbody data-draw="dim-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ux-dim" data-dim="cip" id="by-cip" hidden>
+      <p class="ux-empty ux-msg" hidden>No program (6-digit cip) headcounts are reported for York in this selection.</p>
+      <p class="ux-msg ux-pick-field" hidden>Pick a field of study in the filters to see the programs within it. Showing the largest programs across all fields.</p>
+      <div class="ux-dim-body">
+        <div class="ux-card" id="cip-mix" data-view="mix">
+          <h3>Detailed programs: York against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the field, for its 12 largest programs, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_cip"></div>
+        </div>
+        <div class="ux-card" id="cip-field" data-view="gains">
+          <h3>Detailed programs: change in York’s share since 2012-13</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points. The 12 largest groups.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_cip"></div>
+        </div>
+        <div class="ux-card" id="cip-table" data-view="table">
+          <div class="ux-card-head">
+            <h3>Detailed programs: all groups</h3>
+            <input class="ux-search" id="search-cip" type="search" placeholder="Search" aria-label="Search program (6-digit cip)">
+          </div>
+          <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+          <p class="ux-note">York share and Peer share are shares of the program’s field of study, not of all students.</p>
+          <div class="ux-scroll ux-scroll-tall">
+            <table class="ux-table" id="table-cip" data-rows="dim-rows" data-source="cmp_cip" data-row-key="key" data-default-sort="york">
+              <thead><tr>
+                <th data-field="category"><button class="ux-sort" data-sort="category">Program (6-digit CIP)</button></th>
                 <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
                 <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
                 <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
@@ -593,17 +636,18 @@ dash.calc('cmp_cip2', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of cip2) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -615,7 +659,61 @@ dash.calc('cmp_cip2', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_cip', {
+  inputs: ['cip', 'peer_groups'],
+  title: 'York vs comparison groups, detailed programs',
+  description: 'For each comparison group: York’s and the group’s headcount and share of the field of study by program, York’s share of York plus the group, and change since 2012-13.',
+  fn: (cip, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (true ? ly + '|' + category.slice(0, 2) : ly);
+    for (const r of cip) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, tk(ly, r.category), n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -646,17 +744,18 @@ dash.calc('cmp_country', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of country) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -668,7 +767,7 @@ dash.calc('cmp_country', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -699,17 +798,18 @@ dash.calc('cmp_age', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of age) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -721,7 +821,7 @@ dash.calc('cmp_age', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -752,17 +852,18 @@ dash.calc('cmp_gender', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of gender) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -774,7 +875,7 @@ dash.calc('cmp_gender', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -805,17 +906,18 @@ dash.calc('cmp_tongue', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of tongue) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -827,7 +929,7 @@ dash.calc('cmp_tongue', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -858,17 +960,18 @@ dash.calc('cmp_credential', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of credential) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -880,7 +983,7 @@ dash.calc('cmp_credential', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -911,17 +1014,18 @@ dash.calc('cmp_studyyear', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (false ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of studyyear) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -933,7 +1037,7 @@ dash.calc('cmp_studyyear', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -1083,6 +1187,7 @@ const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
 const P = () => dash.params();
 const ALL_F = 'All fields';
 const fieldOf = (p) => p.field || ALL_F;
+const fieldCode = (p) => (fieldOf(p) === ALL_F ? null : fieldOf(p).split(' ')[0]);
 const instKey = (inst, p) => `${fieldOf(p)}|${inst}|${p.level}|${p.year}`;
 const groupKey = (p) => `${p.group}|${fieldOf(p)}|${p.level}|${p.year}`;
 const cmpKey = (p) => `${p.group}|${p.level}|${p.year}`;
@@ -1316,9 +1421,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const oneField = fieldOf(p) !== ALL_F;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !oneField; });
-  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField; });
+  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField || p.dim === 'cip'; });
+  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = oneField; });
   const d = dash.data('cmp_' + p.dim);
-  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0);
+  const code = p.dim === 'cip' ? fieldCode(p) : null;
+  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0 && (!code || r.category.startsWith(code + '.')));
   document.querySelectorAll('.ux .ux-dim').forEach((s) => {
     const on = s.dataset.dim === p.dim;
     s.hidden = !on;
@@ -1335,13 +1442,29 @@ dash.draw('sel-field', (el) => {
   const f = fieldOf(P());
   el.textContent = f === ALL_F ? 'all fields' : f.replace(/^\d+ /, '');
 });
+// Field list: fields with York students in the selected year and level first, with York's headcount.
 dash.draw('field-select', (sel) => {
-  const g = dash.data('cip2');
+  const t = dash.data('totals');
   const p = P();
-  const names = g.status === 'ok' ? [...new Set(g.data.map((r) => r.category))].sort(d3.ascending) : [fieldOf(p)].filter((f) => f !== ALL_F);
-  sel.replaceChildren(new Option(ALL_F), ...names.map((n) => new Option(n, n)));
-  sel.value = fieldOf(p);
   sel.onchange = () => dash.setParams({ field: sel.value });
+  if (t.status !== 'ok') {
+    sel.replaceChildren(...[ALL_F, fieldOf(p)].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
+    sel.value = fieldOf(p);
+    return;
+  }
+  const fields = [...new Set(t.data.filter((r) => r.field !== ALL_F).map((r) => r.field))].sort(d3.ascending);
+  const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && r.field !== ALL_F)
+    .map((r) => [r.field, r.headcount]));
+  const at = fields.filter((f) => york.get(f) > 0);
+  const not = fields.filter((f) => !(york.get(f) > 0));
+  const group = (label, list, withCount) => {
+    const og = document.createElement('optgroup');
+    og.label = label;
+    og.append(...list.map((f) => new Option(withCount ? `${f}  ·  York ${fmtN(york.get(f))}` : f, f)));
+    return og;
+  };
+  sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length})`, at, true), group(`No York students (${not.length})`, not, false));
+  sel.value = fieldOf(p);
 });
 dash.draw('members', (el) => {
   if (!gate(el, ['peer_groups'])) return;
@@ -1709,7 +1832,12 @@ dash.draw('inst-rows', (tb) => {
 
 // Breakdown rows for the selected group, level and year, largest first.
 const TOP = 12;
-const selRows = (id) => (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+const selRows = (id) => {
+  const p = P();
+  const code = id === 'cmp_cip' ? fieldCode(p) : null;
+  return (bySel(dash.data(id).data).get(cmpKey(p)) ?? [])
+    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')));
+};
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
 // York's mix against the group's: paired bars of share.

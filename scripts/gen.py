@@ -17,13 +17,14 @@ BLOBS = {
     "country": "ef6338b961b6e6ea21305c69cbcd94f1", "credential": "5ee8bd0601319ac7a231fa765715a66f",
     "gender": "24e8d17d4190003e50eeed89426b30bd", "studyyear": "95f2dc413de6f94aac44102b5dacde38",
     "tongue": "ad69eec14c41ca8ad6ec1a02b8e8d0d1", "cip2": "a1f6ae4b1aa9d56d7a31b24e7bcbf724",
-    "peer_groups": "7faded20eef6fb6fee7bac811118c8ff",
+    "peer_groups": "7faded20eef6fb6fee7bac811118c8ff", "cip": "e640b3f10b687ffd4b22d4cb6d315782",
 }
-REMOVED = ["cip", "program", "campus"]  # datasets the York-vs-peers page no longer uses (files kept in the repo)
+REMOVED = ["program", "campus"]  # datasets the York-vs-peers page no longer uses (files kept in the repo)
 
 # id, tab label, column header, note under the table
 DIMS = [
     ("cip2", "Field of study", "Field of study (CIP series)", "Detailed CIP codes rolled up to their 2-digit series."),
+    ("cip", "Detailed programs", "Program (6-digit CIP)", "York share and Peer share are shares of the program’s field of study, not of all students."),
     ("country", "Citizenship", "Country of citizenship", ""),
     ("age", "Age", "Age group", ""),
     ("gender", "Gender", "Gender group", ""),
@@ -58,6 +59,12 @@ writes = [
                        "GTA universities, and all other Ontario universities. Edit this file to change a group.",
         "source": {"kind": "file", "url": f"/_blob/{BLOBS['peer_groups']}", "name": "peer_groups.csv", "format": "csv"},
         "updated": {"at": now, "by": "Claude, chosen from 2024-25 headcounts"}}),
+    w("set", "datasets", "cip", data={
+        "title": "Headcount by detailed program",
+        "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 6-digit CIP code and title, from cip.sas7bdat. "
+                       "The slice column is institution|level|year; All institutions and All levels totals added; zero counts dropped.",
+        "source": {"kind": "file", "url": f"/_blob/{BLOBS['cip']}", "name": "cip.csv", "format": "csv"},
+        "updated": {"at": now, "by": "Claude, converted from cip.sas7bdat"}, "fixed": True}),
 ] + [w("delete", "datasets", d) for d in REMOVED]
 
 CMP_FN = """dash.calc('cmp___D__', {
@@ -69,17 +76,18 @@ CMP_FN = """dash.calc('cmp___D__', {
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
     const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    const tk = (ly, category) => (__WITHIN__ ? ly + '|' + category.slice(0, 2) : ly);
     for (const r of __D__) {
       const [inst, level, year] = r.slice.split('|');
       const n = Number(r.headcount);
       const ly = level + '|' + year;
       if (inst === 'York') {
         add(york, ly + '|' + r.category, n);
-        add(yorkTotal, ly, n);
+        add(yorkTotal, tk(ly, r.category), n);
       } else {
         for (const g of groupsOf.get(inst) ?? []) {
           add(peers, g + '|' + ly + '|' + r.category, n);
-          add(peerTotal, g + '|' + ly, n);
+          add(peerTotal, g + '|' + tk(ly, r.category), n);
         }
       }
     }
@@ -91,7 +99,7 @@ CMP_FN = """dash.calc('cmp___D__', {
         const parts = k.split('|');
         const [level, year] = parts;
         const category = parts.slice(2).join('|');
-        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const yt = yorkTotal.get(tk(level + '|' + year, category)), pt = peerTotal.get(group + '|' + tk(level + '|' + year, category));
         const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
         const bk = level + '|2012-2013|' + category;
         const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
@@ -119,13 +127,17 @@ CMP_FN = """dash.calc('cmp___D__', {
 def section(d, tab, col, note):
     note_html = f'\n          <p class="ux-note">{note}</p>' if note else ""
     low = col.lower()
+    mixnote = ('Share of each one’s students in the field, for its 12 largest programs, selected year.' if d == 'cip'
+               else 'Share of each one’s students in the 12 largest groups, selected year.')
+    pick = ('\n      <p class="ux-msg ux-pick-field" hidden>Pick a field of study in the filters to see the programs within it. Showing the largest programs across all fields.</p>'
+            if d == "cip" else "")
     return f"""
     <div class="ux-dim" data-dim="{d}" id="by-{d}" hidden>
-      <p class="ux-empty ux-msg" hidden>No {low} headcounts are reported for York in this selection.</p>
+      <p class="ux-empty ux-msg" hidden>No {low} headcounts are reported for York in this selection.</p>{pick}
       <div class="ux-dim-body">
         <div class="ux-card" id="{d}-mix" data-view="mix">
           <h3>{tab}: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <p class="ux-note">{mixnote}</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_{d}"></div>
         </div>
@@ -164,7 +176,9 @@ def section(d, tab, col, note):
 
 css = open(os.path.join(HERE, "page.css"), encoding="utf-8").read()
 js = open(os.path.join(HERE, "page.js"), encoding="utf-8").read()
-calcs = "".join(CMP_FN.replace("__D__", d).replace("__LOW__", tab.lower()) for d, tab, *_ in DIMS)
+calcs = "".join(CMP_FN.replace("__D__", d).replace("__LOW__", tab.lower()).replace("__WITHIN__", "true" if d == "cip" else "false")
+                .replace("York’s and the group’s headcount and share by category", "York’s and the group’s headcount and share of the field of study by program" if d == "cip" else "York’s and the group’s headcount and share by category")
+                for d, tab, *_ in DIMS)
 tabs = "\n".join(f'          <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in DIMS)
 sections = "".join(section(*x) for x in DIMS)
 
@@ -204,7 +218,7 @@ html = f"""<meta name="dash-one-writer">
         </select>
       </label>
       <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="cip2"></select></label>
+      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals"></select></label>
       <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
@@ -301,7 +315,7 @@ html = f"""<meta name="dash-one-writer">
 
     <section class="ux-page" data-page="mix gains table" id="breakdown" hidden>
       <div class="ux-break">
-        <p class="ux-msg ux-field-off" hidden>The field of study filter doesn’t apply here: these breakdowns aren’t reported by field. Use the Field of study tab to compare fields.</p>
+        <p class="ux-msg ux-field-off" hidden>The field of study filter applies only to the Detailed programs tab: the other breakdowns aren’t reported by field.</p>
         <div class="ux-tabs" role="group" aria-label="Break down by">
 {tabs}
         </div>
