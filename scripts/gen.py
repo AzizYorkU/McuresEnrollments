@@ -209,23 +209,32 @@ html = f"""<meta name="dash-one-writer">
     </header>
 
     <div class="ux-filters" id="filters">
-      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-      <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
-      <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
-      <label class="ux-field">Study level
-        <select id="f-level" class="ux-level">
-          <option>All levels</option>
-          <option>Undergraduate</option>
-          <option>Graduate</option>
-        </select>
-      </label>
-      <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
-      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
-      <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
-      <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
-      <div class="ux-field ux-reset-cell"><button class="ux-btn ux-reset" type="button">Reset</button></div>
+      <div class="ux-frow" role="group" aria-labelledby="fh-view">
+        <p class="ux-frow-h" id="fh-view">View</p>
+        <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
+        <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
+        <div class="ux-field ux-reset-cell"><button class="ux-btn ux-reset" type="button">Reset</button></div>
+      </div>
+      <div class="ux-frow" role="group" aria-labelledby="fh-program">
+        <p class="ux-frow-h" id="fh-program">Program</p>
+        <label class="ux-field">Study level
+          <select id="f-level" class="ux-level">
+            <option>All levels</option>
+            <option>Undergraduate</option>
+            <option>Graduate</option>
+          </select>
+        </label>
+        <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
+        <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
+        <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
+      </div>
+      <div class="ux-frow" role="group" aria-labelledby="fh-student">
+        <p class="ux-frow-h" id="fh-student">Student</p>
+        <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
+        <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
+      </div>
     </div>
-    <p class="ux-note ux-filter-note">Field of study, gender, citizenship, credential and year of study come from separate files that aren’t cross-tabulated, so one of them applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
+    <p class="ux-note ux-filter-note">Year, comparison group and study level always apply. Credential, field of study, year of study, citizenship and gender come from separate files that aren’t cross-tabulated, so only one of those five applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
