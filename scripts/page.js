@@ -870,10 +870,21 @@ const TOP = 12;
 const selRows = (id) => {
   const p = P();
   const code = id === 'cmp_cip' ? fieldCode(p) : null;
-  return (bySel(dash.data(id).data).get(cmpKey(p)) ?? [])
-    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')))
-    .map((r) => (id === 'cmp_cip2' ? { ...r, category: fieldName(r.category) } : r)); // field names without the CIP code
+  const rows = (bySel(dash.data(id).data).get(cmpKey(p)) ?? [])
+    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')));
+  if (id === 'cmp_cip2') return rows.map((r) => ({ ...r, category: fieldName(r.category) })); // names without the CIP code
+  if (id === 'cmp_cip') return programLabels(rows);
+  return rows;
 };
+// Program titles without the CIP code; a title shared by more than one code in the list keeps its code in brackets.
+const programTitle = (c) => c.replace(/^\d\d(\.\d+)? /, '');
+function programLabels(rows) {
+  const n = d3.rollup(rows, (v) => v.length, (r) => programTitle(r.category));
+  return rows.map((r) => {
+    const t = programTitle(r.category);
+    return { ...r, category: n.get(t) > 1 ? `${t} (${r.category.split(' ')[0]})` : t };
+  });
+}
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
 // York's mix against the group's: paired bars of share.
