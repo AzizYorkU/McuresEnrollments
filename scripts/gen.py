@@ -226,7 +226,7 @@ html = f"""<meta name="dash-one-writer">
         </label>
         <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
         <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
-        <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
+        <label class="ux-field ux-field-wide">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
       </div>
       <div class="ux-frow" role="group" aria-labelledby="fh-student">
         <p class="ux-frow-h" id="fh-student">Student</p>
