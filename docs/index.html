@@ -1,0 +1,1622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>York University vs Ontario Peers</title>
+<meta name="description" content="How York University's enrolment compares with other Ontario universities, 2012-13 to 2024-25.">
+<link rel="stylesheet" href="theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+window.DASH_SOURCES = {"status": "data/status.csv", "peer_groups": "data/peer_groups.csv", "cip2": "data/cip2.csv", "country": "data/country.csv", "age": "data/age.csv", "gender": "data/gender.csv", "tongue": "data/tongue.csv", "credential": "data/credential.csv", "studyyear": "data/studyyear.csv"};
+window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base"};
+</script>
+<script src="dash.js"></script>
+</head>
+<body>
+<main class="site">
+<style>
+/* Layout: header + filters, York-vs-peer figures, growth and share charts, ranking, then one breakdown at a time behind tabs. */
+.ux { container-type: inline-size; display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+.ux h1 { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); text-wrap: balance; }
+.ux h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.ux h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+.ux-head { display: grid; gap: var(--cds-gap-xs); }
+.ux-lede { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); }
+.ux .ux-lede b { color: var(--color-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ux-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ux-msg { margin: 0; padding: var(--cds-pad-md) var(--cds-pad-lg); border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); color: var(--color-fg-muted); }
+
+.ux-filters { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: end; }
+.ux-field { display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); min-width: 0; }
+.ux select, .ux .ux-search { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); max-width: 100%; }
+.ux-btn, .ux-tab { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: transparent; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); cursor: pointer; }
+.ux-btn:hover, .ux-tab:hover { background: var(--color-panel); }
+.ux-tab[aria-pressed="true"] { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+.ux button:focus-visible, .ux select:focus-visible, .ux input:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+
+.ux-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); }
+.ux-tile { display: grid; gap: var(--cds-gap-xs); align-content: start; background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); }
+.ux-tile-l { font-size: var(--cds-font-size-body); }
+.ux-tile-v { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; min-height: 1.2em; }
+.ux-up { color: var(--color-ok); }
+.ux-down { color: var(--color-bad); }
+
+.ux-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+.ux-card { display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); }
+.ux-card-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; justify-content: space-between; }
+.ux-chart { position: relative; min-height: 240px; }
+.ux-svg { display: block; overflow: visible; }
+.ux-tick text, text.ux-tick { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); }
+.ux-tick text.is-on { fill: var(--color-fg); font-weight: 600; }
+.ux-grid-line { stroke: var(--cds-chart-grid); stroke-width: 1; }
+.ux-axis-line { stroke: var(--cds-chart-axis); stroke-width: 1; }
+.ux-rule { stroke: var(--cds-chart-reference); stroke-width: 1; }
+
+.ux-legend-static, .ux-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ux-legend { margin-top: var(--cds-gap-sm); }
+.ux-key { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); min-width: 0; max-width: 100%; }
+.ux-key span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ux-sw { flex: none; width: 0.625rem; height: 0.625rem; border-radius: 2px; display: inline-block; }
+
+.ux-tip { position: absolute; z-index: 2; pointer-events: none; display: grid; gap: 2px; min-width: 8rem; max-width: min(18rem, 90%); background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); }
+.ux-tip-h { color: var(--cds-text-secondary); }
+.ux-tip-r { display: flex; align-items: center; gap: var(--cds-gap-xs); }
+.ux-tip-r .ux-tip-n { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ux-tip-r .ux-tip-v { font-variant-numeric: tabular-nums; }
+
+.ux-bars { display: grid; gap: var(--cds-gap-sm); min-height: 240px; align-content: start; }
+.ux-bar-row { display: grid; gap: 3px; }
+.ux-bar-head { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); }
+.ux-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ux-bar-val { flex: none; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.ux-bar { height: 10px; border-radius: 2px; min-width: 2px; }
+.ux-bar-base { height: 3px; border-radius: 2px; background: var(--cds-chart-muted); }
+
+.ux-break { display: grid; gap: var(--cds-gap-sm); }
+.ux-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+.ux-dim, .ux-dim-body { display: grid; gap: var(--cds-gap-md); }
+
+.ux-scroll { max-height: 28rem; overflow: auto; }
+.ux-scroll-short { max-height: 22rem; }
+.ux-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-body); font-variant-numeric: tabular-nums; }
+.ux-table th { position: sticky; top: 0; z-index: 1; background: var(--color-panel); text-align: left; font-weight: var(--cds-font-weight-medium); border-bottom: 1px solid var(--color-border-line); padding: 0; }
+.ux-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+.ux-table .ux-num { text-align: right; white-space: nowrap; }
+.ux-sort { font: inherit; color: var(--color-fg-muted); background: none; border: 0; padding: var(--cds-pad-xs) var(--cds-pad-sm); width: 100%; text-align: inherit; cursor: pointer; white-space: nowrap; }
+.ux-table th[aria-sort="ascending"] .ux-sort::after { content: " ↑"; }
+.ux-table th[aria-sort="descending"] .ux-sort::after { content: " ↓"; }
+.ux-table th[aria-sort="ascending"] .ux-sort, .ux-table th[aria-sort="descending"] .ux-sort { color: var(--color-fg); }
+.ux-link { font: inherit; color: var(--color-fg); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--color-border-line); text-underline-offset: 3px; }
+.ux-inst-table tr.is-picked td { background: var(--cds-chart-grid); }
+.ux-inst-table tr.is-picked .ux-link { font-weight: 600; text-decoration: none; }
+.ux-cell { display: grid; justify-items: end; gap: 2px; }
+.ux-cellbar { height: 3px; border-radius: 2px; }
+
+.ux-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
+.ux-fail::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-bad); }
+.ux-foot { max-width: 65ch; }
+
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+[data-dash-source-state=empty] { color: transparent; }
+@container (max-width: 34rem) { .ux-hide-narrow { display: none; } }
+
+/* York-vs-peers additions */
+.ux-sub { display: flex; flex-wrap: wrap; gap: 0 var(--cds-gap-sm); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.ux .ux-sub b { color: var(--color-fg); font-weight: 600; }
+.ux .ux-sub b .ux-up { color: var(--color-ok); }
+.ux .ux-sub b .ux-down { color: var(--color-bad); }
+.ux-members { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+.ux-lbl { fill: var(--color-fg); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; }
+.ux-lbl-strong { font-weight: 600; }
+.ux-bar-thin { height: 5px; }
+.ux-hbars { position: relative; min-height: 120px; }
+.ux-section { display: grid; gap: var(--cds-gap-sm); }
+.ux [hidden] { display: none !important; }
+
+</style>
+<div class="ux">
+  <header class="ux-head" id="overview">
+    <h1>York University against its Ontario peers</h1>
+    <p class="ux-lede">In <span data-draw="sel-year">—</span>, York had <b data-draw="lede-york" data-source="totals">—</b> students (<span data-draw="sel-level">—</span>), <b data-draw="lede-york-chg" data-source="totals">—</b> since 2012-13. Its comparison group, <span data-draw="sel-group">—</span>, changed by <b data-draw="lede-peer-chg" data-source="group_totals">—</b> combined.</p>
+  </header>
+
+  <div class="ux-filters" id="filters">
+    <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
+    <label class="ux-field">Study level
+      <select id="f-level" class="ux-level">
+        <option>All levels</option>
+        <option>Undergraduate</option>
+        <option>Graduate</option>
+      </select>
+    </label>
+    <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
+    <button class="ux-btn ux-reset" type="button">Reset</button>
+  </div>
+  <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
+
+  <div class="ux-tiles" id="figures">
+    <div class="ux-tile"><span class="ux-tile-l">York headcount</span><span class="ux-tile-v dash-skeleton" data-draw="t-headcount" data-source="totals">—</span>
+      <span class="ux-sub"><span>Rank by size <b data-draw="r-headcount" data-source="york_standing">—</b></span></span></div>
+    <div class="ux-tile"><span class="ux-tile-l">Growth since 2012-13</span><span class="ux-tile-v dash-skeleton" data-draw="t-base" data-source="totals">—</span>
+      <span class="ux-sub"><span>Peers <b data-draw="g-base" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_base" data-source="york_standing">—</b></span></span></div>
+    <div class="ux-tile"><span class="ux-tile-l">From previous year</span><span class="ux-tile-v dash-skeleton" data-draw="t-prev" data-source="totals">—</span>
+      <span class="ux-sub"><span>Peers <b data-draw="g-prev" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_prev" data-source="york_standing">—</b></span></span></div>
+    <div class="ux-tile"><span class="ux-tile-l">International share</span><span class="ux-tile-v dash-skeleton" data-draw="t-intl" data-source="totals">—</span>
+      <span class="ux-sub"><span>Peers <b data-draw="g-intl" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-intl_share" data-source="york_standing">—</b></span></span></div>
+    <div class="ux-tile"><span class="ux-tile-l">York’s share of Ontario</span><span class="ux-tile-v dash-skeleton" data-draw="t-ont" data-source="york_ontario">—</span>
+      <span class="ux-sub"><span>Since 2012-13 <b data-draw="o-base" data-source="york_ontario">—</b></span></span></div>
+  </div>
+
+  <div class="ux-grid">
+    <div class="ux-card" id="growth">
+      <h3>Growth since 2012-13</h3>
+      <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer.</p>
+      <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
+      <div class="ux-chart dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
+      <p class="ux-note">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
+    </div>
+    <div class="ux-card" id="share">
+      <h3>York’s share of Ontario students</h3>
+      <p class="ux-note">York’s headcount as a share of all Ontario universities combined, each year.</p>
+      <div class="ux-chart dash-skeleton" data-draw="share" data-source="york_ontario"></div>
+    </div>
+  </div>
+
+  <div class="ux-section" id="ranking">
+    <h2>How York ranks</h2>
+    <div class="ux-grid">
+      <div class="ux-card" id="rank-chart">
+        <div class="ux-card-head">
+          <h3>York and <span data-draw="sel-group">—</span></h3>
+        </div>
+        <div class="ux-tabs" role="group" aria-label="Rank by">
+          <button class="ux-tab ux-metric" data-metric="change_base" aria-pressed="false">Since 2012-13</button>
+          <button class="ux-tab ux-metric" data-metric="change_prev" aria-pressed="false">Previous year</button>
+          <button class="ux-tab ux-metric" data-metric="headcount" aria-pressed="false">Headcount</button>
+          <button class="ux-tab ux-metric" data-metric="intl_share" aria-pressed="false">International share</button>
+        </div>
+        <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
+        <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
+      </div>
+      <div class="ux-card" id="institutions">
+        <h3>Institutions in the comparison</h3>
+        <p class="ux-note">Selected year and study level.</p>
+        <div class="ux-scroll ux-scroll-short">
+          <table class="ux-table ux-inst-table" id="table-inst" data-rows="inst-rows" data-source="totals peer_groups" data-row-key="slice">
+            <thead><tr>
+              <th data-field="institution"><button class="ux-sort" data-sort="institution">Institution</button></th>
+              <th class="ux-num" data-field="headcount"><button class="ux-sort" data-sort="headcount">Headcount</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="change_prev"><button class="ux-sort" data-sort="change_prev">1 yr</button></th>
+              <th class="ux-num" data-field="change_base"><button class="ux-sort" data-sort="change_base">Since 2012-13</button></th>
+              <th class="ux-num" data-field="intl_share"><button class="ux-sort" data-sort="intl_share">Intl</button></th>
+            </tr></thead>
+            <tbody data-draw="inst-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ux-break" id="breakdown">
+    <h2>Where York differs from its peers</h2>
+    <div class="ux-tabs" role="group" aria-label="Break down by">
+      <button class="ux-tab ux-dimtab" data-dim="cip2" aria-pressed="false">Field of study</button>
+      <button class="ux-tab ux-dimtab" data-dim="country" aria-pressed="false">Citizenship</button>
+      <button class="ux-tab ux-dimtab" data-dim="age" aria-pressed="false">Age</button>
+      <button class="ux-tab ux-dimtab" data-dim="gender" aria-pressed="false">Gender</button>
+      <button class="ux-tab ux-dimtab" data-dim="tongue" aria-pressed="false">Mother tongue</button>
+      <button class="ux-tab ux-dimtab" data-dim="credential" aria-pressed="false">Credential</button>
+      <button class="ux-tab ux-dimtab" data-dim="studyyear" aria-pressed="false">Year of study</button>
+    </div>
+  </div>
+
+  <section class="ux-dim" data-dim="cip2" id="by-cip2" hidden>
+    <p class="ux-empty ux-msg" hidden>No field of study (cip series) headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="cip2-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_cip2"></div>
+        </div>
+        <div class="ux-card" id="cip2-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_cip2"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="cip2-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-cip2" type="search" placeholder="Search" aria-label="Search field of study (cip series)">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <p class="ux-note">Detailed CIP codes rolled up to their 2-digit series.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-cip2" data-rows="dim-rows" data-source="cmp_cip2" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Field of study (CIP series)</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="ux-dim" data-dim="country" id="by-country" hidden>
+    <p class="ux-empty ux-msg" hidden>No country of citizenship headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="country-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_country"></div>
+        </div>
+        <div class="ux-card" id="country-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_country"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="country-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-country" type="search" placeholder="Search" aria-label="Search country of citizenship">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-country" data-rows="dim-rows" data-source="cmp_country" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Country of citizenship</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="ux-dim" data-dim="age" id="by-age" hidden>
+    <p class="ux-empty ux-msg" hidden>No age group headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="age-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_age"></div>
+        </div>
+        <div class="ux-card" id="age-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_age"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="age-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-age" type="search" placeholder="Search" aria-label="Search age group">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-age" data-rows="dim-rows" data-source="cmp_age" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Age group</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="ux-dim" data-dim="gender" id="by-gender" hidden>
+    <p class="ux-empty ux-msg" hidden>No gender group headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="gender-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_gender"></div>
+        </div>
+        <div class="ux-card" id="gender-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_gender"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="gender-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-gender" type="search" placeholder="Search" aria-label="Search gender group">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-gender" data-rows="dim-rows" data-source="cmp_gender" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Gender group</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="ux-dim" data-dim="tongue" id="by-tongue" hidden>
+    <p class="ux-empty ux-msg" hidden>No mother tongue headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="tongue-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_tongue"></div>
+        </div>
+        <div class="ux-card" id="tongue-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_tongue"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="tongue-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-tongue" type="search" placeholder="Search" aria-label="Search mother tongue">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-tongue" data-rows="dim-rows" data-source="cmp_tongue" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Mother tongue</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="ux-dim" data-dim="credential" id="by-credential" hidden>
+    <p class="ux-empty ux-msg" hidden>No credential headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="credential-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_credential"></div>
+        </div>
+        <div class="ux-card" id="credential-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_credential"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="credential-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-credential" type="search" placeholder="Search" aria-label="Search credential">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-credential" data-rows="dim-rows" data-source="cmp_credential" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Credential</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="ux-dim" data-dim="studyyear" id="by-studyyear" hidden>
+    <p class="ux-empty ux-msg" hidden>No year of study headcounts are reported for York in this selection.</p>
+    <div class="ux-dim-body">
+      <div class="ux-grid">
+        <div class="ux-card" id="studyyear-mix">
+          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+          <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_studyyear"></div>
+        </div>
+        <div class="ux-card" id="studyyear-field">
+          <h3>Where York gained or lost ground</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+          <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_studyyear"></div>
+        </div>
+      </div>
+      <div class="ux-card" id="studyyear-table">
+        <div class="ux-card-head">
+          <h3>All groups</h3>
+          <input class="ux-search" id="search-studyyear" type="search" placeholder="Search" aria-label="Search year of study">
+        </div>
+        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
+        <p class="ux-note">Reported for undergraduates only.</p>
+        <div class="ux-scroll">
+          <table class="ux-table" id="table-studyyear" data-rows="dim-rows" data-source="cmp_studyyear" data-row-key="key" data-default-sort="york">
+            <thead><tr>
+              <th data-field="category"><button class="ux-sort" data-sort="category">Year of study</button></th>
+              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+            </tr></thead>
+            <tbody data-draw="dim-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. Figures, growth, ranks and the institution table use the domestic/international file. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are listed in data/peer_groups.csv. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
+</div>
+<script>
+dash.calc('cmp_cip2', {
+  inputs: ['cip2', 'peer_groups'],
+  title: 'York vs comparison groups, field of study',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (cip2, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of cip2) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_country', {
+  inputs: ['country', 'peer_groups'],
+  title: 'York vs comparison groups, citizenship',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (country, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of country) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_age', {
+  inputs: ['age', 'peer_groups'],
+  title: 'York vs comparison groups, age',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (age, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of age) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_gender', {
+  inputs: ['gender', 'peer_groups'],
+  title: 'York vs comparison groups, gender',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (gender, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of gender) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_tongue', {
+  inputs: ['tongue', 'peer_groups'],
+  title: 'York vs comparison groups, mother tongue',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (tongue, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of tongue) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_credential', {
+  inputs: ['credential', 'peer_groups'],
+  title: 'York vs comparison groups, credential',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (credential, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of credential) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+dash.calc('cmp_studyyear', {
+  inputs: ['studyyear', 'peer_groups'],
+  title: 'York vs comparison groups, year of study',
+  description: 'For each comparison group: York’s and the group’s headcount and share by category, York’s share of York plus the group, and change since 2012-13.',
+  fn: (studyyear, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
+    const york = new Map(), peers = new Map(), yorkTotal = new Map(), peerTotal = new Map();
+    const add = (m, k, n) => m.set(k, (m.get(k) ?? 0) + n);
+    for (const r of studyyear) {
+      const [inst, level, year] = r.slice.split('|');
+      const n = Number(r.headcount);
+      const ly = level + '|' + year;
+      if (inst === 'York') {
+        add(york, ly + '|' + r.category, n);
+        add(yorkTotal, ly, n);
+      } else {
+        for (const g of groupsOf.get(inst) ?? []) {
+          add(peers, g + '|' + ly + '|' + r.category, n);
+          add(peerTotal, g + '|' + ly, n);
+        }
+      }
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const keys = new Set(york.keys());
+      for (const k of peers.keys()) if (k.startsWith(group + '|')) keys.add(k.slice(group.length + 1));
+      for (const k of keys) {
+        const parts = k.split('|');
+        const [level, year] = parts;
+        const category = parts.slice(2).join('|');
+        const yt = yorkTotal.get(level + '|' + year), pt = peerTotal.get(group + '|' + level + '|' + year);
+        const y = york.get(k) ?? 0, p = peers.get(group + '|' + k) ?? 0;
+        const bk = level + '|2012-2013|' + category;
+        const yb = york.get(bk) ?? 0, pb = peers.get(group + '|' + bk) ?? 0;
+        const field = y + p ? y / (y + p) : null;
+        const fieldBase = yb + pb ? yb / (yb + pb) : null;
+        const later = year !== '2012-2013';
+        rows.push({
+          key: group + '|' + k, group, level, year, category, york: y, peers: p,
+          york_share: yt ? y / yt : null,
+          peer_share: pt ? p / pt : null,
+          gap: yt && pt ? (y / yt - p / pt) * 100 : null,
+          field_share: field,
+          field_change: later && field != null && fieldBase != null ? (field - fieldBase) * 100 : null,
+          york_change: later && yb ? y / yb - 1 : null,
+          peer_change: later && pb ? p / pb - 1 : null,
+        });
+      }
+    }
+    return rows;
+  },
+});
+
+dash.calc('totals', {
+  inputs: ['status'],
+  title: 'Totals by institution and year',
+  description: 'Domestic plus international headcount per slice, its international share, and change from the previous year and from 2012-13.',
+  fn: (status) => {
+    const by = new Map();
+    for (const r of status) {
+      const n = Number(r.headcount);
+      const t = by.get(r.slice) ?? { slice: r.slice, headcount: 0, international: 0 };
+      t.headcount += n;
+      if (r.category === 'International') t.international += n;
+      by.set(r.slice, t);
+    }
+    const rows = [...by.values()];
+    for (const t of rows) {
+      const [institution, level, year] = t.slice.split('|');
+      const y = Number(year.slice(0, 4));
+      const prev = by.get(`${institution}|${level}|${y - 1}-${y}`);
+      const base = by.get(`${institution}|${level}|2012-2013`);
+      Object.assign(t, {
+        institution,
+        level,
+        year,
+        intl_share: t.international / t.headcount,
+        change_prev: prev ? t.headcount / prev.headcount - 1 : null,
+        change_base: base && year !== '2012-2013' ? t.headcount / base.headcount - 1 : null,
+      });
+    }
+    return rows;
+  },
+});
+
+dash.calc('group_totals', {
+  inputs: ['totals', 'peer_groups'],
+  title: 'Comparison groups combined',
+  description: 'Each comparison group’s members added together: headcount, international share, and change from the previous year and from 2012-13.',
+  fn: (totals, peer_groups) => {
+    const by = new Map();
+    for (const t of totals) {
+      for (const g of peer_groups) {
+        if (g.institution !== t.institution) continue;
+        const key = `${g.group}|${t.level}|${t.year}`;
+        const s = by.get(key) ?? { key, group: g.group, level: t.level, year: t.year, headcount: 0, international: 0, members: 0 };
+        s.headcount += t.headcount;
+        s.international += t.international;
+        s.members += 1;
+        by.set(key, s);
+      }
+    }
+    const rows = [...by.values()];
+    for (const s of rows) {
+      const y = Number(s.year.slice(0, 4));
+      const prev = by.get(`${s.group}|${s.level}|${y - 1}-${y}`);
+      const base = by.get(`${s.group}|${s.level}|2012-2013`);
+      s.intl_share = s.international / s.headcount;
+      s.change_prev = prev ? s.headcount / prev.headcount - 1 : null;
+      s.change_base = base && s.year !== '2012-2013' ? s.headcount / base.headcount - 1 : null;
+    }
+    return rows;
+  },
+});
+
+dash.calc('york_standing', {
+  inputs: ['totals', 'peer_groups'],
+  title: 'York’s rank in each comparison group',
+  description: 'York’s place among itself and the group’s members on headcount, growth and international share (1 = highest).',
+  fn: (totals, peer_groups) => {
+    const slices = new Map();
+    for (const t of totals) {
+      const k = t.level + '|' + t.year;
+      if (!slices.has(k)) slices.set(k, []);
+      slices.get(k).push(t);
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const members = new Set(peer_groups.filter((g) => g.group === group).map((g) => g.institution));
+      for (const [k, list] of slices) {
+        const york = list.find((t) => t.institution === 'York');
+        if (!york) continue;
+        const pool = list.filter((t) => t.institution === 'York' || members.has(t.institution));
+        const [level, year] = k.split('|');
+        const r = { key: `${group}|${k}`, group, level, year };
+        for (const f of ['headcount', 'change_prev', 'change_base', 'intl_share']) {
+          const vals = pool.filter((t) => t[f] != null);
+          r['rank_' + f] = york[f] == null ? null : 1 + vals.filter((t) => t[f] > york[f]).length;
+          r['n_' + f] = york[f] == null ? null : vals.length;
+        }
+        rows.push(r);
+      }
+    }
+    return rows;
+  },
+});
+
+dash.calc('york_ontario', {
+  inputs: ['totals'],
+  title: 'York’s share of Ontario',
+  description: 'York’s headcount as a share of all Ontario institutions combined, and its change since 2012-13 in percentage points.',
+  fn: (totals) => {
+    const all = new Map(totals.filter((t) => t.institution === 'All institutions').map((t) => [t.level + '|' + t.year, t.headcount]));
+    const share = new Map(totals.filter((t) => t.institution === 'York').map((t) => [t.level + '|' + t.year, t.headcount / all.get(t.level + '|' + t.year)]));
+    return [...share].map(([key, s]) => {
+      const [level, year] = key.split('|');
+      const base = share.get(level + '|2012-2013');
+      return { key, level, year, share: s, change_base: year === '2012-2013' || base == null ? null : (s - base) * 100 };
+    });
+  },
+});
+
+const FOCUS = 'York';
+const FIRST = '2012-2013';
+const fmtN = d3.format(',');
+const fmtP = d3.format('.1%');
+const fmtD = d3.format('+.1%');
+const fmtPt = (v) => d3.format('+.1f')(v) + ' pts';
+const fmtI = d3.format('.0f');
+const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+const shortYear = (y) => y.slice(0, 5) + y.slice(7);
+const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
+const P = () => dash.params();
+const instKey = (inst, p) => `${inst}|${p.level}|${p.year}`;
+const groupKey = (p) => `${p.group}|${p.level}|${p.year}`;
+const MUTED = 'var(--cds-chart-muted)';
+const LOSS = 'var(--cds-chart-status-critical)';
+const memo = (f) => {
+  const m = new WeakMap();
+  return (rows) => {
+    if (!m.has(rows)) m.set(rows, f(rows));
+    return m.get(rows);
+  };
+};
+const byField = (field) => memo((rows) => new Map(rows.map((r) => [r[field], r])));
+const bySliceRow = byField('slice');
+const byKeyRow = byField('key');
+const bySel = memo((rows) => d3.group(rows, (r) => `${r.group}|${r.level}|${r.year}`));
+const membersOf = (group) => {
+  const g = dash.data('peer_groups');
+  return g.status === 'ok' ? g.data.filter((r) => r.group === group).map((r) => r.institution) : [];
+};
+const FAILED = ['error', 'missing', 'declined'];
+
+function failLine() {
+  const f = document.createElement('span');
+  f.className = 'ux-fail';
+  f.textContent = 'Failed to load';
+  return f;
+}
+// Shows loading or failure in el; true when every source is ready.
+function gate(el, ids, box) {
+  const st = ids.map((id) => dash.data(id).status);
+  if (st.every((s) => s === 'ok')) {
+    el.classList.remove('dash-skeleton');
+    return true;
+  }
+  const failed = st.some((s) => FAILED.includes(s));
+  el.classList.toggle('dash-skeleton', !failed);
+  if (failed) el.replaceChildren(failLine());
+  else if (box) el.replaceChildren();
+  else el.replaceChildren('—');
+  return false;
+}
+function gateRows(tb, ids, cols) {
+  const st = ids.map((id) => dash.data(id).status);
+  if (st.every((s) => s === 'ok')) return true;
+  const cell = document.createElement('td');
+  cell.colSpan = cols;
+  if (st.some((s) => FAILED.includes(s))) cell.append(failLine());
+  else {
+    cell.className = 'dash-skeleton';
+    cell.textContent = '—';
+  }
+  const tr = document.createElement('tr');
+  tr.append(cell);
+  tb.replaceChildren(tr);
+  return false;
+}
+function cite(tag, text, source, field, where) {
+  const e = document.createElement(tag);
+  e.textContent = text;
+  e.dataset.source = source;
+  e.dataset.field = field;
+  if (where) e.dataset.where = where;
+  return e;
+}
+const tone = (v) => (v == null ? '' : v >= 0 ? 'ux-up' : 'ux-down');
+const signed = (v) => ('ux-num ' + tone(v)).trim();
+function td(text, cls) {
+  const e = document.createElement('td');
+  e.textContent = text;
+  if (cls) e.className = cls;
+  return e;
+}
+
+// Table sorting, shared by every table on the page.
+const sortBy = new Map();
+function sortRows(list, table) {
+  const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
+  list.sort((a, b) => {
+    const x = a[s.key], y = b[s.key];
+    if (x == null) return y == null ? 0 : 1;
+    if (y == null) return -1;
+    return s.dir === 'asc' ? d3.ascending(x, y) : d3.descending(x, y);
+  });
+  table.querySelectorAll('th').forEach((th) => {
+    const b = th.querySelector('.ux-sort');
+    th.setAttribute('aria-sort', b && b.dataset.sort === s.key ? (s.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+  });
+}
+
+// Charts: an svg sized to its box, a tooltip, and text measuring.
+function svgIn(el, W, H) {
+  const svg = d3.create('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('class', 'ux-svg');
+  const tip = document.createElement('div');
+  tip.className = 'ux-tip';
+  tip.hidden = true;
+  el.replaceChildren(svg.node(), tip);
+  return { svg, tip };
+}
+function measure(svg, texts, cls = 'ux-tick') {
+  const g = svg.append('g').attr('class', cls);
+  const w = d3.max(texts, (t) => g.append('text').text(t).node().getComputedTextLength()) || 0;
+  g.remove();
+  return w;
+}
+// Shortens a label until it fits in max px.
+function fit(svg, text, max, cls = 'ux-tick') {
+  const g = svg.append('g').attr('class', cls);
+  const t = g.append('text').text(text);
+  let s = text;
+  while (s.length > 3 && t.node().getComputedTextLength() > max) {
+    s = s.slice(0, -1);
+    t.text(s.trimEnd() + '…');
+  }
+  const out = t.text();
+  g.remove();
+  return out;
+}
+function showTip(el, tip, event, head, lines) {
+  const h = document.createElement('div');
+  h.className = 'ux-tip-h';
+  h.textContent = head;
+  tip.replaceChildren(h, ...lines.map((l) => {
+    const r = document.createElement('div');
+    r.className = 'ux-tip-r';
+    if (l.color) {
+      const sw = document.createElement('i');
+      sw.className = 'ux-sw';
+      sw.style.background = l.color;
+      r.append(sw);
+    }
+    const n = document.createElement('span');
+    n.className = 'ux-tip-n';
+    n.textContent = l.name;
+    const v = document.createElement('span');
+    v.className = 'ux-tip-v';
+    v.textContent = l.value;
+    r.append(n, v);
+    return r;
+  }));
+  tip.hidden = false;
+  const box = el.getBoundingClientRect();
+  const x = event.clientX - box.left, y = event.clientY - box.top;
+  const w = tip.offsetWidth, th = tip.offsetHeight;
+  let left = x + 14;
+  if (left + w > box.width) left = x - w - 14;
+  tip.style.left = Math.max(0, Math.min(left, box.width - w)) + 'px';
+  tip.style.top = Math.max(0, y - th - 10) + 'px';
+}
+function yearAxis(svg, years, x, H, selected) {
+  const lw = measure(svg, ['2012-13']) + 10;
+  const step = Math.max(1, Math.ceil(lw / x.step()));
+  const shown = years.filter((y, i) => (years.length - 1 - i) % step === 0);
+  const off = x.bandwidth ? x.bandwidth() / 2 : 0;
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(shown).join('text')
+    .attr('x', (y) => x(y) + off).attr('y', H - 6).attr('text-anchor', 'middle')
+    .attr('class', (y) => (y === selected ? 'is-on' : null)).text(shortYear);
+}
+function yGrid(svg, y, ticks, tf, left, W) {
+  svg.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ux-grid-line')
+    .attr('x1', left).attr('x2', W).attr('y1', y).attr('y2', y);
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(ticks).join('text')
+    .attr('x', left - 8).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(tf);
+}
+// Spreads end labels so they don't meet: items {y}, sorted, min gap px.
+function spread(items, gap, lo, hi) {
+  items.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < items.length; i++) items[i].y = Math.max(items[i].y, items[i - 1].y + gap);
+  const over = items.length ? items[items.length - 1].y - hi : 0;
+  if (over > 0) items.forEach((d) => { d.y -= over; });
+  for (let i = items.length - 2; i >= 0; i--) items[i].y = Math.min(items[i].y, items[i + 1].y - gap);
+  items.forEach((d) => { d.y = Math.max(lo, d.y); });
+}
+
+// Filters and controls.
+document.addEventListener('click', (e) => {
+  const sort = e.target.closest('.ux .ux-sort');
+  if (sort) {
+    const table = sort.closest('table');
+    const cur = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
+    const key = sort.dataset.sort;
+    const text = key === 'category' || key === 'institution';
+    const dir = cur.key === key ? (cur.dir === 'asc' ? 'desc' : 'asc') : text ? 'asc' : 'desc';
+    sortBy.set(table.id, { key, dir });
+    dash.draw(table.dataset.rows);
+    return;
+  }
+  const metric = e.target.closest('.ux .ux-metric');
+  if (metric) {
+    dash.setParams({ metric: metric.dataset.metric });
+    return;
+  }
+  const tab = e.target.closest('.ux .ux-dimtab');
+  if (tab) {
+    dash.setParams({ dim: tab.dataset.dim });
+    dash.setLink('by-' + tab.dataset.dim);
+    return;
+  }
+  if (e.target.closest('.ux .ux-reset')) dash.resetParams();
+});
+document.addEventListener('change', (e) => {
+  if (e.target.matches('.ux .ux-level')) dash.setParams({ level: e.target.value });
+});
+document.addEventListener('input', (e) => {
+  if (e.target.matches('.ux .ux-search')) dash.draw('dim-rows');
+});
+
+dash.onData(() => {
+  const p = P();
+  document.querySelectorAll('.ux .ux-level').forEach((s) => { s.value = p.level; });
+  document.querySelectorAll('.ux .ux-sw[data-i]').forEach((s) => { s.style.background = dash.colors[Number(s.dataset.i)]; });
+  document.querySelectorAll('.ux .ux-sw[data-muted]').forEach((s) => { s.style.background = MUTED; });
+  document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
+  document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
+  document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
+  const d = dash.data('cmp_' + p.dim);
+  const empty = d.status === 'ok' && !(bySel(d.data).get(groupKey(p)) ?? []).some((r) => r.york > 0);
+  document.querySelectorAll('.ux .ux-dim').forEach((s) => {
+    const on = s.dataset.dim === p.dim;
+    s.hidden = !on;
+    s.querySelectorAll('.ux-empty').forEach((n) => { n.hidden = !(on && empty); });
+    s.querySelectorAll('.ux-dim-body').forEach((b) => { b.hidden = !on || empty; });
+  });
+});
+
+// Words that follow the filters.
+dash.draw('sel-level', (el) => { el.textContent = P().level.toLowerCase(); });
+dash.draw('sel-year', (el) => { el.textContent = shortYear(P().year); });
+dash.draw('sel-group', (el) => { el.textContent = P().group; });
+dash.draw('members', (el) => {
+  if (!gate(el, ['peer_groups'])) return;
+  el.textContent = membersOf(P().group).join(', ') || '—';
+});
+
+dash.draw('group-select', (sel) => {
+  const g = dash.data('peer_groups');
+  const p = P();
+  const names = g.status === 'ok'
+    ? [...new Set(g.data.slice().sort((a, b) => Number(a.order) - Number(b.order)).map((r) => r.group))]
+    : [p.group];
+  sel.replaceChildren(...names.map((n) => new Option(n)));
+  sel.value = p.group;
+  sel.onchange = () => dash.setParams({ group: sel.value });
+});
+dash.draw('year-select', (sel) => {
+  const t = dash.data('totals');
+  const p = P();
+  const years = t.status === 'ok' ? [...new Set(t.data.map((r) => r.year))].sort(d3.descending) : [p.year];
+  sel.replaceChildren(...years.map((y) => new Option(shortYear(y), y)));
+  sel.value = p.year;
+  sel.onchange = () => dash.setParams({ year: sel.value });
+});
+
+// Headline figures. Each reads one row of one source.
+const SOURCES = {
+  totals: { index: bySliceRow, key: (p) => instKey(FOCUS, p), col: 'slice' },
+  group_totals: { index: byKeyRow, key: groupKey, col: 'key' },
+  york_standing: { index: byKeyRow, key: groupKey, col: 'key' },
+  york_ontario: { index: byKeyRow, key: (p) => `${p.level}|${p.year}`, col: 'key' },
+};
+const rowOf = (id) => SOURCES[id].index(dash.data(id).data).get(SOURCES[id].key(P()));
+const figure = (id, field, fmt, colored) => (el) => {
+  if (!gate(el, [id])) return;
+  const r = rowOf(id);
+  if (!r || r[field] == null) {
+    el.replaceChildren('—');
+    return;
+  }
+  const s = cite('span', fmt(r[field]), id, field, SOURCES[id].col + '=' + enc(r[SOURCES[id].col]));
+  if (colored) s.className = tone(r[field]);
+  el.replaceChildren(s);
+};
+dash.draw('lede-york', figure('totals', 'headcount', fmtN));
+dash.draw('lede-york-chg', figure('totals', 'change_base', fmtD));
+dash.draw('lede-peer-chg', figure('group_totals', 'change_base', fmtD));
+dash.draw('t-headcount', figure('totals', 'headcount', fmtN));
+dash.draw('t-base', figure('totals', 'change_base', fmtD, true));
+dash.draw('t-prev', figure('totals', 'change_prev', fmtD, true));
+dash.draw('t-intl', figure('totals', 'intl_share', fmtP));
+dash.draw('t-ont', figure('york_ontario', 'share', fmtP));
+dash.draw('g-base', figure('group_totals', 'change_base', fmtD, true));
+dash.draw('g-prev', figure('group_totals', 'change_prev', fmtD, true));
+dash.draw('g-intl', figure('group_totals', 'intl_share', fmtP));
+dash.draw('o-base', figure('york_ontario', 'change_base', fmtPt, true));
+// "2 of 10": York's rank and how many were ranked.
+const rank = (f) => (el) => {
+  if (!gate(el, ['york_standing'])) return;
+  const r = rowOf('york_standing');
+  if (!r || r['rank_' + f] == null) {
+    el.replaceChildren('—');
+    return;
+  }
+  const where = 'key=' + enc(r.key);
+  el.replaceChildren(cite('span', String(r['rank_' + f]), 'york_standing', 'rank_' + f, where), ' of ',
+    cite('span', String(r['n_' + f]), 'york_standing', 'n_' + f, where));
+};
+['headcount', 'change_base', 'change_prev', 'intl_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
+
+// Growth since 2012-13, indexed to 100: York, peers combined, and each peer.
+dash.draw('growth', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const tot = dash.data('totals').data.filter((r) => r.level === p.level);
+  const years = [...new Set(tot.map((r) => r.year))].sort(d3.ascending);
+  const index = (rows) => {
+    const base = rows.find((r) => r.year === FIRST);
+    if (!base) return null;
+    return rows.filter((r) => years.includes(r.year)).sort((a, b) => d3.ascending(a.year, b.year))
+      .map((r) => ({ year: r.year, v: (r.headcount / base.headcount) * 100 }));
+  };
+  const byInst = d3.group(tot, (r) => r.institution);
+  const peers = membersOf(p.group).map((m) => ({ name: m, pts: index(byInst.get(m) ?? []) })).filter((s) => s.pts && s.pts.length > 1);
+  const york = { name: FOCUS, color: dash.colors[0], pts: index(byInst.get(FOCUS) ?? []) ?? [] };
+  const comb = { name: 'Peers combined', color: dash.colors[1],
+    pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level)) ?? [] };
+  const W = Math.max(260, el.clientWidth), H = 260;
+  const { svg, tip } = svgIn(el, W, H);
+  if (!york.pts.length || !years.length) return;
+  const all = [york, comb, ...peers].flatMap((s) => s.pts.map((d) => d.v));
+  const peerVals = peers.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
+  // Clip only outliers: peers far above the rest (a small school growing from a low base).
+  const q90 = d3.quantile(peerVals, 0.9) ?? 100, top = peerVals[peerVals.length - 1] ?? 100;
+  const peerHi = top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 : top;
+  const hi = Math.max(d3.max([york, comb], (s) => d3.max(s.pts, (d) => d.v)) ?? 100, peerHi);
+  const y = d3.scaleLinear([Math.min(100, d3.min(all)), hi * 1.03], [H - 26, 10]).nice();
+  const ticks = y.ticks(5);
+  const left = measure(svg, ticks.map(fmtI)) + 8;
+  const last = (s) => s.pts[s.pts.length - 1];
+  const ends = [york, comb].filter((s) => s.pts.length).map((s) => ({ s, text: `${s.name === FOCUS ? 'York' : 'Peers'} ${fmtI(last(s).v)}` }));
+  const right = measure(svg, ends.map((e) => e.text), 'ux-lbl') + 12;
+  const x = d3.scalePoint(years, [left + 6, W - right]);
+  yGrid(svg, y, ticks, fmtI, left, W - right + 4);
+  svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
+  yearAxis(svg, years, x, H, p.year);
+  const clip = 'clip-growth-' + Math.random().toString(36).slice(2, 8);
+  svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', H - 24);
+  const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
+  const peerPaths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(peers).join('path')
+    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', MUTED).attr('stroke-width', 1.25)
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  svg.append('g').selectAll('path').data([comb, york].filter((s) => s.pts.length)).join('path')
+    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', (s) => s.color).attr('stroke-width', (s) => (s === york ? 2.5 : 2))
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const labels = ends.map((e) => ({ ...e, y: y(last(e.s).v) }));
+  spread(labels, 14, 8, H - 30);
+  svg.append('g').selectAll('text').data(labels).join('text').attr('class', 'ux-lbl ux-lbl-strong')
+    .attr('x', W - right + 8).attr('y', (d) => d.y).attr('dy', '0.32em').style('fill', (d) => d.s.color).text((d) => d.text);
+  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 10).attr('y2', H - 26).attr('opacity', 0);
+  const dots = svg.append('g');
+  svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
+    .on('mousemove', (e) => {
+      const [mx, my] = d3.pointer(e, svg.node());
+      const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
+      const at = (s) => s.pts.find((d) => d.year === yr);
+      let near = null;
+      for (const s of peers) {
+        const d = at(s);
+        if (d && Math.abs(y(d.v) - my) < 14 && (!near || Math.abs(y(d.v) - my) < Math.abs(y(at(near).v) - my))) near = s;
+      }
+      peerPaths.style('stroke', (s) => (s === near ? 'var(--color-fg-muted)' : MUTED)).attr('stroke-width', (s) => (s === near ? 2 : 1.25));
+      rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+      const shown = [york, comb].filter((s) => at(s));
+      dots.selectAll('circle').data(shown).join('circle').attr('r', 3.5).attr('cx', x(yr)).attr('cy', (s) => y(at(s).v)).style('fill', (s) => s.color);
+      const lines = shown.map((s) => ({ color: s.color, name: s.name, value: fmtI(at(s).v) }));
+      if (near) lines.push({ color: 'var(--color-fg-muted)', name: near.name, value: fmtI(at(near).v) });
+      showTip(el, tip, e, shortYear(yr) + ' · 2012-13 = 100', lines);
+    })
+    .on('mouseleave', () => {
+      tip.hidden = true;
+      rule.attr('opacity', 0);
+      dots.selectAll('circle').remove();
+      peerPaths.style('stroke', MUTED).attr('stroke-width', 1.25);
+    });
+});
+
+// York's share of all Ontario students over time.
+dash.draw('share', (el) => {
+  if (!gate(el, ['york_ontario'], true)) return;
+  const p = P();
+  const rows = dash.data('york_ontario').data.filter((r) => r.level === p.level).sort((a, b) => d3.ascending(a.year, b.year));
+  const W = Math.max(260, el.clientWidth), H = 260;
+  const { svg, tip } = svgIn(el, W, H);
+  if (!rows.length) return;
+  const years = rows.map((r) => r.year);
+  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.share)], [H - 26, 10]).nice();
+  const ticks = y.ticks(4);
+  const tf = y.tickFormat(4, '%');
+  const left = measure(svg, ticks.map(tf)) + 8;
+  const end = fmtP(rows[rows.length - 1].share);
+  const right = measure(svg, [end], 'ux-lbl') + 12;
+  const x = d3.scalePoint(years, [left + 6, W - right]);
+  yGrid(svg, y, ticks, tf, left, W - right + 4);
+  yearAxis(svg, years, x, H, p.year);
+  const grad = 'grad-share-' + Math.random().toString(36).slice(2, 8);
+  const lg = svg.append('defs').append('linearGradient').attr('id', grad).attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', 1);
+  [[0, 0.26], [0.25, 0.16], [0.5, 0.08], [0.75, 0.03], [1, 0]].forEach(([o, a]) => {
+    lg.append('stop').attr('offset', o).style('stop-color', dash.colors[0]).style('stop-opacity', a);
+  });
+  svg.append('path').attr('d', d3.area().x((r) => x(r.year)).y0(y(0)).y1((r) => y(r.share))(rows)).style('fill', `url(#${grad})`);
+  svg.append('path').attr('d', d3.line().x((r) => x(r.year)).y((r) => y(r.share))(rows)).style('fill', 'none')
+    .style('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(0)).attr('y2', y(0));
+  const sel = rows.find((r) => r.year === p.year);
+  if (sel) svg.append('circle').attr('r', 3.5).attr('cx', x(sel.year)).attr('cy', y(sel.share)).style('fill', dash.colors[0]);
+  svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', W - right + 8).attr('y', y(rows[rows.length - 1].share))
+    .attr('dy', '0.32em').style('fill', dash.colors[0]).text(end);
+  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 10).attr('y2', H - 26).attr('opacity', 0);
+  svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
+    .on('mousemove', (e) => {
+      const mx = d3.pointer(e, svg.node())[0];
+      const r = rows[d3.leastIndex(rows, (d) => Math.abs(x(d.year) - mx))];
+      rule.attr('x1', x(r.year)).attr('x2', x(r.year)).attr('opacity', 1);
+      showTip(el, tip, e, shortYear(r.year), [
+        { name: 'York’s share', value: fmtP(r.share) },
+        { name: 'Since 2012-13', value: r.change_base == null ? '—' : fmtPt(r.change_base) },
+      ]);
+    })
+    .on('mouseleave', () => { tip.hidden = true; rule.attr('opacity', 0); });
+});
+
+// Ranking: York, peers combined and each peer on the chosen measure.
+const METRICS = {
+  change_base: { fmt: fmtD, signed: true },
+  change_prev: { fmt: fmtD, signed: true },
+  headcount: { fmt: fmtN, signed: false },
+  intl_share: { fmt: fmtP, signed: false },
+};
+dash.draw('rank-bars', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const m = METRICS[p.metric] ?? METRICS.change_base;
+  const f = METRICS[p.metric] ? p.metric : 'change_base';
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const rows = dash.data('totals').data
+    .filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
+    .map((r) => ({ name: r.institution, v: r[f], kind: r.institution === FOCUS ? 'york' : 'peer' }));
+  const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
+  if (comb && comb[f] != null && f !== 'headcount') rows.push({ name: 'Peers combined', v: comb[f], kind: 'comb' });
+  rows.sort((a, b) => b.v - a.v);
+  const W = Math.max(260, el.clientWidth), rowH = 24, H = Math.max(rowH, rows.length * rowH) + 4;
+  const { svg, tip } = svgIn(el, W, H);
+  if (!rows.length) return;
+  const vals = rows.map((r) => r.v).sort(d3.ascending);
+  const q = d3.quantile(vals, 0.85);
+  const keep = d3.max(rows.filter((r) => r.kind !== 'peer'), (r) => r.v) ?? 0;
+  const max = vals[vals.length - 1];
+  const cap = q > 0 && max > 2 * q ? Math.max(q * 1.4, keep) : max;
+  const lo = Math.min(0, vals[0]);
+  const labelW = Math.min(measure(svg, rows.map((r) => r.name), 'ux-lbl ux-lbl-strong') + 16, W * 0.38);
+  const valW = measure(svg, rows.map((r) => m.fmt(r.v)), 'ux-lbl') + 8;
+  const x = d3.scaleLinear([lo, Math.max(cap, 0)], [labelW + (lo < 0 ? valW : 0), W - valW]);
+  const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
+  g.append('text').attr('class', (r) => (r.kind === 'peer' ? 'ux-lbl' : 'ux-lbl ux-lbl-strong')).attr('x', labelW - 10).attr('y', rowH / 2)
+    .attr('dy', '0.32em').attr('text-anchor', 'end').text((r) => fit(svg, r.name, labelW - 12, 'ux-lbl ux-lbl-strong'));
+  const fill = (r) => (r.kind === 'york' ? dash.colors[0] : r.kind === 'comb' ? dash.colors[1] : MUTED);
+  g.append('rect').attr('y', 5).attr('height', rowH - 10).attr('rx', 2).style('fill', fill)
+    .attr('x', (r) => x(Math.min(0, r.v))).attr('width', (r) => Math.max(1, Math.abs(x(Math.min(r.v, cap)) - x(0))));
+  g.append('text').attr('class', 'ux-lbl').attr('y', rowH / 2).attr('dy', '0.32em')
+    .attr('x', (r) => (r.v < 0 ? x(r.v) - 4 : x(Math.min(r.v, cap)) + 4)).attr('text-anchor', (r) => (r.v < 0 ? 'end' : 'start'))
+    .text((r) => m.fmt(r.v) + (r.v > cap ? ' ›' : ''));
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H);
+  g.append('rect').attr('x', 0).attr('width', W).attr('height', rowH).style('fill', 'transparent')
+    .on('mousemove', (e, r) => {
+      const place = rows.filter((d) => d.kind !== 'comb').findIndex((d) => d.name === r.name) + 1;
+      showTip(el, tip, e, r.name, [
+        { name: 'Value', value: m.fmt(r.v) },
+        ...(r.kind === 'comb' ? [] : [{ name: 'Rank', value: `${place} of ${rows.filter((d) => d.kind !== 'comb').length}` }]),
+      ]);
+    })
+    .on('mouseleave', () => { tip.hidden = true; });
+});
+
+// York and its peers in a table for the selected year and level.
+dash.draw('inst-rows', (tb) => {
+  const table = tb.closest('table');
+  if (!gateRows(tb, ['totals', 'peer_groups'], 5)) return;
+  const p = P();
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const list = dash.data('totals').data.filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution));
+  sortRows(list, table);
+  const max = d3.max(list, (r) => r.headcount) || 1;
+  tb.replaceChildren(...list.map((r) => {
+    const tr = document.createElement('tr');
+    tr.dataset.key = r.slice;
+    if (r.institution === FOCUS) tr.className = 'is-picked';
+    const hc = document.createElement('td');
+    hc.className = 'ux-num';
+    const cell = document.createElement('div');
+    cell.className = 'ux-cell';
+    const num = document.createElement('span');
+    num.textContent = fmtN(r.headcount);
+    const bar = document.createElement('span');
+    bar.className = 'ux-cellbar';
+    bar.style.width = (r.headcount / max) * 100 + '%';
+    bar.style.background = r.institution === FOCUS ? dash.colors[0] : MUTED;
+    cell.append(num, bar);
+    hc.append(cell);
+    tr.append(
+      td(r.institution),
+      hc,
+      td(r.change_prev == null ? '—' : fmtD(r.change_prev), signed(r.change_prev) + ' ux-hide-narrow'),
+      td(r.change_base == null ? '—' : fmtD(r.change_base), signed(r.change_base)),
+      td(fmtP(r.intl_share), 'ux-num'),
+    );
+    return tr;
+  }));
+});
+
+// Breakdown rows for the selected group, level and year, largest first.
+const TOP = 12;
+const selRows = (id) => (bySel(dash.data(id).data).get(groupKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
+
+// York's mix against the group's: paired bars of share.
+dash.draw('mix-bars', (el) => {
+  const id = el.dataset.source;
+  if (!gate(el, [id], true)) return;
+  const rows = topRows(id);
+  const max = d3.max(rows, (r) => Math.max(r.york_share ?? 0, r.peer_share ?? 0)) || 1;
+  el.replaceChildren(...rows.map((r) => {
+    const row = document.createElement('div');
+    row.className = 'ux-bar-row';
+    const head = document.createElement('div');
+    head.className = 'ux-bar-head';
+    const label = document.createElement('span');
+    label.className = 'ux-bar-label';
+    label.textContent = r.category;
+    label.title = r.category;
+    const val = document.createElement('span');
+    val.className = 'ux-bar-val';
+    val.textContent = `${fmtP(r.york_share ?? 0)} vs ${fmtP(r.peer_share ?? 0)}`;
+    head.append(label, val);
+    const yb = document.createElement('div');
+    yb.className = 'ux-bar';
+    yb.style.width = ((r.york_share ?? 0) / max) * 100 + '%';
+    yb.style.background = dash.colors[0];
+    const pb = document.createElement('div');
+    pb.className = 'ux-bar ux-bar-thin';
+    pb.style.width = ((r.peer_share ?? 0) / max) * 100 + '%';
+    pb.style.background = dash.colors[1];
+    row.append(head, yb, pb);
+    return row;
+  }));
+});
+
+// York's share of each category (York ÷ York + peers), change since 2012-13 in points.
+dash.draw('field-bars', (el) => {
+  const id = el.dataset.source;
+  if (!gate(el, [id], true)) return;
+  const rows = topRows(id).filter((r) => r.field_change != null).sort((a, b) => b.field_change - a.field_change);
+  const W = Math.max(260, el.clientWidth), rowH = 24, H = Math.max(rowH, rows.length * rowH) + 4;
+  const { svg, tip } = svgIn(el, W, H);
+  if (!rows.length) return;
+  const ext = d3.max(rows, (r) => Math.abs(r.field_change)) || 1;
+  const labelW = Math.min(measure(svg, rows.map((r) => r.category), 'ux-lbl') + 16, W * 0.45);
+  const valW = measure(svg, rows.map((r) => fmtPt(r.field_change)), 'ux-lbl') + 8;
+  const x = d3.scaleLinear([-ext, ext], [labelW + valW, W - valW]);
+  const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
+  g.append('text').attr('class', 'ux-lbl').attr('x', labelW - 10).attr('y', rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+    .text((r) => fit(svg, r.category, labelW - 12, 'ux-lbl'));
+  g.append('rect').attr('y', 5).attr('height', rowH - 10).attr('rx', 2)
+    .style('fill', (r) => (r.field_change >= 0 ? dash.colors[0] : LOSS))
+    .attr('x', (r) => x(Math.min(0, r.field_change))).attr('width', (r) => Math.max(1, Math.abs(x(r.field_change) - x(0))));
+  g.append('text').attr('class', 'ux-lbl').attr('y', rowH / 2).attr('dy', '0.32em')
+    .attr('x', (r) => (r.field_change < 0 ? x(r.field_change) - 4 : x(r.field_change) + 4))
+    .attr('text-anchor', (r) => (r.field_change < 0 ? 'end' : 'start')).text((r) => fmtPt(r.field_change));
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H);
+  g.append('rect').attr('x', 0).attr('width', W).attr('height', rowH).style('fill', 'transparent')
+    .on('mousemove', (e, r) => showTip(el, tip, e, r.category, [
+      { name: 'York’s share now', value: fmtP(r.field_share) },
+      { name: 'Change since 2012-13', value: fmtPt(r.field_change) },
+      { color: dash.colors[0], name: 'York', value: fmtN(r.york) },
+      { color: dash.colors[1], name: 'Peers combined', value: fmtN(r.peers) },
+    ]))
+    .on('mouseleave', () => { tip.hidden = true; });
+});
+
+// Every category, searchable and sortable.
+dash.draw('dim-rows', (tb) => {
+  const table = tb.closest('table');
+  const id = table.dataset.source;
+  if (!gateRows(tb, [id], 9)) return;
+  const search = table.closest('.ux-dim')?.querySelector('.ux-search');
+  const q = (search?.value ?? '').trim().toLowerCase();
+  let list = selRows(id);
+  if (q) list = list.filter((r) => r.category.toLowerCase().includes(q));
+  sortRows(list, table);
+  const pct = (v) => (v == null ? '—' : fmtP(v));
+  const chg = (v) => (v == null ? '—' : fmtD(v));
+  tb.replaceChildren(...list.map((r) => {
+    const tr = document.createElement('tr');
+    tr.dataset.key = r.key;
+    tr.append(
+      td(r.category),
+      td(fmtN(r.york), 'ux-num'),
+      td(pct(r.york_share), 'ux-num'),
+      td(pct(r.peer_share), 'ux-num'),
+      td(r.gap == null ? '—' : fmtPt(r.gap), 'ux-num ux-hide-narrow'),
+      td(pct(r.field_share), 'ux-num'),
+      td(r.field_change == null ? '—' : fmtPt(r.field_change), signed(r.field_change)),
+      td(chg(r.york_change), signed(r.york_change) + ' ux-hide-narrow'),
+      td(chg(r.peer_change), signed(r.peer_change) + ' ux-hide-narrow'),
+    );
+    return tr;
+  }));
+});
+
+const link = location.hash.slice(1);
+if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ dim: link.slice(3) });
+const named = document.getElementById(link);
+if (named) named.scrollIntoView();
+
+</script>
+
+<footer class="site-foot">Data: Ontario university headcounts by institution, 2012-13 to 2024-25. Source code and data: <a href="https://github.com/AzizYorkU/McuresEnrollments">github.com/AzizYorkU/McuresEnrollments</a>.</footer>
+</main>
+</body>
+</html>

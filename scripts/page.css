@@ -94,3 +94,4 @@
 .ux-bar-thin { height: 5px; }
 .ux-hbars { position: relative; min-height: 120px; }
 .ux-section { display: grid; gap: var(--cds-gap-sm); }
+.ux [hidden] { display: none !important; }

@@ -2,7 +2,9 @@
 
 How York University's enrolment compares with other Ontario universities, fiscal years 2012-13 to 2024-25. The data covers 24 institutions at the undergraduate and graduate levels.
 
-**Live dashboard:** https://claude.ai/artifact/74HZbzDpJKKZejBnGEivkX
+**Website:** https://azizyorku.github.io/McuresEnrollments/ (GitHub Pages, served from `docs/`)
+
+**Claude dashboard:** https://claude.ai/artifact/74HZbzDpJKKZejBnGEivkX
 
 ## What the dashboard shows
 
@@ -34,6 +36,7 @@ Notes on the data:
 | `build.py` | Converts each SAS file to `scripts/out/<dim>.csv` (`slice` = `institution\|level\|year`, `category`, `headcount`), adds "All institutions" / "All levels" rollups, rolls CIP codes up to 2-digit series (`cip2.csv`) and writes the comparison groups (`peer_groups.csv`) |
 | `gen.py` | Combines `page.css` + `page.js` with the per-breakdown York-vs-peers calculations into the dashboard page, and writes the dashboard store updates (`scripts/docs/`) |
 | `page.css`, `page.js` | Dashboard page source |
+| `site/dash.js`, `site/theme.css` | Stand-in for the dashboard runtime and theme, so the same page runs as the static site in `docs/` |
 | `peek.py`, `overview.py`, `headlines.py` | First-look analysis of the raw files |
 
 ## Rebuild
@@ -42,5 +45,5 @@ Notes on the data:
 pip install -r requirements.txt
 cd scripts
 python build.py   # SAS -> CSV
-python gen.py     # page + dataset docs
+python gen.py     # dashboard page + static site in docs/
 ```

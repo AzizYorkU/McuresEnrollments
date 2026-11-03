@@ -1,0 +1,2409 @@
+slice,category,headcount
+Algoma|All levels|2012-2013,English,861
+Algoma|All levels|2012-2013,French,14
+Algoma|All levels|2012-2013,Other,233
+Algoma|All levels|2013-2014,English,861
+Algoma|All levels|2013-2014,French,10
+Algoma|All levels|2013-2014,Other,347
+Algoma|All levels|2014-2015,English,831
+Algoma|All levels|2014-2015,French,12
+Algoma|All levels|2014-2015,Other,346
+Algoma|All levels|2015-2016,English,766
+Algoma|All levels|2015-2016,French,15
+Algoma|All levels|2015-2016,Other,300
+Algoma|All levels|2016-2017,English,706
+Algoma|All levels|2016-2017,Other,285
+Algoma|All levels|2017-2018,English,677
+Algoma|All levels|2017-2018,French,10
+Algoma|All levels|2017-2018,Other,207
+Algoma|All levels|2018-2019,English,706
+Algoma|All levels|2018-2019,French,13
+Algoma|All levels|2018-2019,Other,235
+Algoma|All levels|2019-2020,English,720
+Algoma|All levels|2019-2020,French,12
+Algoma|All levels|2019-2020,Other,880
+Algoma|All levels|2020-2021,English,732
+Algoma|All levels|2020-2021,French,17
+Algoma|All levels|2020-2021,Other,665
+Algoma|All levels|2021-2022,English,769
+Algoma|All levels|2021-2022,French,27
+Algoma|All levels|2021-2022,Other,1647
+Algoma|All levels|2022-2023,English,756
+Algoma|All levels|2022-2023,French,30
+Algoma|All levels|2022-2023,Other,2518
+Algoma|All levels|2023-2024,English,860
+Algoma|All levels|2023-2024,French,23
+Algoma|All levels|2023-2024,Other,5635
+Algoma|All levels|2024-2025,English,952
+Algoma|All levels|2024-2025,French,23
+Algoma|All levels|2024-2025,Other,4749
+Algoma|Graduate|2024-2025,English,18
+Algoma|Graduate|2024-2025,Other,53
+Algoma|Undergraduate|2012-2013,English,861
+Algoma|Undergraduate|2012-2013,French,14
+Algoma|Undergraduate|2012-2013,Other,233
+Algoma|Undergraduate|2013-2014,English,861
+Algoma|Undergraduate|2013-2014,French,10
+Algoma|Undergraduate|2013-2014,Other,347
+Algoma|Undergraduate|2014-2015,English,831
+Algoma|Undergraduate|2014-2015,French,12
+Algoma|Undergraduate|2014-2015,Other,346
+Algoma|Undergraduate|2015-2016,English,766
+Algoma|Undergraduate|2015-2016,French,15
+Algoma|Undergraduate|2015-2016,Other,300
+Algoma|Undergraduate|2016-2017,English,706
+Algoma|Undergraduate|2016-2017,Other,285
+Algoma|Undergraduate|2017-2018,English,677
+Algoma|Undergraduate|2017-2018,French,10
+Algoma|Undergraduate|2017-2018,Other,207
+Algoma|Undergraduate|2018-2019,English,706
+Algoma|Undergraduate|2018-2019,French,13
+Algoma|Undergraduate|2018-2019,Other,235
+Algoma|Undergraduate|2019-2020,English,720
+Algoma|Undergraduate|2019-2020,French,12
+Algoma|Undergraduate|2019-2020,Other,880
+Algoma|Undergraduate|2020-2021,English,732
+Algoma|Undergraduate|2020-2021,French,17
+Algoma|Undergraduate|2020-2021,Other,665
+Algoma|Undergraduate|2021-2022,English,769
+Algoma|Undergraduate|2021-2022,French,27
+Algoma|Undergraduate|2021-2022,Other,1647
+Algoma|Undergraduate|2022-2023,English,756
+Algoma|Undergraduate|2022-2023,French,30
+Algoma|Undergraduate|2022-2023,Other,2518
+Algoma|Undergraduate|2023-2024,English,860
+Algoma|Undergraduate|2023-2024,French,23
+Algoma|Undergraduate|2023-2024,Other,5635
+Algoma|Undergraduate|2024-2025,English,934
+Algoma|Undergraduate|2024-2025,French,23
+Algoma|Undergraduate|2024-2025,Other,4696
+All institutions|All levels|2012-2013,English,292955
+All institutions|All levels|2012-2013,French,14691
+All institutions|All levels|2012-2013,Other,112270
+All institutions|All levels|2013-2014,English,303303
+All institutions|All levels|2013-2014,French,14921
+All institutions|All levels|2013-2014,Other,109665
+All institutions|All levels|2014-2015,English,310069
+All institutions|All levels|2014-2015,French,15109
+All institutions|All levels|2014-2015,Other,108577
+All institutions|All levels|2015-2016,English,317352
+All institutions|All levels|2015-2016,French,15291
+All institutions|All levels|2015-2016,Other,107964
+All institutions|All levels|2016-2017,English,328874
+All institutions|All levels|2016-2017,French,15763
+All institutions|All levels|2016-2017,Other,106056
+All institutions|All levels|2017-2018,English,330558
+All institutions|All levels|2017-2018,French,15799
+All institutions|All levels|2017-2018,Other,113309
+All institutions|All levels|2018-2019,English,331441
+All institutions|All levels|2018-2019,French,15884
+All institutions|All levels|2018-2019,Other,122933
+All institutions|All levels|2019-2020,English,327989
+All institutions|All levels|2019-2020,French,16108
+All institutions|All levels|2019-2020,Other,136376
+All institutions|All levels|2020-2021,English,322745
+All institutions|All levels|2020-2021,French,16555
+All institutions|All levels|2020-2021,Other,151394
+All institutions|All levels|2021-2022,English,316931
+All institutions|All levels|2021-2022,French,17060
+All institutions|All levels|2021-2022,Other,165077
+All institutions|All levels|2022-2023,English,301959
+All institutions|All levels|2022-2023,French,14493
+All institutions|All levels|2022-2023,Other,184969
+All institutions|All levels|2023-2024,English,307267
+All institutions|All levels|2023-2024,French,17740
+All institutions|All levels|2023-2024,Other,190990
+All institutions|All levels|2024-2025,English,303643
+All institutions|All levels|2024-2025,French,18613
+All institutions|All levels|2024-2025,Other,201816
+All institutions|Graduate|2012-2013,English,32773
+All institutions|Graduate|2012-2013,French,1907
+All institutions|Graduate|2012-2013,Other,17944
+All institutions|Graduate|2013-2014,English,33708
+All institutions|Graduate|2013-2014,French,1973
+All institutions|Graduate|2013-2014,Other,19039
+All institutions|Graduate|2014-2015,English,34215
+All institutions|Graduate|2014-2015,French,1987
+All institutions|Graduate|2014-2015,Other,20034
+All institutions|Graduate|2015-2016,English,34705
+All institutions|Graduate|2015-2016,French,2052
+All institutions|Graduate|2015-2016,Other,21105
+All institutions|Graduate|2016-2017,English,36038
+All institutions|Graduate|2016-2017,French,2137
+All institutions|Graduate|2016-2017,Other,21947
+All institutions|Graduate|2017-2018,English,36868
+All institutions|Graduate|2017-2018,French,2008
+All institutions|Graduate|2017-2018,Other,24400
+All institutions|Graduate|2018-2019,English,37805
+All institutions|Graduate|2018-2019,French,1961
+All institutions|Graduate|2018-2019,Other,26212
+All institutions|Graduate|2019-2020,English,39103
+All institutions|Graduate|2019-2020,French,1919
+All institutions|Graduate|2019-2020,Other,27992
+All institutions|Graduate|2020-2021,English,39912
+All institutions|Graduate|2020-2021,French,2081
+All institutions|Graduate|2020-2021,Other,27977
+All institutions|Graduate|2021-2022,English,40625
+All institutions|Graduate|2021-2022,French,2143
+All institutions|Graduate|2021-2022,Other,31318
+All institutions|Graduate|2022-2023,English,36706
+All institutions|Graduate|2022-2023,French,1879
+All institutions|Graduate|2022-2023,Other,36295
+All institutions|Graduate|2023-2024,English,35395
+All institutions|Graduate|2023-2024,French,2067
+All institutions|Graduate|2023-2024,Other,39303
+All institutions|Graduate|2024-2025,English,35209
+All institutions|Graduate|2024-2025,French,2134
+All institutions|Graduate|2024-2025,Other,39459
+All institutions|Undergraduate|2012-2013,English,260182
+All institutions|Undergraduate|2012-2013,French,12784
+All institutions|Undergraduate|2012-2013,Other,94326
+All institutions|Undergraduate|2013-2014,English,269595
+All institutions|Undergraduate|2013-2014,French,12948
+All institutions|Undergraduate|2013-2014,Other,90626
+All institutions|Undergraduate|2014-2015,English,275854
+All institutions|Undergraduate|2014-2015,French,13122
+All institutions|Undergraduate|2014-2015,Other,88543
+All institutions|Undergraduate|2015-2016,English,282647
+All institutions|Undergraduate|2015-2016,French,13239
+All institutions|Undergraduate|2015-2016,Other,86859
+All institutions|Undergraduate|2016-2017,English,292836
+All institutions|Undergraduate|2016-2017,French,13626
+All institutions|Undergraduate|2016-2017,Other,84109
+All institutions|Undergraduate|2017-2018,English,293690
+All institutions|Undergraduate|2017-2018,French,13791
+All institutions|Undergraduate|2017-2018,Other,88909
+All institutions|Undergraduate|2018-2019,English,293636
+All institutions|Undergraduate|2018-2019,French,13923
+All institutions|Undergraduate|2018-2019,Other,96721
+All institutions|Undergraduate|2019-2020,English,288886
+All institutions|Undergraduate|2019-2020,French,14189
+All institutions|Undergraduate|2019-2020,Other,108384
+All institutions|Undergraduate|2020-2021,English,282833
+All institutions|Undergraduate|2020-2021,French,14474
+All institutions|Undergraduate|2020-2021,Other,123417
+All institutions|Undergraduate|2021-2022,English,276306
+All institutions|Undergraduate|2021-2022,French,14917
+All institutions|Undergraduate|2021-2022,Other,133759
+All institutions|Undergraduate|2022-2023,English,265253
+All institutions|Undergraduate|2022-2023,French,12614
+All institutions|Undergraduate|2022-2023,Other,148674
+All institutions|Undergraduate|2023-2024,English,271872
+All institutions|Undergraduate|2023-2024,French,15673
+All institutions|Undergraduate|2023-2024,Other,151687
+All institutions|Undergraduate|2024-2025,English,268434
+All institutions|Undergraduate|2024-2025,French,16479
+All institutions|Undergraduate|2024-2025,Other,162357
+Brock|All levels|2012-2013,English,13341
+Brock|All levels|2012-2013,French,109
+Brock|All levels|2012-2013,Other,2397
+Brock|All levels|2013-2014,English,13526
+Brock|All levels|2013-2014,French,133
+Brock|All levels|2013-2014,Other,2491
+Brock|All levels|2014-2015,English,13540
+Brock|All levels|2014-2015,French,141
+Brock|All levels|2014-2015,Other,2483
+Brock|All levels|2015-2016,English,13473
+Brock|All levels|2015-2016,French,124
+Brock|All levels|2015-2016,Other,2317
+Brock|All levels|2016-2017,English,13807
+Brock|All levels|2016-2017,French,119
+Brock|All levels|2016-2017,Other,2243
+Brock|All levels|2017-2018,English,13730
+Brock|All levels|2017-2018,French,123
+Brock|All levels|2017-2018,Other,2286
+Brock|All levels|2018-2019,English,13783
+Brock|All levels|2018-2019,French,145
+Brock|All levels|2018-2019,Other,2422
+Brock|All levels|2019-2020,English,14095
+Brock|All levels|2019-2020,French,188
+Brock|All levels|2019-2020,Other,2783
+Brock|All levels|2020-2021,English,13839
+Brock|All levels|2020-2021,French,177
+Brock|All levels|2020-2021,Other,2822
+Brock|All levels|2021-2022,English,13808
+Brock|All levels|2021-2022,French,142
+Brock|All levels|2021-2022,Other,2742
+Brock|All levels|2022-2023,English,13770
+Brock|All levels|2022-2023,French,157
+Brock|All levels|2022-2023,Other,2790
+Brock|All levels|2023-2024,English,13886
+Brock|All levels|2023-2024,French,158
+Brock|All levels|2023-2024,Other,2593
+Brock|All levels|2024-2025,English,14247
+Brock|All levels|2024-2025,French,165
+Brock|All levels|2024-2025,Other,2452
+Brock|Graduate|2012-2013,English,614
+Brock|Graduate|2012-2013,Other,559
+Brock|Graduate|2013-2014,English,681
+Brock|Graduate|2013-2014,French,12
+Brock|Graduate|2013-2014,Other,605
+Brock|Graduate|2014-2015,English,662
+Brock|Graduate|2014-2015,Other,591
+Brock|Graduate|2015-2016,English,695
+Brock|Graduate|2015-2016,Other,566
+Brock|Graduate|2016-2017,English,716
+Brock|Graduate|2016-2017,Other,615
+Brock|Graduate|2017-2018,English,720
+Brock|Graduate|2017-2018,Other,653
+Brock|Graduate|2018-2019,English,777
+Brock|Graduate|2018-2019,Other,651
+Brock|Graduate|2019-2020,English,860
+Brock|Graduate|2019-2020,French,10
+Brock|Graduate|2019-2020,Other,727
+Brock|Graduate|2020-2021,English,940
+Brock|Graduate|2020-2021,French,16
+Brock|Graduate|2020-2021,Other,619
+Brock|Graduate|2021-2022,English,937
+Brock|Graduate|2021-2022,French,12
+Brock|Graduate|2021-2022,Other,584
+Brock|Graduate|2022-2023,English,887
+Brock|Graduate|2022-2023,French,15
+Brock|Graduate|2022-2023,Other,588
+Brock|Graduate|2023-2024,English,914
+Brock|Graduate|2023-2024,French,15
+Brock|Graduate|2023-2024,Other,601
+Brock|Graduate|2024-2025,English,868
+Brock|Graduate|2024-2025,French,15
+Brock|Graduate|2024-2025,Other,580
+Brock|Undergraduate|2012-2013,English,12727
+Brock|Undergraduate|2012-2013,French,109
+Brock|Undergraduate|2012-2013,Other,1838
+Brock|Undergraduate|2013-2014,English,12845
+Brock|Undergraduate|2013-2014,French,121
+Brock|Undergraduate|2013-2014,Other,1886
+Brock|Undergraduate|2014-2015,English,12878
+Brock|Undergraduate|2014-2015,French,141
+Brock|Undergraduate|2014-2015,Other,1892
+Brock|Undergraduate|2015-2016,English,12778
+Brock|Undergraduate|2015-2016,French,124
+Brock|Undergraduate|2015-2016,Other,1751
+Brock|Undergraduate|2016-2017,English,13091
+Brock|Undergraduate|2016-2017,French,119
+Brock|Undergraduate|2016-2017,Other,1628
+Brock|Undergraduate|2017-2018,English,13010
+Brock|Undergraduate|2017-2018,French,123
+Brock|Undergraduate|2017-2018,Other,1633
+Brock|Undergraduate|2018-2019,English,13006
+Brock|Undergraduate|2018-2019,French,145
+Brock|Undergraduate|2018-2019,Other,1771
+Brock|Undergraduate|2019-2020,English,13235
+Brock|Undergraduate|2019-2020,French,178
+Brock|Undergraduate|2019-2020,Other,2056
+Brock|Undergraduate|2020-2021,English,12899
+Brock|Undergraduate|2020-2021,French,161
+Brock|Undergraduate|2020-2021,Other,2203
+Brock|Undergraduate|2021-2022,English,12871
+Brock|Undergraduate|2021-2022,French,130
+Brock|Undergraduate|2021-2022,Other,2158
+Brock|Undergraduate|2022-2023,English,12883
+Brock|Undergraduate|2022-2023,French,142
+Brock|Undergraduate|2022-2023,Other,2202
+Brock|Undergraduate|2023-2024,English,12972
+Brock|Undergraduate|2023-2024,French,143
+Brock|Undergraduate|2023-2024,Other,1992
+Brock|Undergraduate|2024-2025,English,13379
+Brock|Undergraduate|2024-2025,French,150
+Brock|Undergraduate|2024-2025,Other,1872
+Carleton|All levels|2012-2013,English,17527
+Carleton|All levels|2012-2013,French,587
+Carleton|All levels|2012-2013,Other,4322
+Carleton|All levels|2013-2014,English,18028
+Carleton|All levels|2013-2014,French,657
+Carleton|All levels|2013-2014,Other,4433
+Carleton|All levels|2014-2015,English,18359
+Carleton|All levels|2014-2015,French,645
+Carleton|All levels|2014-2015,Other,4556
+Carleton|All levels|2015-2016,English,18694
+Carleton|All levels|2015-2016,French,660
+Carleton|All levels|2015-2016,Other,4607
+Carleton|All levels|2016-2017,English,19249
+Carleton|All levels|2016-2017,French,722
+Carleton|All levels|2016-2017,Other,4491
+Carleton|All levels|2017-2018,English,19748
+Carleton|All levels|2017-2018,French,762
+Carleton|All levels|2017-2018,Other,4784
+Carleton|All levels|2018-2019,English,19525
+Carleton|All levels|2018-2019,French,812
+Carleton|All levels|2018-2019,Other,4905
+Carleton|All levels|2019-2020,English,19356
+Carleton|All levels|2019-2020,French,874
+Carleton|All levels|2019-2020,Other,5216
+Carleton|All levels|2020-2021,English,18972
+Carleton|All levels|2020-2021,French,906
+Carleton|All levels|2020-2021,Other,5196
+Carleton|All levels|2021-2022,English,18174
+Carleton|All levels|2021-2022,French,947
+Carleton|All levels|2021-2022,Other,5314
+Carleton|All levels|2022-2023,English,17388
+Carleton|All levels|2022-2023,French,922
+Carleton|All levels|2022-2023,Other,5417
+Carleton|All levels|2023-2024,English,17653
+Carleton|All levels|2023-2024,French,1003
+Carleton|All levels|2023-2024,Other,5319
+Carleton|All levels|2024-2025,English,17491
+Carleton|All levels|2024-2025,French,1053
+Carleton|All levels|2024-2025,Other,5262
+Carleton|Graduate|2012-2013,English,2075
+Carleton|Graduate|2012-2013,French,90
+Carleton|Graduate|2012-2013,Other,815
+Carleton|Graduate|2013-2014,English,2111
+Carleton|Graduate|2013-2014,French,108
+Carleton|Graduate|2013-2014,Other,861
+Carleton|Graduate|2014-2015,English,2157
+Carleton|Graduate|2014-2015,French,102
+Carleton|Graduate|2014-2015,Other,898
+Carleton|Graduate|2015-2016,English,2244
+Carleton|Graduate|2015-2016,French,97
+Carleton|Graduate|2015-2016,Other,1018
+Carleton|Graduate|2016-2017,English,2304
+Carleton|Graduate|2016-2017,French,104
+Carleton|Graduate|2016-2017,Other,1077
+Carleton|Graduate|2017-2018,English,2365
+Carleton|Graduate|2017-2018,French,104
+Carleton|Graduate|2017-2018,Other,1118
+Carleton|Graduate|2018-2019,English,2294
+Carleton|Graduate|2018-2019,French,86
+Carleton|Graduate|2018-2019,Other,1107
+Carleton|Graduate|2019-2020,English,2344
+Carleton|Graduate|2019-2020,French,82
+Carleton|Graduate|2019-2020,Other,1213
+Carleton|Graduate|2020-2021,English,2491
+Carleton|Graduate|2020-2021,French,101
+Carleton|Graduate|2020-2021,Other,1253
+Carleton|Graduate|2021-2022,English,2366
+Carleton|Graduate|2021-2022,French,123
+Carleton|Graduate|2021-2022,Other,1383
+Carleton|Graduate|2022-2023,English,2219
+Carleton|Graduate|2022-2023,French,126
+Carleton|Graduate|2022-2023,Other,1459
+Carleton|Graduate|2023-2024,English,2251
+Carleton|Graduate|2023-2024,French,127
+Carleton|Graduate|2023-2024,Other,1542
+Carleton|Graduate|2024-2025,English,2430
+Carleton|Graduate|2024-2025,French,127
+Carleton|Graduate|2024-2025,Other,1528
+Carleton|Undergraduate|2012-2013,English,15452
+Carleton|Undergraduate|2012-2013,French,497
+Carleton|Undergraduate|2012-2013,Other,3507
+Carleton|Undergraduate|2013-2014,English,15917
+Carleton|Undergraduate|2013-2014,French,549
+Carleton|Undergraduate|2013-2014,Other,3572
+Carleton|Undergraduate|2014-2015,English,16202
+Carleton|Undergraduate|2014-2015,French,543
+Carleton|Undergraduate|2014-2015,Other,3658
+Carleton|Undergraduate|2015-2016,English,16450
+Carleton|Undergraduate|2015-2016,French,563
+Carleton|Undergraduate|2015-2016,Other,3589
+Carleton|Undergraduate|2016-2017,English,16945
+Carleton|Undergraduate|2016-2017,French,618
+Carleton|Undergraduate|2016-2017,Other,3414
+Carleton|Undergraduate|2017-2018,English,17383
+Carleton|Undergraduate|2017-2018,French,658
+Carleton|Undergraduate|2017-2018,Other,3666
+Carleton|Undergraduate|2018-2019,English,17231
+Carleton|Undergraduate|2018-2019,French,726
+Carleton|Undergraduate|2018-2019,Other,3798
+Carleton|Undergraduate|2019-2020,English,17012
+Carleton|Undergraduate|2019-2020,French,792
+Carleton|Undergraduate|2019-2020,Other,4003
+Carleton|Undergraduate|2020-2021,English,16481
+Carleton|Undergraduate|2020-2021,French,805
+Carleton|Undergraduate|2020-2021,Other,3943
+Carleton|Undergraduate|2021-2022,English,15808
+Carleton|Undergraduate|2021-2022,French,824
+Carleton|Undergraduate|2021-2022,Other,3931
+Carleton|Undergraduate|2022-2023,English,15169
+Carleton|Undergraduate|2022-2023,French,796
+Carleton|Undergraduate|2022-2023,Other,3958
+Carleton|Undergraduate|2023-2024,English,15402
+Carleton|Undergraduate|2023-2024,French,876
+Carleton|Undergraduate|2023-2024,Other,3777
+Carleton|Undergraduate|2024-2025,English,15061
+Carleton|Undergraduate|2024-2025,French,926
+Carleton|Undergraduate|2024-2025,Other,3734
+Dominican|All levels|2012-2013,English,54
+Dominican|All levels|2012-2013,French,42
+Dominican|Graduate|2012-2013,English,22
+Dominican|Graduate|2012-2013,French,21
+Dominican|Undergraduate|2012-2013,English,32
+Dominican|Undergraduate|2012-2013,French,21
+Guelph|All levels|2012-2013,English,21859
+Guelph|All levels|2012-2013,French,227
+Guelph|All levels|2012-2013,Other,2834
+Guelph|All levels|2013-2014,English,22286
+Guelph|All levels|2013-2014,French,217
+Guelph|All levels|2013-2014,Other,2538
+Guelph|All levels|2014-2015,English,22592
+Guelph|All levels|2014-2015,French,214
+Guelph|All levels|2014-2015,Other,2427
+Guelph|All levels|2015-2016,English,23453
+Guelph|All levels|2015-2016,French,203
+Guelph|All levels|2015-2016,Other,2348
+Guelph|All levels|2016-2017,English,24349
+Guelph|All levels|2016-2017,French,187
+Guelph|All levels|2016-2017,Other,2229
+Guelph|All levels|2017-2018,English,24239
+Guelph|All levels|2017-2018,French,186
+Guelph|All levels|2017-2018,Other,2396
+Guelph|All levels|2018-2019,English,23901
+Guelph|All levels|2018-2019,French,195
+Guelph|All levels|2018-2019,Other,2708
+Guelph|All levels|2019-2020,English,23994
+Guelph|All levels|2019-2020,French,180
+Guelph|All levels|2019-2020,Other,3123
+Guelph|All levels|2020-2021,English,23325
+Guelph|All levels|2020-2021,French,184
+Guelph|All levels|2020-2021,Other,3323
+Guelph|All levels|2021-2022,English,22608
+Guelph|All levels|2021-2022,French,189
+Guelph|All levels|2021-2022,Other,3416
+Guelph|All levels|2022-2023,English,23430
+Guelph|All levels|2022-2023,French,216
+Guelph|All levels|2022-2023,Other,3920
+Guelph|All levels|2023-2024,English,24168
+Guelph|All levels|2023-2024,French,222
+Guelph|All levels|2023-2024,Other,3749
+Guelph|All levels|2024-2025,English,26514
+Guelph|All levels|2024-2025,French,267
+Guelph|All levels|2024-2025,Other,4018
+Guelph|Graduate|2012-2013,English,1933
+Guelph|Graduate|2012-2013,French,31
+Guelph|Graduate|2012-2013,Other,449
+Guelph|Graduate|2013-2014,English,1849
+Guelph|Graduate|2013-2014,French,29
+Guelph|Graduate|2013-2014,Other,457
+Guelph|Graduate|2014-2015,English,1816
+Guelph|Graduate|2014-2015,French,25
+Guelph|Graduate|2014-2015,Other,449
+Guelph|Graduate|2015-2016,English,1847
+Guelph|Graduate|2015-2016,French,18
+Guelph|Graduate|2015-2016,Other,433
+Guelph|Graduate|2016-2017,English,2027
+Guelph|Graduate|2016-2017,French,23
+Guelph|Graduate|2016-2017,Other,438
+Guelph|Graduate|2017-2018,English,2116
+Guelph|Graduate|2017-2018,French,24
+Guelph|Graduate|2017-2018,Other,481
+Guelph|Graduate|2018-2019,English,2102
+Guelph|Graduate|2018-2019,French,28
+Guelph|Graduate|2018-2019,Other,557
+Guelph|Graduate|2019-2020,English,2153
+Guelph|Graduate|2019-2020,French,29
+Guelph|Graduate|2019-2020,Other,654
+Guelph|Graduate|2020-2021,English,2246
+Guelph|Graduate|2020-2021,French,27
+Guelph|Graduate|2020-2021,Other,561
+Guelph|Graduate|2021-2022,English,2251
+Guelph|Graduate|2021-2022,French,28
+Guelph|Graduate|2021-2022,Other,634
+Guelph|Graduate|2022-2023,English,2095
+Guelph|Graduate|2022-2023,French,28
+Guelph|Graduate|2022-2023,Other,729
+Guelph|Graduate|2023-2024,English,2045
+Guelph|Graduate|2023-2024,French,31
+Guelph|Graduate|2023-2024,Other,749
+Guelph|Graduate|2024-2025,English,2103
+Guelph|Graduate|2024-2025,French,28
+Guelph|Graduate|2024-2025,Other,696
+Guelph|Undergraduate|2012-2013,English,19926
+Guelph|Undergraduate|2012-2013,French,196
+Guelph|Undergraduate|2012-2013,Other,2385
+Guelph|Undergraduate|2013-2014,English,20437
+Guelph|Undergraduate|2013-2014,French,188
+Guelph|Undergraduate|2013-2014,Other,2081
+Guelph|Undergraduate|2014-2015,English,20776
+Guelph|Undergraduate|2014-2015,French,189
+Guelph|Undergraduate|2014-2015,Other,1978
+Guelph|Undergraduate|2015-2016,English,21606
+Guelph|Undergraduate|2015-2016,French,185
+Guelph|Undergraduate|2015-2016,Other,1915
+Guelph|Undergraduate|2016-2017,English,22322
+Guelph|Undergraduate|2016-2017,French,164
+Guelph|Undergraduate|2016-2017,Other,1791
+Guelph|Undergraduate|2017-2018,English,22123
+Guelph|Undergraduate|2017-2018,French,162
+Guelph|Undergraduate|2017-2018,Other,1915
+Guelph|Undergraduate|2018-2019,English,21799
+Guelph|Undergraduate|2018-2019,French,167
+Guelph|Undergraduate|2018-2019,Other,2151
+Guelph|Undergraduate|2019-2020,English,21841
+Guelph|Undergraduate|2019-2020,French,151
+Guelph|Undergraduate|2019-2020,Other,2469
+Guelph|Undergraduate|2020-2021,English,21079
+Guelph|Undergraduate|2020-2021,French,157
+Guelph|Undergraduate|2020-2021,Other,2762
+Guelph|Undergraduate|2021-2022,English,20357
+Guelph|Undergraduate|2021-2022,French,161
+Guelph|Undergraduate|2021-2022,Other,2782
+Guelph|Undergraduate|2022-2023,English,21335
+Guelph|Undergraduate|2022-2023,French,188
+Guelph|Undergraduate|2022-2023,Other,3191
+Guelph|Undergraduate|2023-2024,English,22123
+Guelph|Undergraduate|2023-2024,French,191
+Guelph|Undergraduate|2023-2024,Other,3000
+Guelph|Undergraduate|2024-2025,English,24411
+Guelph|Undergraduate|2024-2025,French,239
+Guelph|Undergraduate|2024-2025,Other,3322
+Hearst|All levels|2012-2013,French,67
+Hearst|All levels|2013-2014,French,66
+Hearst|All levels|2014-2015,French,72
+Hearst|All levels|2015-2016,French,104
+Hearst|All levels|2016-2017,French,98
+Hearst|All levels|2017-2018,French,120
+Hearst|All levels|2018-2019,French,138
+Hearst|All levels|2019-2020,French,199
+Hearst|All levels|2020-2021,French,158
+Hearst|All levels|2021-2022,French,211
+Hearst|All levels|2022-2023,French,225
+Hearst|All levels|2023-2024,French,179
+Hearst|All levels|2023-2024,Other,133
+Hearst|All levels|2024-2025,French,196
+Hearst|All levels|2024-2025,Other,113
+Hearst|Graduate|2022-2023,French,10
+Hearst|Graduate|2024-2025,French,10
+Hearst|Undergraduate|2012-2013,French,67
+Hearst|Undergraduate|2013-2014,French,66
+Hearst|Undergraduate|2014-2015,French,72
+Hearst|Undergraduate|2015-2016,French,104
+Hearst|Undergraduate|2016-2017,French,98
+Hearst|Undergraduate|2017-2018,French,120
+Hearst|Undergraduate|2018-2019,French,138
+Hearst|Undergraduate|2019-2020,French,199
+Hearst|Undergraduate|2020-2021,French,158
+Hearst|Undergraduate|2021-2022,French,211
+Hearst|Undergraduate|2022-2023,French,215
+Hearst|Undergraduate|2023-2024,French,179
+Hearst|Undergraduate|2023-2024,Other,133
+Hearst|Undergraduate|2024-2025,French,186
+Hearst|Undergraduate|2024-2025,Other,113
+Lakehead|All levels|2012-2013,English,6563
+Lakehead|All levels|2012-2013,French,69
+Lakehead|All levels|2012-2013,Other,461
+Lakehead|All levels|2013-2014,English,6507
+Lakehead|All levels|2013-2014,French,62
+Lakehead|All levels|2013-2014,Other,524
+Lakehead|All levels|2014-2015,English,6346
+Lakehead|All levels|2014-2015,French,67
+Lakehead|All levels|2014-2015,Other,613
+Lakehead|All levels|2015-2016,English,5820
+Lakehead|All levels|2015-2016,French,58
+Lakehead|All levels|2015-2016,Other,731
+Lakehead|All levels|2016-2017,English,5861
+Lakehead|All levels|2016-2017,French,59
+Lakehead|All levels|2016-2017,Other,1041
+Lakehead|All levels|2017-2018,English,5547
+Lakehead|All levels|2017-2018,French,62
+Lakehead|All levels|2017-2018,Other,1305
+Lakehead|All levels|2018-2019,English,5544
+Lakehead|All levels|2018-2019,French,69
+Lakehead|All levels|2018-2019,Other,1531
+Lakehead|All levels|2019-2020,English,5484
+Lakehead|All levels|2019-2020,French,76
+Lakehead|All levels|2019-2020,Other,1745
+Lakehead|All levels|2020-2021,English,5440
+Lakehead|All levels|2020-2021,French,69
+Lakehead|All levels|2020-2021,Other,1551
+Lakehead|All levels|2021-2022,English,5421
+Lakehead|All levels|2021-2022,French,68
+Lakehead|All levels|2021-2022,Other,1599
+Lakehead|All levels|2022-2023,English,5376
+Lakehead|All levels|2022-2023,French,67
+Lakehead|All levels|2022-2023,Other,1601
+Lakehead|All levels|2023-2024,English,5597
+Lakehead|All levels|2023-2024,French,74
+Lakehead|All levels|2023-2024,Other,1743
+Lakehead|All levels|2024-2025,English,5855
+Lakehead|All levels|2024-2025,French,72
+Lakehead|All levels|2024-2025,Other,1716
+Lakehead|Graduate|2012-2013,English,614
+Lakehead|Graduate|2012-2013,Other,131
+Lakehead|Graduate|2013-2014,English,622
+Lakehead|Graduate|2013-2014,Other,167
+Lakehead|Graduate|2014-2015,English,584
+Lakehead|Graduate|2014-2015,Other,207
+Lakehead|Graduate|2015-2016,English,560
+Lakehead|Graduate|2015-2016,Other,324
+Lakehead|Graduate|2016-2017,English,520
+Lakehead|Graduate|2016-2017,Other,518
+Lakehead|Graduate|2017-2018,English,512
+Lakehead|Graduate|2017-2018,Other,702
+Lakehead|Graduate|2018-2019,English,447
+Lakehead|Graduate|2018-2019,Other,850
+Lakehead|Graduate|2019-2020,English,477
+Lakehead|Graduate|2019-2020,Other,968
+Lakehead|Graduate|2020-2021,English,499
+Lakehead|Graduate|2020-2021,Other,805
+Lakehead|Graduate|2021-2022,English,528
+Lakehead|Graduate|2021-2022,Other,899
+Lakehead|Graduate|2022-2023,English,579
+Lakehead|Graduate|2022-2023,Other,878
+Lakehead|Graduate|2023-2024,English,738
+Lakehead|Graduate|2023-2024,Other,1001
+Lakehead|Graduate|2024-2025,English,818
+Lakehead|Graduate|2024-2025,Other,976
+Lakehead|Undergraduate|2012-2013,English,5949
+Lakehead|Undergraduate|2012-2013,French,69
+Lakehead|Undergraduate|2012-2013,Other,330
+Lakehead|Undergraduate|2013-2014,English,5885
+Lakehead|Undergraduate|2013-2014,French,62
+Lakehead|Undergraduate|2013-2014,Other,357
+Lakehead|Undergraduate|2014-2015,English,5762
+Lakehead|Undergraduate|2014-2015,French,67
+Lakehead|Undergraduate|2014-2015,Other,406
+Lakehead|Undergraduate|2015-2016,English,5260
+Lakehead|Undergraduate|2015-2016,French,58
+Lakehead|Undergraduate|2015-2016,Other,407
+Lakehead|Undergraduate|2016-2017,English,5341
+Lakehead|Undergraduate|2016-2017,French,59
+Lakehead|Undergraduate|2016-2017,Other,523
+Lakehead|Undergraduate|2017-2018,English,5035
+Lakehead|Undergraduate|2017-2018,French,62
+Lakehead|Undergraduate|2017-2018,Other,603
+Lakehead|Undergraduate|2018-2019,English,5097
+Lakehead|Undergraduate|2018-2019,French,69
+Lakehead|Undergraduate|2018-2019,Other,681
+Lakehead|Undergraduate|2019-2020,English,5007
+Lakehead|Undergraduate|2019-2020,French,76
+Lakehead|Undergraduate|2019-2020,Other,777
+Lakehead|Undergraduate|2020-2021,English,4941
+Lakehead|Undergraduate|2020-2021,French,69
+Lakehead|Undergraduate|2020-2021,Other,746
+Lakehead|Undergraduate|2021-2022,English,4893
+Lakehead|Undergraduate|2021-2022,French,68
+Lakehead|Undergraduate|2021-2022,Other,700
+Lakehead|Undergraduate|2022-2023,English,4797
+Lakehead|Undergraduate|2022-2023,French,67
+Lakehead|Undergraduate|2022-2023,Other,723
+Lakehead|Undergraduate|2023-2024,English,4859
+Lakehead|Undergraduate|2023-2024,French,74
+Lakehead|Undergraduate|2023-2024,Other,742
+Lakehead|Undergraduate|2024-2025,English,5037
+Lakehead|Undergraduate|2024-2025,French,72
+Lakehead|Undergraduate|2024-2025,Other,740
+Laurentian|All levels|2012-2013,English,4876
+Laurentian|All levels|2012-2013,French,1195
+Laurentian|All levels|2012-2013,Other,611
+Laurentian|All levels|2013-2014,English,4926
+Laurentian|All levels|2013-2014,French,1161
+Laurentian|All levels|2013-2014,Other,667
+Laurentian|All levels|2014-2015,English,4907
+Laurentian|All levels|2014-2015,French,1261
+Laurentian|All levels|2014-2015,Other,643
+Laurentian|All levels|2015-2016,English,5194
+Laurentian|All levels|2015-2016,French,1269
+Laurentian|All levels|2015-2016,Other,668
+Laurentian|All levels|2016-2017,English,5091
+Laurentian|All levels|2016-2017,French,1320
+Laurentian|All levels|2016-2017,Other,617
+Laurentian|All levels|2017-2018,English,4767
+Laurentian|All levels|2017-2018,French,1391
+Laurentian|All levels|2017-2018,Other,659
+Laurentian|All levels|2018-2019,English,4775
+Laurentian|All levels|2018-2019,French,1431
+Laurentian|All levels|2018-2019,Other,521
+Laurentian|All levels|2019-2020,English,4772
+Laurentian|All levels|2019-2020,French,1465
+Laurentian|All levels|2019-2020,Other,604
+Laurentian|All levels|2020-2021,English,4902
+Laurentian|All levels|2020-2021,French,1501
+Laurentian|All levels|2020-2021,Other,638
+Laurentian|All levels|2021-2022,English,4036
+Laurentian|All levels|2021-2022,French,1355
+Laurentian|All levels|2021-2022,Other,585
+Laurentian|All levels|2022-2023,English,3642
+Laurentian|All levels|2022-2023,French,1305
+Laurentian|All levels|2022-2023,Other,679
+Laurentian|All levels|2023-2024,English,3446
+Laurentian|All levels|2023-2024,French,1385
+Laurentian|All levels|2023-2024,Other,1415
+Laurentian|All levels|2024-2025,English,3222
+Laurentian|All levels|2024-2025,French,1446
+Laurentian|All levels|2024-2025,Other,1668
+Laurentian|Graduate|2012-2013,English,224
+Laurentian|Graduate|2012-2013,French,44
+Laurentian|Graduate|2012-2013,Other,135
+Laurentian|Graduate|2013-2014,English,255
+Laurentian|Graduate|2013-2014,French,60
+Laurentian|Graduate|2013-2014,Other,147
+Laurentian|Graduate|2014-2015,English,274
+Laurentian|Graduate|2014-2015,French,66
+Laurentian|Graduate|2014-2015,Other,136
+Laurentian|Graduate|2015-2016,English,315
+Laurentian|Graduate|2015-2016,French,70
+Laurentian|Graduate|2015-2016,Other,122
+Laurentian|Graduate|2016-2017,English,330
+Laurentian|Graduate|2016-2017,French,74
+Laurentian|Graduate|2016-2017,Other,102
+Laurentian|Graduate|2017-2018,English,309
+Laurentian|Graduate|2017-2018,French,84
+Laurentian|Graduate|2017-2018,Other,99
+Laurentian|Graduate|2018-2019,English,368
+Laurentian|Graduate|2018-2019,French,96
+Laurentian|Graduate|2018-2019,Other,107
+Laurentian|Graduate|2019-2020,English,392
+Laurentian|Graduate|2019-2020,French,102
+Laurentian|Graduate|2019-2020,Other,151
+Laurentian|Graduate|2020-2021,English,409
+Laurentian|Graduate|2020-2021,French,110
+Laurentian|Graduate|2020-2021,Other,196
+Laurentian|Graduate|2021-2022,English,337
+Laurentian|Graduate|2021-2022,French,105
+Laurentian|Graduate|2021-2022,Other,199
+Laurentian|Graduate|2022-2023,English,351
+Laurentian|Graduate|2022-2023,French,85
+Laurentian|Graduate|2022-2023,Other,317
+Laurentian|Graduate|2023-2024,English,381
+Laurentian|Graduate|2023-2024,French,84
+Laurentian|Graduate|2023-2024,Other,1051
+Laurentian|Graduate|2024-2025,English,369
+Laurentian|Graduate|2024-2025,French,80
+Laurentian|Graduate|2024-2025,Other,1262
+Laurentian|Undergraduate|2012-2013,English,4652
+Laurentian|Undergraduate|2012-2013,French,1151
+Laurentian|Undergraduate|2012-2013,Other,476
+Laurentian|Undergraduate|2013-2014,English,4671
+Laurentian|Undergraduate|2013-2014,French,1101
+Laurentian|Undergraduate|2013-2014,Other,520
+Laurentian|Undergraduate|2014-2015,English,4633
+Laurentian|Undergraduate|2014-2015,French,1195
+Laurentian|Undergraduate|2014-2015,Other,507
+Laurentian|Undergraduate|2015-2016,English,4879
+Laurentian|Undergraduate|2015-2016,French,1199
+Laurentian|Undergraduate|2015-2016,Other,546
+Laurentian|Undergraduate|2016-2017,English,4761
+Laurentian|Undergraduate|2016-2017,French,1246
+Laurentian|Undergraduate|2016-2017,Other,515
+Laurentian|Undergraduate|2017-2018,English,4458
+Laurentian|Undergraduate|2017-2018,French,1307
+Laurentian|Undergraduate|2017-2018,Other,560
+Laurentian|Undergraduate|2018-2019,English,4407
+Laurentian|Undergraduate|2018-2019,French,1335
+Laurentian|Undergraduate|2018-2019,Other,414
+Laurentian|Undergraduate|2019-2020,English,4380
+Laurentian|Undergraduate|2019-2020,French,1363
+Laurentian|Undergraduate|2019-2020,Other,453
+Laurentian|Undergraduate|2020-2021,English,4493
+Laurentian|Undergraduate|2020-2021,French,1391
+Laurentian|Undergraduate|2020-2021,Other,442
+Laurentian|Undergraduate|2021-2022,English,3699
+Laurentian|Undergraduate|2021-2022,French,1250
+Laurentian|Undergraduate|2021-2022,Other,386
+Laurentian|Undergraduate|2022-2023,English,3291
+Laurentian|Undergraduate|2022-2023,French,1220
+Laurentian|Undergraduate|2022-2023,Other,362
+Laurentian|Undergraduate|2023-2024,English,3065
+Laurentian|Undergraduate|2023-2024,French,1301
+Laurentian|Undergraduate|2023-2024,Other,364
+Laurentian|Undergraduate|2024-2025,English,2853
+Laurentian|Undergraduate|2024-2025,French,1366
+Laurentian|Undergraduate|2024-2025,Other,406
+McMaster|All levels|2012-2013,English,18390
+McMaster|All levels|2012-2013,French,188
+McMaster|All levels|2012-2013,Other,7215
+McMaster|All levels|2013-2014,English,18555
+McMaster|All levels|2013-2014,French,188
+McMaster|All levels|2013-2014,Other,7391
+McMaster|All levels|2014-2015,English,19211
+McMaster|All levels|2014-2015,French,174
+McMaster|All levels|2014-2015,Other,7098
+McMaster|All levels|2015-2016,English,20336
+McMaster|All levels|2015-2016,French,164
+McMaster|All levels|2015-2016,Other,7910
+McMaster|All levels|2016-2017,English,21856
+McMaster|All levels|2016-2017,French,143
+McMaster|All levels|2016-2017,Other,7823
+McMaster|All levels|2017-2018,English,22196
+McMaster|All levels|2017-2018,French,142
+McMaster|All levels|2017-2018,Other,8206
+McMaster|All levels|2018-2019,English,22742
+McMaster|All levels|2018-2019,French,135
+McMaster|All levels|2018-2019,Other,9016
+McMaster|All levels|2019-2020,English,23262
+McMaster|All levels|2019-2020,French,136
+McMaster|All levels|2019-2020,Other,9802
+McMaster|All levels|2020-2021,English,24053
+McMaster|All levels|2020-2021,French,143
+McMaster|All levels|2020-2021,Other,10575
+McMaster|All levels|2021-2022,English,24561
+McMaster|All levels|2021-2022,French,146
+McMaster|All levels|2021-2022,Other,10937
+McMaster|All levels|2022-2023,English,23938
+McMaster|All levels|2022-2023,French,183
+McMaster|All levels|2022-2023,Other,11917
+McMaster|All levels|2023-2024,English,23889
+McMaster|All levels|2023-2024,French,198
+McMaster|All levels|2023-2024,Other,12094
+McMaster|All levels|2024-2025,English,23600
+McMaster|All levels|2024-2025,French,210
+McMaster|All levels|2024-2025,Other,12252
+McMaster|Graduate|2012-2013,English,2434
+McMaster|Graduate|2012-2013,French,23
+McMaster|Graduate|2012-2013,Other,1087
+McMaster|Graduate|2013-2014,English,2402
+McMaster|Graduate|2013-2014,French,27
+McMaster|Graduate|2013-2014,Other,1093
+McMaster|Graduate|2014-2015,English,2419
+McMaster|Graduate|2014-2015,French,29
+McMaster|Graduate|2014-2015,Other,1175
+McMaster|Graduate|2015-2016,English,2005
+McMaster|Graduate|2015-2016,French,29
+McMaster|Graduate|2015-2016,Other,1582
+McMaster|Graduate|2016-2017,English,2376
+McMaster|Graduate|2016-2017,French,20
+McMaster|Graduate|2016-2017,Other,1419
+McMaster|Graduate|2017-2018,English,2617
+McMaster|Graduate|2017-2018,French,16
+McMaster|Graduate|2017-2018,Other,1277
+McMaster|Graduate|2018-2019,English,2884
+McMaster|Graduate|2018-2019,Other,1290
+McMaster|Graduate|2019-2020,English,3459
+McMaster|Graduate|2019-2020,Other,907
+McMaster|Graduate|2020-2021,English,3655
+McMaster|Graduate|2020-2021,Other,556
+McMaster|Graduate|2021-2022,English,4074
+McMaster|Graduate|2021-2022,Other,401
+McMaster|Graduate|2022-2023,English,3461
+McMaster|Graduate|2022-2023,Other,1202
+McMaster|Graduate|2023-2024,English,2752
+McMaster|Graduate|2023-2024,French,10
+McMaster|Graduate|2023-2024,Other,2044
+McMaster|Graduate|2024-2025,English,2391
+McMaster|Graduate|2024-2025,French,10
+McMaster|Graduate|2024-2025,Other,2375
+McMaster|Undergraduate|2012-2013,English,15956
+McMaster|Undergraduate|2012-2013,French,165
+McMaster|Undergraduate|2012-2013,Other,6128
+McMaster|Undergraduate|2013-2014,English,16153
+McMaster|Undergraduate|2013-2014,French,161
+McMaster|Undergraduate|2013-2014,Other,6298
+McMaster|Undergraduate|2014-2015,English,16792
+McMaster|Undergraduate|2014-2015,French,145
+McMaster|Undergraduate|2014-2015,Other,5923
+McMaster|Undergraduate|2015-2016,English,18331
+McMaster|Undergraduate|2015-2016,French,135
+McMaster|Undergraduate|2015-2016,Other,6328
+McMaster|Undergraduate|2016-2017,English,19480
+McMaster|Undergraduate|2016-2017,French,123
+McMaster|Undergraduate|2016-2017,Other,6404
+McMaster|Undergraduate|2017-2018,English,19579
+McMaster|Undergraduate|2017-2018,French,126
+McMaster|Undergraduate|2017-2018,Other,6929
+McMaster|Undergraduate|2018-2019,English,19858
+McMaster|Undergraduate|2018-2019,French,135
+McMaster|Undergraduate|2018-2019,Other,7726
+McMaster|Undergraduate|2019-2020,English,19803
+McMaster|Undergraduate|2019-2020,French,136
+McMaster|Undergraduate|2019-2020,Other,8895
+McMaster|Undergraduate|2020-2021,English,20398
+McMaster|Undergraduate|2020-2021,French,143
+McMaster|Undergraduate|2020-2021,Other,10019
+McMaster|Undergraduate|2021-2022,English,20487
+McMaster|Undergraduate|2021-2022,French,146
+McMaster|Undergraduate|2021-2022,Other,10536
+McMaster|Undergraduate|2022-2023,English,20477
+McMaster|Undergraduate|2022-2023,French,183
+McMaster|Undergraduate|2022-2023,Other,10715
+McMaster|Undergraduate|2023-2024,English,21137
+McMaster|Undergraduate|2023-2024,French,188
+McMaster|Undergraduate|2023-2024,Other,10050
+McMaster|Undergraduate|2024-2025,English,21209
+McMaster|Undergraduate|2024-2025,French,200
+McMaster|Undergraduate|2024-2025,Other,9877
+Metropolitan|All levels|2012-2013,English,15437
+Metropolitan|All levels|2012-2013,French,122
+Metropolitan|All levels|2012-2013,Other,7165
+Metropolitan|All levels|2013-2014,English,16510
+Metropolitan|All levels|2013-2014,French,147
+Metropolitan|All levels|2013-2014,Other,7342
+Metropolitan|All levels|2014-2015,English,19064
+Metropolitan|All levels|2014-2015,French,161
+Metropolitan|All levels|2014-2015,Other,7230
+Metropolitan|All levels|2015-2016,English,21036
+Metropolitan|All levels|2015-2016,French,178
+Metropolitan|All levels|2015-2016,Other,6941
+Metropolitan|All levels|2016-2017,English,23118
+Metropolitan|All levels|2016-2017,French,190
+Metropolitan|All levels|2016-2017,Other,6694
+Metropolitan|All levels|2017-2018,English,23298
+Metropolitan|All levels|2017-2018,French,183
+Metropolitan|All levels|2017-2018,Other,7105
+Metropolitan|All levels|2018-2019,English,23185
+Metropolitan|All levels|2018-2019,French,213
+Metropolitan|All levels|2018-2019,Other,7838
+Metropolitan|All levels|2019-2020,English,22456
+Metropolitan|All levels|2019-2020,French,218
+Metropolitan|All levels|2019-2020,Other,8597
+Metropolitan|All levels|2020-2021,English,23860
+Metropolitan|All levels|2020-2021,French,246
+Metropolitan|All levels|2020-2021,Other,9899
+Metropolitan|All levels|2021-2022,English,23729
+Metropolitan|All levels|2021-2022,French,261
+Metropolitan|All levels|2021-2022,Other,10547
+Metropolitan|All levels|2022-2023,English,22410
+Metropolitan|All levels|2022-2023,French,222
+Metropolitan|All levels|2022-2023,Other,10438
+Metropolitan|All levels|2023-2024,English,17966
+Metropolitan|All levels|2023-2024,French,194
+Metropolitan|All levels|2023-2024,Other,15647
+Metropolitan|All levels|2024-2025,English,13300
+Metropolitan|All levels|2024-2025,French,153
+Metropolitan|All levels|2024-2025,Other,21296
+Metropolitan|Graduate|2012-2013,English,483
+Metropolitan|Graduate|2012-2013,Other,1510
+Metropolitan|Graduate|2013-2014,English,486
+Metropolitan|Graduate|2013-2014,Other,1493
+Metropolitan|Graduate|2014-2015,English,528
+Metropolitan|Graduate|2014-2015,Other,1519
+Metropolitan|Graduate|2015-2016,English,568
+Metropolitan|Graduate|2015-2016,Other,1560
+Metropolitan|Graduate|2016-2017,English,600
+Metropolitan|Graduate|2016-2017,Other,1662
+Metropolitan|Graduate|2017-2018,English,611
+Metropolitan|Graduate|2017-2018,Other,1713
+Metropolitan|Graduate|2018-2019,English,705
+Metropolitan|Graduate|2018-2019,French,10
+Metropolitan|Graduate|2018-2019,Other,1689
+Metropolitan|Graduate|2019-2020,English,808
+Metropolitan|Graduate|2019-2020,Other,1756
+Metropolitan|Graduate|2020-2021,English,892
+Metropolitan|Graduate|2020-2021,French,10
+Metropolitan|Graduate|2020-2021,Other,1799
+Metropolitan|Graduate|2021-2022,English,848
+Metropolitan|Graduate|2021-2022,Other,1883
+Metropolitan|Graduate|2022-2023,English,841
+Metropolitan|Graduate|2022-2023,Other,1791
+Metropolitan|Graduate|2023-2024,English,892
+Metropolitan|Graduate|2023-2024,Other,1696
+Metropolitan|Graduate|2024-2025,English,909
+Metropolitan|Graduate|2024-2025,Other,1744
+Metropolitan|Undergraduate|2012-2013,English,14954
+Metropolitan|Undergraduate|2012-2013,French,122
+Metropolitan|Undergraduate|2012-2013,Other,5655
+Metropolitan|Undergraduate|2013-2014,English,16024
+Metropolitan|Undergraduate|2013-2014,French,147
+Metropolitan|Undergraduate|2013-2014,Other,5849
+Metropolitan|Undergraduate|2014-2015,English,18536
+Metropolitan|Undergraduate|2014-2015,French,161
+Metropolitan|Undergraduate|2014-2015,Other,5711
+Metropolitan|Undergraduate|2015-2016,English,20468
+Metropolitan|Undergraduate|2015-2016,French,178
+Metropolitan|Undergraduate|2015-2016,Other,5381
+Metropolitan|Undergraduate|2016-2017,English,22518
+Metropolitan|Undergraduate|2016-2017,French,190
+Metropolitan|Undergraduate|2016-2017,Other,5032
+Metropolitan|Undergraduate|2017-2018,English,22687
+Metropolitan|Undergraduate|2017-2018,French,183
+Metropolitan|Undergraduate|2017-2018,Other,5392
+Metropolitan|Undergraduate|2018-2019,English,22480
+Metropolitan|Undergraduate|2018-2019,French,203
+Metropolitan|Undergraduate|2018-2019,Other,6149
+Metropolitan|Undergraduate|2019-2020,English,21648
+Metropolitan|Undergraduate|2019-2020,French,218
+Metropolitan|Undergraduate|2019-2020,Other,6841
+Metropolitan|Undergraduate|2020-2021,English,22968
+Metropolitan|Undergraduate|2020-2021,French,236
+Metropolitan|Undergraduate|2020-2021,Other,8100
+Metropolitan|Undergraduate|2021-2022,English,22881
+Metropolitan|Undergraduate|2021-2022,French,261
+Metropolitan|Undergraduate|2021-2022,Other,8664
+Metropolitan|Undergraduate|2022-2023,English,21569
+Metropolitan|Undergraduate|2022-2023,French,222
+Metropolitan|Undergraduate|2022-2023,Other,8647
+Metropolitan|Undergraduate|2023-2024,English,17074
+Metropolitan|Undergraduate|2023-2024,French,194
+Metropolitan|Undergraduate|2023-2024,Other,13951
+Metropolitan|Undergraduate|2024-2025,English,12391
+Metropolitan|Undergraduate|2024-2025,French,153
+Metropolitan|Undergraduate|2024-2025,Other,19552
+NOSMU|All levels|2012-2013,English,330
+NOSMU|All levels|2012-2013,French,20
+NOSMU|All levels|2012-2013,Other,37
+NOSMU|All levels|2013-2014,English,371
+NOSMU|All levels|2013-2014,French,24
+NOSMU|All levels|2013-2014,Other,21
+NOSMU|All levels|2014-2015,English,392
+NOSMU|All levels|2014-2015,French,23
+NOSMU|All levels|2014-2015,Other,10
+NOSMU|All levels|2015-2016,English,400
+NOSMU|All levels|2015-2016,French,25
+NOSMU|All levels|2016-2017,English,403
+NOSMU|All levels|2016-2017,French,25
+NOSMU|All levels|2017-2018,English,391
+NOSMU|All levels|2017-2018,French,27
+NOSMU|All levels|2017-2018,Other,20
+NOSMU|All levels|2018-2019,English,386
+NOSMU|All levels|2018-2019,French,25
+NOSMU|All levels|2018-2019,Other,37
+NOSMU|All levels|2019-2020,English,387
+NOSMU|All levels|2019-2020,French,20
+NOSMU|All levels|2019-2020,Other,40
+NOSMU|All levels|2020-2021,English,408
+NOSMU|All levels|2020-2021,French,16
+NOSMU|All levels|2020-2021,Other,33
+NOSMU|All levels|2021-2022,English,352
+NOSMU|All levels|2021-2022,Other,85
+NOSMU|All levels|2022-2023,English,296
+NOSMU|All levels|2022-2023,French,57
+NOSMU|All levels|2022-2023,Other,114
+NOSMU|All levels|2023-2024,English,329
+NOSMU|All levels|2023-2024,French,63
+NOSMU|All levels|2023-2024,Other,93
+NOSMU|All levels|2024-2025,English,290
+NOSMU|All levels|2024-2025,French,60
+NOSMU|All levels|2024-2025,Other,163
+NOSMU|Undergraduate|2012-2013,English,330
+NOSMU|Undergraduate|2012-2013,French,20
+NOSMU|Undergraduate|2012-2013,Other,37
+NOSMU|Undergraduate|2013-2014,English,371
+NOSMU|Undergraduate|2013-2014,French,24
+NOSMU|Undergraduate|2013-2014,Other,21
+NOSMU|Undergraduate|2014-2015,English,392
+NOSMU|Undergraduate|2014-2015,French,23
+NOSMU|Undergraduate|2014-2015,Other,10
+NOSMU|Undergraduate|2015-2016,English,400
+NOSMU|Undergraduate|2015-2016,French,25
+NOSMU|Undergraduate|2016-2017,English,403
+NOSMU|Undergraduate|2016-2017,French,25
+NOSMU|Undergraduate|2017-2018,English,391
+NOSMU|Undergraduate|2017-2018,French,27
+NOSMU|Undergraduate|2017-2018,Other,20
+NOSMU|Undergraduate|2018-2019,English,386
+NOSMU|Undergraduate|2018-2019,French,25
+NOSMU|Undergraduate|2018-2019,Other,37
+NOSMU|Undergraduate|2019-2020,English,387
+NOSMU|Undergraduate|2019-2020,French,20
+NOSMU|Undergraduate|2019-2020,Other,40
+NOSMU|Undergraduate|2020-2021,English,408
+NOSMU|Undergraduate|2020-2021,French,16
+NOSMU|Undergraduate|2020-2021,Other,33
+NOSMU|Undergraduate|2021-2022,English,352
+NOSMU|Undergraduate|2021-2022,Other,85
+NOSMU|Undergraduate|2022-2023,English,296
+NOSMU|Undergraduate|2022-2023,French,57
+NOSMU|Undergraduate|2022-2023,Other,114
+NOSMU|Undergraduate|2023-2024,English,329
+NOSMU|Undergraduate|2023-2024,French,63
+NOSMU|Undergraduate|2023-2024,Other,93
+NOSMU|Undergraduate|2024-2025,English,290
+NOSMU|Undergraduate|2024-2025,French,60
+NOSMU|Undergraduate|2024-2025,Other,163
+Nipissing|All levels|2012-2013,English,3595
+Nipissing|All levels|2012-2013,French,78
+Nipissing|All levels|2012-2013,Other,92
+Nipissing|All levels|2013-2014,English,3338
+Nipissing|All levels|2013-2014,French,80
+Nipissing|All levels|2013-2014,Other,101
+Nipissing|All levels|2014-2015,English,3231
+Nipissing|All levels|2014-2015,French,76
+Nipissing|All levels|2014-2015,Other,112
+Nipissing|All levels|2015-2016,English,3062
+Nipissing|All levels|2015-2016,French,87
+Nipissing|All levels|2015-2016,Other,114
+Nipissing|All levels|2016-2017,English,3031
+Nipissing|All levels|2016-2017,French,103
+Nipissing|All levels|2016-2017,Other,95
+Nipissing|All levels|2017-2018,English,2986
+Nipissing|All levels|2017-2018,French,97
+Nipissing|All levels|2017-2018,Other,83
+Nipissing|All levels|2018-2019,English,3298
+Nipissing|All levels|2018-2019,French,116
+Nipissing|All levels|2018-2019,Other,142
+Nipissing|All levels|2019-2020,English,3466
+Nipissing|All levels|2019-2020,French,127
+Nipissing|All levels|2019-2020,Other,180
+Nipissing|All levels|2020-2021,English,3483
+Nipissing|All levels|2020-2021,French,125
+Nipissing|All levels|2020-2021,Other,170
+Nipissing|All levels|2021-2022,English,3595
+Nipissing|All levels|2021-2022,French,125
+Nipissing|All levels|2021-2022,Other,213
+Nipissing|All levels|2022-2023,English,3416
+Nipissing|All levels|2022-2023,French,127
+Nipissing|All levels|2022-2023,Other,239
+Nipissing|All levels|2023-2024,English,3471
+Nipissing|All levels|2023-2024,French,127
+Nipissing|All levels|2023-2024,Other,444
+Nipissing|All levels|2024-2025,English,3731
+Nipissing|All levels|2024-2025,French,148
+Nipissing|All levels|2024-2025,Other,564
+Nipissing|Graduate|2012-2013,English,78
+Nipissing|Graduate|2012-2013,Other,15
+Nipissing|Graduate|2013-2014,English,82
+Nipissing|Graduate|2013-2014,Other,18
+Nipissing|Graduate|2014-2015,English,103
+Nipissing|Graduate|2014-2015,Other,32
+Nipissing|Graduate|2015-2016,English,128
+Nipissing|Graduate|2015-2016,Other,30
+Nipissing|Graduate|2016-2017,English,120
+Nipissing|Graduate|2016-2017,Other,22
+Nipissing|Graduate|2017-2018,English,139
+Nipissing|Graduate|2017-2018,Other,11
+Nipissing|Graduate|2018-2019,English,157
+Nipissing|Graduate|2019-2020,English,148
+Nipissing|Graduate|2019-2020,Other,10
+Nipissing|Graduate|2020-2021,English,160
+Nipissing|Graduate|2020-2021,Other,14
+Nipissing|Graduate|2021-2022,English,164
+Nipissing|Graduate|2021-2022,Other,16
+Nipissing|Graduate|2022-2023,English,148
+Nipissing|Graduate|2022-2023,Other,19
+Nipissing|Graduate|2023-2024,English,151
+Nipissing|Graduate|2023-2024,Other,23
+Nipissing|Graduate|2024-2025,English,150
+Nipissing|Graduate|2024-2025,Other,18
+Nipissing|Undergraduate|2012-2013,English,3517
+Nipissing|Undergraduate|2012-2013,French,78
+Nipissing|Undergraduate|2012-2013,Other,77
+Nipissing|Undergraduate|2013-2014,English,3256
+Nipissing|Undergraduate|2013-2014,French,80
+Nipissing|Undergraduate|2013-2014,Other,83
+Nipissing|Undergraduate|2014-2015,English,3128
+Nipissing|Undergraduate|2014-2015,French,76
+Nipissing|Undergraduate|2014-2015,Other,80
+Nipissing|Undergraduate|2015-2016,English,2934
+Nipissing|Undergraduate|2015-2016,French,87
+Nipissing|Undergraduate|2015-2016,Other,84
+Nipissing|Undergraduate|2016-2017,English,2911
+Nipissing|Undergraduate|2016-2017,French,103
+Nipissing|Undergraduate|2016-2017,Other,73
+Nipissing|Undergraduate|2017-2018,English,2847
+Nipissing|Undergraduate|2017-2018,French,97
+Nipissing|Undergraduate|2017-2018,Other,72
+Nipissing|Undergraduate|2018-2019,English,3141
+Nipissing|Undergraduate|2018-2019,French,116
+Nipissing|Undergraduate|2018-2019,Other,142
+Nipissing|Undergraduate|2019-2020,English,3318
+Nipissing|Undergraduate|2019-2020,French,127
+Nipissing|Undergraduate|2019-2020,Other,170
+Nipissing|Undergraduate|2020-2021,English,3323
+Nipissing|Undergraduate|2020-2021,French,125
+Nipissing|Undergraduate|2020-2021,Other,156
+Nipissing|Undergraduate|2021-2022,English,3431
+Nipissing|Undergraduate|2021-2022,French,125
+Nipissing|Undergraduate|2021-2022,Other,197
+Nipissing|Undergraduate|2022-2023,English,3268
+Nipissing|Undergraduate|2022-2023,French,127
+Nipissing|Undergraduate|2022-2023,Other,220
+Nipissing|Undergraduate|2023-2024,English,3320
+Nipissing|Undergraduate|2023-2024,French,127
+Nipissing|Undergraduate|2023-2024,Other,421
+Nipissing|Undergraduate|2024-2025,English,3581
+Nipissing|Undergraduate|2024-2025,French,148
+Nipissing|Undergraduate|2024-2025,Other,546
+OCADU|All levels|2012-2013,English,2563
+OCADU|All levels|2012-2013,French,38
+OCADU|All levels|2012-2013,Other,970
+OCADU|All levels|2013-2014,English,2553
+OCADU|All levels|2013-2014,French,37
+OCADU|All levels|2013-2014,Other,964
+OCADU|All levels|2014-2015,English,2501
+OCADU|All levels|2014-2015,French,33
+OCADU|All levels|2014-2015,Other,989
+OCADU|All levels|2015-2016,English,2497
+OCADU|All levels|2015-2016,French,39
+OCADU|All levels|2015-2016,Other,953
+OCADU|All levels|2016-2017,English,2390
+OCADU|All levels|2016-2017,French,37
+OCADU|All levels|2016-2017,Other,925
+OCADU|All levels|2017-2018,English,2311
+OCADU|All levels|2017-2018,French,46
+OCADU|All levels|2017-2018,Other,1032
+OCADU|All levels|2018-2019,English,2149
+OCADU|All levels|2018-2019,French,44
+OCADU|All levels|2018-2019,Other,1214
+OCADU|All levels|2019-2020,English,2132
+OCADU|All levels|2019-2020,French,47
+OCADU|All levels|2019-2020,Other,1382
+OCADU|All levels|2020-2021,English,2338
+OCADU|All levels|2020-2021,French,47
+OCADU|All levels|2020-2021,Other,1883
+OCADU|All levels|2021-2022,English,2355
+OCADU|All levels|2021-2022,French,39
+OCADU|All levels|2021-2022,Other,1970
+OCADU|All levels|2022-2023,English,2432
+OCADU|All levels|2022-2023,French,45
+OCADU|All levels|2022-2023,Other,2077
+OCADU|All levels|2023-2024,English,2579
+OCADU|All levels|2023-2024,French,48
+OCADU|All levels|2023-2024,Other,2122
+OCADU|All levels|2024-2025,English,2638
+OCADU|All levels|2024-2025,French,48
+OCADU|All levels|2024-2025,Other,1918
+OCADU|Graduate|2012-2013,English,101
+OCADU|Graduate|2012-2013,Other,32
+OCADU|Graduate|2013-2014,English,118
+OCADU|Graduate|2013-2014,Other,41
+OCADU|Graduate|2014-2015,English,114
+OCADU|Graduate|2014-2015,Other,51
+OCADU|Graduate|2015-2016,English,115
+OCADU|Graduate|2015-2016,Other,56
+OCADU|Graduate|2016-2017,English,122
+OCADU|Graduate|2016-2017,Other,50
+OCADU|Graduate|2017-2018,English,134
+OCADU|Graduate|2017-2018,Other,51
+OCADU|Graduate|2018-2019,English,151
+OCADU|Graduate|2018-2019,Other,51
+OCADU|Graduate|2019-2020,English,162
+OCADU|Graduate|2019-2020,Other,55
+OCADU|Graduate|2020-2021,English,89
+OCADU|Graduate|2020-2021,Other,139
+OCADU|Graduate|2021-2022,English,38
+OCADU|Graduate|2021-2022,Other,213
+OCADU|Graduate|2022-2023,English,23
+OCADU|Graduate|2022-2023,Other,209
+OCADU|Graduate|2023-2024,English,21
+OCADU|Graduate|2023-2024,Other,235
+OCADU|Graduate|2024-2025,English,18
+OCADU|Graduate|2024-2025,Other,213
+OCADU|Undergraduate|2012-2013,English,2462
+OCADU|Undergraduate|2012-2013,French,38
+OCADU|Undergraduate|2012-2013,Other,938
+OCADU|Undergraduate|2013-2014,English,2435
+OCADU|Undergraduate|2013-2014,French,37
+OCADU|Undergraduate|2013-2014,Other,923
+OCADU|Undergraduate|2014-2015,English,2387
+OCADU|Undergraduate|2014-2015,French,33
+OCADU|Undergraduate|2014-2015,Other,938
+OCADU|Undergraduate|2015-2016,English,2382
+OCADU|Undergraduate|2015-2016,French,39
+OCADU|Undergraduate|2015-2016,Other,897
+OCADU|Undergraduate|2016-2017,English,2268
+OCADU|Undergraduate|2016-2017,French,37
+OCADU|Undergraduate|2016-2017,Other,875
+OCADU|Undergraduate|2017-2018,English,2177
+OCADU|Undergraduate|2017-2018,French,46
+OCADU|Undergraduate|2017-2018,Other,981
+OCADU|Undergraduate|2018-2019,English,1998
+OCADU|Undergraduate|2018-2019,French,44
+OCADU|Undergraduate|2018-2019,Other,1163
+OCADU|Undergraduate|2019-2020,English,1970
+OCADU|Undergraduate|2019-2020,French,47
+OCADU|Undergraduate|2019-2020,Other,1327
+OCADU|Undergraduate|2020-2021,English,2249
+OCADU|Undergraduate|2020-2021,French,47
+OCADU|Undergraduate|2020-2021,Other,1744
+OCADU|Undergraduate|2021-2022,English,2317
+OCADU|Undergraduate|2021-2022,French,39
+OCADU|Undergraduate|2021-2022,Other,1757
+OCADU|Undergraduate|2022-2023,English,2409
+OCADU|Undergraduate|2022-2023,French,45
+OCADU|Undergraduate|2022-2023,Other,1868
+OCADU|Undergraduate|2023-2024,English,2558
+OCADU|Undergraduate|2023-2024,French,48
+OCADU|Undergraduate|2023-2024,Other,1887
+OCADU|Undergraduate|2024-2025,English,2620
+OCADU|Undergraduate|2024-2025,French,48
+OCADU|Undergraduate|2024-2025,Other,1705
+Ontario Tech|All levels|2012-2013,Other,8472
+Ontario Tech|All levels|2013-2014,English,6580
+Ontario Tech|All levels|2013-2014,French,60
+Ontario Tech|All levels|2013-2014,Other,2333
+Ontario Tech|All levels|2014-2015,English,6872
+Ontario Tech|All levels|2014-2015,French,59
+Ontario Tech|All levels|2014-2015,Other,2213
+Ontario Tech|All levels|2015-2016,English,6936
+Ontario Tech|All levels|2015-2016,French,55
+Ontario Tech|All levels|2015-2016,Other,2044
+Ontario Tech|All levels|2016-2017,English,7291
+Ontario Tech|All levels|2016-2017,French,54
+Ontario Tech|All levels|2016-2017,Other,1837
+Ontario Tech|All levels|2017-2018,English,7224
+Ontario Tech|All levels|2017-2018,French,53
+Ontario Tech|All levels|2017-2018,Other,1988
+Ontario Tech|All levels|2018-2019,English,7199
+Ontario Tech|All levels|2018-2019,French,65
+Ontario Tech|All levels|2018-2019,Other,2155
+Ontario Tech|All levels|2019-2020,English,7107
+Ontario Tech|All levels|2019-2020,French,84
+Ontario Tech|All levels|2019-2020,Other,2321
+Ontario Tech|All levels|2020-2021,English,7128
+Ontario Tech|All levels|2020-2021,French,93
+Ontario Tech|All levels|2020-2021,Other,2504
+Ontario Tech|All levels|2021-2022,English,7133
+Ontario Tech|All levels|2021-2022,French,110
+Ontario Tech|All levels|2021-2022,Other,2786
+Ontario Tech|All levels|2022-2023,English,6968
+Ontario Tech|All levels|2022-2023,French,128
+Ontario Tech|All levels|2022-2023,Other,2993
+Ontario Tech|All levels|2023-2024,English,7620
+Ontario Tech|All levels|2023-2024,French,134
+Ontario Tech|All levels|2023-2024,Other,2987
+Ontario Tech|All levels|2024-2025,English,7918
+Ontario Tech|All levels|2024-2025,French,145
+Ontario Tech|All levels|2024-2025,Other,3389
+Ontario Tech|Graduate|2012-2013,Other,333
+Ontario Tech|Graduate|2013-2014,English,123
+Ontario Tech|Graduate|2013-2014,Other,249
+Ontario Tech|Graduate|2014-2015,English,115
+Ontario Tech|Graduate|2014-2015,Other,281
+Ontario Tech|Graduate|2015-2016,English,124
+Ontario Tech|Graduate|2015-2016,Other,294
+Ontario Tech|Graduate|2016-2017,English,116
+Ontario Tech|Graduate|2016-2017,Other,271
+Ontario Tech|Graduate|2017-2018,English,72
+Ontario Tech|Graduate|2017-2018,Other,367
+Ontario Tech|Graduate|2018-2019,English,33
+Ontario Tech|Graduate|2018-2019,Other,444
+Ontario Tech|Graduate|2019-2020,English,15
+Ontario Tech|Graduate|2019-2020,Other,504
+Ontario Tech|Graduate|2020-2021,Other,552
+Ontario Tech|Graduate|2021-2022,Other,675
+Ontario Tech|Graduate|2022-2023,Other,751
+Ontario Tech|Graduate|2023-2024,Other,735
+Ontario Tech|Graduate|2024-2025,Other,902
+Ontario Tech|Undergraduate|2012-2013,Other,8139
+Ontario Tech|Undergraduate|2013-2014,English,6457
+Ontario Tech|Undergraduate|2013-2014,French,60
+Ontario Tech|Undergraduate|2013-2014,Other,2084
+Ontario Tech|Undergraduate|2014-2015,English,6757
+Ontario Tech|Undergraduate|2014-2015,French,59
+Ontario Tech|Undergraduate|2014-2015,Other,1932
+Ontario Tech|Undergraduate|2015-2016,English,6812
+Ontario Tech|Undergraduate|2015-2016,French,55
+Ontario Tech|Undergraduate|2015-2016,Other,1750
+Ontario Tech|Undergraduate|2016-2017,English,7175
+Ontario Tech|Undergraduate|2016-2017,French,54
+Ontario Tech|Undergraduate|2016-2017,Other,1566
+Ontario Tech|Undergraduate|2017-2018,English,7152
+Ontario Tech|Undergraduate|2017-2018,French,53
+Ontario Tech|Undergraduate|2017-2018,Other,1621
+Ontario Tech|Undergraduate|2018-2019,English,7166
+Ontario Tech|Undergraduate|2018-2019,French,65
+Ontario Tech|Undergraduate|2018-2019,Other,1711
+Ontario Tech|Undergraduate|2019-2020,English,7092
+Ontario Tech|Undergraduate|2019-2020,French,84
+Ontario Tech|Undergraduate|2019-2020,Other,1817
+Ontario Tech|Undergraduate|2020-2021,English,7128
+Ontario Tech|Undergraduate|2020-2021,French,93
+Ontario Tech|Undergraduate|2020-2021,Other,1952
+Ontario Tech|Undergraduate|2021-2022,English,7133
+Ontario Tech|Undergraduate|2021-2022,French,110
+Ontario Tech|Undergraduate|2021-2022,Other,2111
+Ontario Tech|Undergraduate|2022-2023,English,6968
+Ontario Tech|Undergraduate|2022-2023,French,128
+Ontario Tech|Undergraduate|2022-2023,Other,2242
+Ontario Tech|Undergraduate|2023-2024,English,7620
+Ontario Tech|Undergraduate|2023-2024,French,134
+Ontario Tech|Undergraduate|2023-2024,Other,2252
+Ontario Tech|Undergraduate|2024-2025,English,7918
+Ontario Tech|Undergraduate|2024-2025,French,145
+Ontario Tech|Undergraduate|2024-2025,Other,2487
+Ottawa|All levels|2012-2013,English,19350
+Ottawa|All levels|2012-2013,French,9559
+Ottawa|All levels|2012-2013,Other,6223
+Ottawa|All levels|2013-2014,English,19234
+Ottawa|All levels|2013-2014,French,9556
+Ottawa|All levels|2013-2014,Other,6748
+Ottawa|All levels|2014-2015,English,19267
+Ottawa|All levels|2014-2015,French,9653
+Ottawa|All levels|2014-2015,Other,7004
+Ottawa|All levels|2015-2016,English,19132
+Ottawa|All levels|2015-2016,French,9714
+Ottawa|All levels|2015-2016,Other,7096
+Ottawa|All levels|2016-2017,English,19497
+Ottawa|All levels|2016-2017,French,9966
+Ottawa|All levels|2016-2017,Other,7064
+Ottawa|All levels|2017-2018,English,19035
+Ottawa|All levels|2017-2018,French,9720
+Ottawa|All levels|2017-2018,Other,7790
+Ottawa|All levels|2018-2019,English,19380
+Ottawa|All levels|2018-2019,French,9613
+Ottawa|All levels|2018-2019,Other,8325
+Ottawa|All levels|2019-2020,English,19099
+Ottawa|All levels|2019-2020,French,9569
+Ottawa|All levels|2019-2020,Other,9189
+Ottawa|All levels|2020-2021,English,19231
+Ottawa|All levels|2020-2021,French,10146
+Ottawa|All levels|2020-2021,Other,9692
+Ottawa|All levels|2021-2022,English,19606
+Ottawa|All levels|2021-2022,French,10673
+Ottawa|All levels|2021-2022,Other,10498
+Ottawa|All levels|2022-2023,English,14498
+Ottawa|All levels|2022-2023,French,8092
+Ottawa|All levels|2022-2023,Other,18763
+Ottawa|All levels|2023-2024,English,20016
+Ottawa|All levels|2023-2024,French,11302
+Ottawa|All levels|2023-2024,Other,10565
+Ottawa|All levels|2024-2025,English,20182
+Ottawa|All levels|2024-2025,French,11963
+Ottawa|All levels|2024-2025,Other,10233
+Ottawa|Graduate|2012-2013,English,2465
+Ottawa|Graduate|2012-2013,French,1228
+Ottawa|Graduate|2012-2013,Other,1519
+Ottawa|Graduate|2013-2014,English,2428
+Ottawa|Graduate|2013-2014,French,1272
+Ottawa|Graduate|2013-2014,Other,1803
+Ottawa|Graduate|2014-2015,English,2430
+Ottawa|Graduate|2014-2015,French,1318
+Ottawa|Graduate|2014-2015,Other,1907
+Ottawa|Graduate|2015-2016,English,2436
+Ottawa|Graduate|2015-2016,French,1386
+Ottawa|Graduate|2015-2016,Other,1779
+Ottawa|Graduate|2016-2017,English,2398
+Ottawa|Graduate|2016-2017,French,1399
+Ottawa|Graduate|2016-2017,Other,1734
+Ottawa|Graduate|2017-2018,English,2426
+Ottawa|Graduate|2017-2018,French,1310
+Ottawa|Graduate|2017-2018,Other,2000
+Ottawa|Graduate|2018-2019,English,2532
+Ottawa|Graduate|2018-2019,French,1288
+Ottawa|Graduate|2018-2019,Other,2187
+Ottawa|Graduate|2019-2020,English,2686
+Ottawa|Graduate|2019-2020,French,1253
+Ottawa|Graduate|2019-2020,Other,2365
+Ottawa|Graduate|2020-2021,English,2843
+Ottawa|Graduate|2020-2021,French,1355
+Ottawa|Graduate|2020-2021,Other,2257
+Ottawa|Graduate|2021-2022,English,3027
+Ottawa|Graduate|2021-2022,French,1409
+Ottawa|Graduate|2021-2022,Other,2342
+Ottawa|Graduate|2022-2023,English,2355
+Ottawa|Graduate|2022-2023,French,1226
+Ottawa|Graduate|2022-2023,Other,3490
+Ottawa|Graduate|2023-2024,English,3038
+Ottawa|Graduate|2023-2024,French,1446
+Ottawa|Graduate|2023-2024,Other,2644
+Ottawa|Graduate|2024-2025,English,2992
+Ottawa|Graduate|2024-2025,French,1567
+Ottawa|Graduate|2024-2025,Other,2369
+Ottawa|Undergraduate|2012-2013,English,16885
+Ottawa|Undergraduate|2012-2013,French,8331
+Ottawa|Undergraduate|2012-2013,Other,4704
+Ottawa|Undergraduate|2013-2014,English,16806
+Ottawa|Undergraduate|2013-2014,French,8284
+Ottawa|Undergraduate|2013-2014,Other,4945
+Ottawa|Undergraduate|2014-2015,English,16837
+Ottawa|Undergraduate|2014-2015,French,8335
+Ottawa|Undergraduate|2014-2015,Other,5097
+Ottawa|Undergraduate|2015-2016,English,16696
+Ottawa|Undergraduate|2015-2016,French,8328
+Ottawa|Undergraduate|2015-2016,Other,5317
+Ottawa|Undergraduate|2016-2017,English,17099
+Ottawa|Undergraduate|2016-2017,French,8567
+Ottawa|Undergraduate|2016-2017,Other,5330
+Ottawa|Undergraduate|2017-2018,English,16609
+Ottawa|Undergraduate|2017-2018,French,8410
+Ottawa|Undergraduate|2017-2018,Other,5790
+Ottawa|Undergraduate|2018-2019,English,16848
+Ottawa|Undergraduate|2018-2019,French,8325
+Ottawa|Undergraduate|2018-2019,Other,6138
+Ottawa|Undergraduate|2019-2020,English,16413
+Ottawa|Undergraduate|2019-2020,French,8316
+Ottawa|Undergraduate|2019-2020,Other,6824
+Ottawa|Undergraduate|2020-2021,English,16388
+Ottawa|Undergraduate|2020-2021,French,8791
+Ottawa|Undergraduate|2020-2021,Other,7435
+Ottawa|Undergraduate|2021-2022,English,16579
+Ottawa|Undergraduate|2021-2022,French,9264
+Ottawa|Undergraduate|2021-2022,Other,8156
+Ottawa|Undergraduate|2022-2023,English,12143
+Ottawa|Undergraduate|2022-2023,French,6866
+Ottawa|Undergraduate|2022-2023,Other,15273
+Ottawa|Undergraduate|2023-2024,English,16978
+Ottawa|Undergraduate|2023-2024,French,9856
+Ottawa|Undergraduate|2023-2024,Other,7921
+Ottawa|Undergraduate|2024-2025,English,17190
+Ottawa|Undergraduate|2024-2025,French,10396
+Ottawa|Undergraduate|2024-2025,Other,7864
+Queen's|All levels|2012-2013,English,17240
+Queen's|All levels|2012-2013,French,231
+Queen's|All levels|2012-2013,Other,3578
+Queen's|All levels|2013-2014,English,17520
+Queen's|All levels|2013-2014,French,232
+Queen's|All levels|2013-2014,Other,3748
+Queen's|All levels|2014-2015,English,18223
+Queen's|All levels|2014-2015,French,236
+Queen's|All levels|2014-2015,Other,4011
+Queen's|All levels|2015-2016,English,18645
+Queen's|All levels|2015-2016,French,244
+Queen's|All levels|2015-2016,Other,4273
+Queen's|All levels|2016-2017,English,18907
+Queen's|All levels|2016-2017,French,276
+Queen's|All levels|2016-2017,Other,4317
+Queen's|All levels|2017-2018,English,19557
+Queen's|All levels|2017-2018,French,296
+Queen's|All levels|2017-2018,Other,4677
+Queen's|All levels|2018-2019,English,20019
+Queen's|All levels|2018-2019,French,308
+Queen's|All levels|2018-2019,Other,5205
+Queen's|All levels|2019-2020,English,19976
+Queen's|All levels|2019-2020,French,333
+Queen's|All levels|2019-2020,Other,5747
+Queen's|All levels|2020-2021,English,15532
+Queen's|All levels|2020-2021,French,217
+Queen's|All levels|2020-2021,Other,10845
+Queen's|All levels|2021-2022,English,12098
+Queen's|All levels|2021-2022,French,174
+Queen's|All levels|2021-2022,Other,16160
+Queen's|All levels|2022-2023,English,8672
+Queen's|All levels|2022-2023,French,149
+Queen's|All levels|2022-2023,Other,20147
+Queen's|All levels|2023-2024,English,6017
+Queen's|All levels|2023-2024,French,31
+Queen's|All levels|2023-2024,Other,23502
+Queen's|All levels|2024-2025,English,4899
+Queen's|All levels|2024-2025,French,13
+Queen's|All levels|2024-2025,Other,25149
+Queen's|Graduate|2012-2013,English,2584
+Queen's|Graduate|2012-2013,French,13
+Queen's|Graduate|2012-2013,Other,1149
+Queen's|Graduate|2013-2014,English,2613
+Queen's|Graduate|2013-2014,Other,1176
+Queen's|Graduate|2014-2015,English,2677
+Queen's|Graduate|2014-2015,Other,1274
+Queen's|Graduate|2015-2016,English,2692
+Queen's|Graduate|2015-2016,Other,1368
+Queen's|Graduate|2016-2017,English,2723
+Queen's|Graduate|2016-2017,French,10
+Queen's|Graduate|2016-2017,Other,1341
+Queen's|Graduate|2017-2018,English,2842
+Queen's|Graduate|2017-2018,Other,1467
+Queen's|Graduate|2018-2019,English,2997
+Queen's|Graduate|2018-2019,Other,1622
+Queen's|Graduate|2019-2020,English,3109
+Queen's|Graduate|2019-2020,Other,1678
+Queen's|Graduate|2020-2021,English,3115
+Queen's|Graduate|2020-2021,Other,1666
+Queen's|Graduate|2021-2022,English,3413
+Queen's|Graduate|2021-2022,Other,2193
+Queen's|Graduate|2022-2023,English,3406
+Queen's|Graduate|2022-2023,Other,2057
+Queen's|Graduate|2023-2024,English,3449
+Queen's|Graduate|2023-2024,Other,1850
+Queen's|Graduate|2024-2025,English,3379
+Queen's|Graduate|2024-2025,Other,1915
+Queen's|Undergraduate|2012-2013,English,14656
+Queen's|Undergraduate|2012-2013,French,218
+Queen's|Undergraduate|2012-2013,Other,2429
+Queen's|Undergraduate|2013-2014,English,14907
+Queen's|Undergraduate|2013-2014,French,232
+Queen's|Undergraduate|2013-2014,Other,2572
+Queen's|Undergraduate|2014-2015,English,15546
+Queen's|Undergraduate|2014-2015,French,236
+Queen's|Undergraduate|2014-2015,Other,2737
+Queen's|Undergraduate|2015-2016,English,15953
+Queen's|Undergraduate|2015-2016,French,244
+Queen's|Undergraduate|2015-2016,Other,2905
+Queen's|Undergraduate|2016-2017,English,16184
+Queen's|Undergraduate|2016-2017,French,266
+Queen's|Undergraduate|2016-2017,Other,2976
+Queen's|Undergraduate|2017-2018,English,16715
+Queen's|Undergraduate|2017-2018,French,296
+Queen's|Undergraduate|2017-2018,Other,3210
+Queen's|Undergraduate|2018-2019,English,17022
+Queen's|Undergraduate|2018-2019,French,308
+Queen's|Undergraduate|2018-2019,Other,3583
+Queen's|Undergraduate|2019-2020,English,16867
+Queen's|Undergraduate|2019-2020,French,333
+Queen's|Undergraduate|2019-2020,Other,4069
+Queen's|Undergraduate|2020-2021,English,12417
+Queen's|Undergraduate|2020-2021,French,217
+Queen's|Undergraduate|2020-2021,Other,9179
+Queen's|Undergraduate|2021-2022,English,8685
+Queen's|Undergraduate|2021-2022,French,174
+Queen's|Undergraduate|2021-2022,Other,13967
+Queen's|Undergraduate|2022-2023,English,5266
+Queen's|Undergraduate|2022-2023,French,149
+Queen's|Undergraduate|2022-2023,Other,18090
+Queen's|Undergraduate|2023-2024,English,2568
+Queen's|Undergraduate|2023-2024,French,31
+Queen's|Undergraduate|2023-2024,Other,21652
+Queen's|Undergraduate|2024-2025,English,1520
+Queen's|Undergraduate|2024-2025,French,13
+Queen's|Undergraduate|2024-2025,Other,23234
+Toronto|All levels|2012-2013,English,44102
+Toronto|All levels|2012-2013,French,755
+Toronto|All levels|2012-2013,Other,28358
+Toronto|All levels|2013-2014,English,45121
+Toronto|All levels|2013-2014,French,834
+Toronto|All levels|2013-2014,Other,29446
+Toronto|All levels|2014-2015,English,46584
+Toronto|All levels|2014-2015,French,805
+Toronto|All levels|2014-2015,Other,29793
+Toronto|All levels|2015-2016,English,48713
+Toronto|All levels|2015-2016,French,851
+Toronto|All levels|2015-2016,Other,29974
+Toronto|All levels|2016-2017,English,50248
+Toronto|All levels|2016-2017,French,931
+Toronto|All levels|2016-2017,Other,29763
+Toronto|All levels|2017-2018,English,50006
+Toronto|All levels|2017-2018,French,972
+Toronto|All levels|2017-2018,Other,31026
+Toronto|All levels|2018-2019,English,49780
+Toronto|All levels|2018-2019,French,905
+Toronto|All levels|2018-2019,Other,32869
+Toronto|All levels|2019-2020,English,49280
+Toronto|All levels|2019-2020,French,997
+Toronto|All levels|2019-2020,Other,35038
+Toronto|All levels|2020-2021,English,49047
+Toronto|All levels|2020-2021,French,1004
+Toronto|All levels|2020-2021,Other,37006
+Toronto|All levels|2021-2022,English,49084
+Toronto|All levels|2021-2022,French,1092
+Toronto|All levels|2021-2022,Other,38571
+Toronto|All levels|2022-2023,English,47489
+Toronto|All levels|2022-2023,French,1010
+Toronto|All levels|2022-2023,Other,41185
+Toronto|All levels|2023-2024,English,48192
+Toronto|All levels|2023-2024,French,968
+Toronto|All levels|2023-2024,Other,42720
+Toronto|All levels|2024-2025,English,48643
+Toronto|All levels|2024-2025,French,945
+Toronto|All levels|2024-2025,Other,44910
+Toronto|Graduate|2012-2013,English,9253
+Toronto|Graduate|2012-2013,French,245
+Toronto|Graduate|2012-2013,Other,4482
+Toronto|Graduate|2013-2014,English,9654
+Toronto|Graduate|2013-2014,French,257
+Toronto|Graduate|2013-2014,Other,4779
+Toronto|Graduate|2014-2015,English,9867
+Toronto|Graduate|2014-2015,French,262
+Toronto|Graduate|2014-2015,Other,5128
+Toronto|Graduate|2015-2016,English,10251
+Toronto|Graduate|2015-2016,French,279
+Toronto|Graduate|2015-2016,Other,5288
+Toronto|Graduate|2016-2017,English,10678
+Toronto|Graduate|2016-2017,French,302
+Toronto|Graduate|2016-2017,Other,5626
+Toronto|Graduate|2017-2018,English,10841
+Toronto|Graduate|2017-2018,French,289
+Toronto|Graduate|2017-2018,Other,5927
+Toronto|Graduate|2018-2019,English,11275
+Toronto|Graduate|2018-2019,French,284
+Toronto|Graduate|2018-2019,Other,6275
+Toronto|Graduate|2019-2020,English,11777
+Toronto|Graduate|2019-2020,French,288
+Toronto|Graduate|2019-2020,Other,6615
+Toronto|Graduate|2020-2021,English,11983
+Toronto|Graduate|2020-2021,French,321
+Toronto|Graduate|2020-2021,Other,6751
+Toronto|Graduate|2021-2022,English,12080
+Toronto|Graduate|2021-2022,French,327
+Toronto|Graduate|2021-2022,Other,7415
+Toronto|Graduate|2022-2023,English,10276
+Toronto|Graduate|2022-2023,French,261
+Toronto|Graduate|2022-2023,Other,9479
+Toronto|Graduate|2023-2024,English,8781
+Toronto|Graduate|2023-2024,French,213
+Toronto|Graduate|2023-2024,Other,10936
+Toronto|Graduate|2024-2025,English,8467
+Toronto|Graduate|2024-2025,French,174
+Toronto|Graduate|2024-2025,Other,11663
+Toronto|Undergraduate|2012-2013,English,34849
+Toronto|Undergraduate|2012-2013,French,510
+Toronto|Undergraduate|2012-2013,Other,23876
+Toronto|Undergraduate|2013-2014,English,35467
+Toronto|Undergraduate|2013-2014,French,577
+Toronto|Undergraduate|2013-2014,Other,24667
+Toronto|Undergraduate|2014-2015,English,36717
+Toronto|Undergraduate|2014-2015,French,543
+Toronto|Undergraduate|2014-2015,Other,24665
+Toronto|Undergraduate|2015-2016,English,38462
+Toronto|Undergraduate|2015-2016,French,572
+Toronto|Undergraduate|2015-2016,Other,24686
+Toronto|Undergraduate|2016-2017,English,39570
+Toronto|Undergraduate|2016-2017,French,629
+Toronto|Undergraduate|2016-2017,Other,24137
+Toronto|Undergraduate|2017-2018,English,39165
+Toronto|Undergraduate|2017-2018,French,683
+Toronto|Undergraduate|2017-2018,Other,25099
+Toronto|Undergraduate|2018-2019,English,38505
+Toronto|Undergraduate|2018-2019,French,621
+Toronto|Undergraduate|2018-2019,Other,26594
+Toronto|Undergraduate|2019-2020,English,37503
+Toronto|Undergraduate|2019-2020,French,709
+Toronto|Undergraduate|2019-2020,Other,28423
+Toronto|Undergraduate|2020-2021,English,37064
+Toronto|Undergraduate|2020-2021,French,683
+Toronto|Undergraduate|2020-2021,Other,30255
+Toronto|Undergraduate|2021-2022,English,37004
+Toronto|Undergraduate|2021-2022,French,765
+Toronto|Undergraduate|2021-2022,Other,31156
+Toronto|Undergraduate|2022-2023,English,37213
+Toronto|Undergraduate|2022-2023,French,749
+Toronto|Undergraduate|2022-2023,Other,31706
+Toronto|Undergraduate|2023-2024,English,39411
+Toronto|Undergraduate|2023-2024,French,755
+Toronto|Undergraduate|2023-2024,Other,31784
+Toronto|Undergraduate|2024-2025,English,40176
+Toronto|Undergraduate|2024-2025,French,771
+Toronto|Undergraduate|2024-2025,Other,33247
+Trent|All levels|2012-2013,English,6010
+Trent|All levels|2012-2013,French,40
+Trent|All levels|2012-2013,Other,767
+Trent|All levels|2013-2014,English,6067
+Trent|All levels|2013-2014,French,41
+Trent|All levels|2013-2014,Other,801
+Trent|All levels|2014-2015,English,6052
+Trent|All levels|2014-2015,French,59
+Trent|All levels|2014-2015,Other,804
+Trent|All levels|2015-2016,English,6255
+Trent|All levels|2015-2016,French,64
+Trent|All levels|2015-2016,Other,751
+Trent|All levels|2016-2017,English,6744
+Trent|All levels|2016-2017,French,64
+Trent|All levels|2016-2017,Other,828
+Trent|All levels|2017-2018,English,7098
+Trent|All levels|2017-2018,French,78
+Trent|All levels|2017-2018,Other,973
+Trent|All levels|2018-2019,English,7573
+Trent|All levels|2018-2019,French,89
+Trent|All levels|2018-2019,Other,1052
+Trent|All levels|2019-2020,English,8097
+Trent|All levels|2019-2020,French,91
+Trent|All levels|2019-2020,Other,1241
+Trent|All levels|2020-2021,English,8365
+Trent|All levels|2020-2021,French,107
+Trent|All levels|2020-2021,Other,1220
+Trent|All levels|2021-2022,English,8637
+Trent|All levels|2021-2022,French,117
+Trent|All levels|2021-2022,Other,1356
+Trent|All levels|2022-2023,English,8901
+Trent|All levels|2022-2023,French,123
+Trent|All levels|2022-2023,Other,1628
+Trent|All levels|2023-2024,English,9323
+Trent|All levels|2023-2024,French,127
+Trent|All levels|2023-2024,Other,2471
+Trent|All levels|2024-2025,English,9405
+Trent|All levels|2024-2025,French,132
+Trent|All levels|2024-2025,Other,2356
+Trent|Graduate|2012-2013,English,366
+Trent|Graduate|2012-2013,Other,42
+Trent|Graduate|2013-2014,English,369
+Trent|Graduate|2013-2014,Other,42
+Trent|Graduate|2014-2015,English,326
+Trent|Graduate|2014-2015,Other,49
+Trent|Graduate|2015-2016,English,323
+Trent|Graduate|2015-2016,Other,46
+Trent|Graduate|2016-2017,English,307
+Trent|Graduate|2016-2017,Other,48
+Trent|Graduate|2017-2018,English,348
+Trent|Graduate|2017-2018,Other,68
+Trent|Graduate|2018-2019,English,371
+Trent|Graduate|2018-2019,Other,120
+Trent|Graduate|2019-2020,English,354
+Trent|Graduate|2019-2020,Other,172
+Trent|Graduate|2020-2021,English,406
+Trent|Graduate|2020-2021,Other,134
+Trent|Graduate|2021-2022,English,407
+Trent|Graduate|2021-2022,Other,217
+Trent|Graduate|2022-2023,English,406
+Trent|Graduate|2022-2023,Other,264
+Trent|Graduate|2023-2024,English,468
+Trent|Graduate|2023-2024,Other,569
+Trent|Graduate|2024-2025,English,503
+Trent|Graduate|2024-2025,Other,582
+Trent|Undergraduate|2012-2013,English,5644
+Trent|Undergraduate|2012-2013,French,40
+Trent|Undergraduate|2012-2013,Other,725
+Trent|Undergraduate|2013-2014,English,5698
+Trent|Undergraduate|2013-2014,French,41
+Trent|Undergraduate|2013-2014,Other,759
+Trent|Undergraduate|2014-2015,English,5726
+Trent|Undergraduate|2014-2015,French,59
+Trent|Undergraduate|2014-2015,Other,755
+Trent|Undergraduate|2015-2016,English,5932
+Trent|Undergraduate|2015-2016,French,64
+Trent|Undergraduate|2015-2016,Other,705
+Trent|Undergraduate|2016-2017,English,6437
+Trent|Undergraduate|2016-2017,French,64
+Trent|Undergraduate|2016-2017,Other,780
+Trent|Undergraduate|2017-2018,English,6750
+Trent|Undergraduate|2017-2018,French,78
+Trent|Undergraduate|2017-2018,Other,905
+Trent|Undergraduate|2018-2019,English,7202
+Trent|Undergraduate|2018-2019,French,89
+Trent|Undergraduate|2018-2019,Other,932
+Trent|Undergraduate|2019-2020,English,7743
+Trent|Undergraduate|2019-2020,French,91
+Trent|Undergraduate|2019-2020,Other,1069
+Trent|Undergraduate|2020-2021,English,7959
+Trent|Undergraduate|2020-2021,French,107
+Trent|Undergraduate|2020-2021,Other,1086
+Trent|Undergraduate|2021-2022,English,8230
+Trent|Undergraduate|2021-2022,French,117
+Trent|Undergraduate|2021-2022,Other,1139
+Trent|Undergraduate|2022-2023,English,8495
+Trent|Undergraduate|2022-2023,French,123
+Trent|Undergraduate|2022-2023,Other,1364
+Trent|Undergraduate|2023-2024,English,8855
+Trent|Undergraduate|2023-2024,French,127
+Trent|Undergraduate|2023-2024,Other,1902
+Trent|Undergraduate|2024-2025,English,8902
+Trent|Undergraduate|2024-2025,French,132
+Trent|Undergraduate|2024-2025,Other,1774
+UOF|All levels|2021-2022,French,21
+UOF|All levels|2022-2023,French,80
+UOF|All levels|2022-2023,Other,16
+UOF|All levels|2023-2024,French,167
+UOF|All levels|2023-2024,Other,25
+UOF|All levels|2024-2025,English,16
+UOF|All levels|2024-2025,French,255
+UOF|All levels|2024-2025,Other,46
+UOF|Undergraduate|2021-2022,French,21
+UOF|Undergraduate|2022-2023,French,80
+UOF|Undergraduate|2022-2023,Other,16
+UOF|Undergraduate|2023-2024,French,167
+UOF|Undergraduate|2023-2024,Other,25
+UOF|Undergraduate|2024-2025,English,16
+UOF|Undergraduate|2024-2025,French,255
+UOF|Undergraduate|2024-2025,Other,46
+Waterloo|All levels|2012-2013,English,19968
+Waterloo|All levels|2012-2013,French,297
+Waterloo|All levels|2012-2013,Other,11922
+Waterloo|All levels|2013-2014,English,20767
+Waterloo|All levels|2013-2014,French,305
+Waterloo|All levels|2013-2014,Other,11994
+Waterloo|All levels|2014-2015,English,21588
+Waterloo|All levels|2014-2015,French,273
+Waterloo|All levels|2014-2015,Other,11662
+Waterloo|All levels|2015-2016,English,22358
+Waterloo|All levels|2015-2016,French,280
+Waterloo|All levels|2015-2016,Other,11324
+Waterloo|All levels|2016-2017,English,23537
+Waterloo|All levels|2016-2017,French,282
+Waterloo|All levels|2016-2017,Other,11300
+Waterloo|All levels|2017-2018,English,23625
+Waterloo|All levels|2017-2018,French,274
+Waterloo|All levels|2017-2018,Other,12385
+Waterloo|All levels|2018-2019,English,23629
+Waterloo|All levels|2018-2019,French,279
+Waterloo|All levels|2018-2019,Other,13180
+Waterloo|All levels|2019-2020,English,23620
+Waterloo|All levels|2019-2020,French,260
+Waterloo|All levels|2019-2020,Other,14061
+Waterloo|All levels|2020-2021,English,23777
+Waterloo|All levels|2020-2021,French,255
+Waterloo|All levels|2020-2021,Other,14908
+Waterloo|All levels|2021-2022,English,23711
+Waterloo|All levels|2021-2022,French,274
+Waterloo|All levels|2021-2022,Other,15479
+Waterloo|All levels|2022-2023,English,23511
+Waterloo|All levels|2022-2023,French,262
+Waterloo|All levels|2022-2023,Other,15268
+Waterloo|All levels|2023-2024,English,24243
+Waterloo|All levels|2023-2024,French,269
+Waterloo|All levels|2023-2024,Other,14503
+Waterloo|All levels|2024-2025,English,21862
+Waterloo|All levels|2024-2025,French,229
+Waterloo|All levels|2024-2025,Other,16531
+Waterloo|Graduate|2012-2013,English,1813
+Waterloo|Graduate|2012-2013,French,50
+Waterloo|Graduate|2012-2013,Other,1975
+Waterloo|Graduate|2013-2014,English,1955
+Waterloo|Graduate|2013-2014,French,50
+Waterloo|Graduate|2013-2014,Other,1955
+Waterloo|Graduate|2014-2015,English,1979
+Waterloo|Graduate|2014-2015,French,42
+Waterloo|Graduate|2014-2015,Other,1942
+Waterloo|Graduate|2015-2016,English,2034
+Waterloo|Graduate|2015-2016,French,38
+Waterloo|Graduate|2015-2016,Other,1976
+Waterloo|Graduate|2016-2017,English,2086
+Waterloo|Graduate|2016-2017,French,49
+Waterloo|Graduate|2016-2017,Other,2074
+Waterloo|Graduate|2017-2018,English,1771
+Waterloo|Graduate|2017-2018,French,31
+Waterloo|Graduate|2017-2018,Other,2703
+Waterloo|Graduate|2018-2019,English,1491
+Waterloo|Graduate|2018-2019,French,23
+Waterloo|Graduate|2018-2019,Other,3056
+Waterloo|Graduate|2019-2020,English,1410
+Waterloo|Graduate|2019-2020,French,19
+Waterloo|Graduate|2019-2020,Other,3310
+Waterloo|Graduate|2020-2021,English,1399
+Waterloo|Graduate|2020-2021,French,19
+Waterloo|Graduate|2020-2021,Other,3298
+Waterloo|Graduate|2021-2022,English,1280
+Waterloo|Graduate|2021-2022,French,20
+Waterloo|Graduate|2021-2022,Other,3656
+Waterloo|Graduate|2022-2023,English,1123
+Waterloo|Graduate|2022-2023,French,16
+Waterloo|Graduate|2022-2023,Other,3502
+Waterloo|Graduate|2023-2024,English,1051
+Waterloo|Graduate|2023-2024,French,20
+Waterloo|Graduate|2023-2024,Other,3483
+Waterloo|Graduate|2024-2025,English,1056
+Waterloo|Graduate|2024-2025,French,17
+Waterloo|Graduate|2024-2025,Other,3401
+Waterloo|Undergraduate|2012-2013,English,18155
+Waterloo|Undergraduate|2012-2013,French,247
+Waterloo|Undergraduate|2012-2013,Other,9947
+Waterloo|Undergraduate|2013-2014,English,18812
+Waterloo|Undergraduate|2013-2014,French,255
+Waterloo|Undergraduate|2013-2014,Other,10039
+Waterloo|Undergraduate|2014-2015,English,19609
+Waterloo|Undergraduate|2014-2015,French,231
+Waterloo|Undergraduate|2014-2015,Other,9720
+Waterloo|Undergraduate|2015-2016,English,20324
+Waterloo|Undergraduate|2015-2016,French,242
+Waterloo|Undergraduate|2015-2016,Other,9348
+Waterloo|Undergraduate|2016-2017,English,21451
+Waterloo|Undergraduate|2016-2017,French,233
+Waterloo|Undergraduate|2016-2017,Other,9226
+Waterloo|Undergraduate|2017-2018,English,21854
+Waterloo|Undergraduate|2017-2018,French,243
+Waterloo|Undergraduate|2017-2018,Other,9682
+Waterloo|Undergraduate|2018-2019,English,22138
+Waterloo|Undergraduate|2018-2019,French,256
+Waterloo|Undergraduate|2018-2019,Other,10124
+Waterloo|Undergraduate|2019-2020,English,22210
+Waterloo|Undergraduate|2019-2020,French,241
+Waterloo|Undergraduate|2019-2020,Other,10751
+Waterloo|Undergraduate|2020-2021,English,22378
+Waterloo|Undergraduate|2020-2021,French,236
+Waterloo|Undergraduate|2020-2021,Other,11610
+Waterloo|Undergraduate|2021-2022,English,22431
+Waterloo|Undergraduate|2021-2022,French,254
+Waterloo|Undergraduate|2021-2022,Other,11823
+Waterloo|Undergraduate|2022-2023,English,22388
+Waterloo|Undergraduate|2022-2023,French,246
+Waterloo|Undergraduate|2022-2023,Other,11766
+Waterloo|Undergraduate|2023-2024,English,23192
+Waterloo|Undergraduate|2023-2024,French,249
+Waterloo|Undergraduate|2023-2024,Other,11020
+Waterloo|Undergraduate|2024-2025,English,20806
+Waterloo|Undergraduate|2024-2025,French,212
+Waterloo|Undergraduate|2024-2025,Other,13130
+Western|All levels|2012-2013,English,26456
+Western|All levels|2012-2013,French,183
+Western|All levels|2012-2013,Other,6847
+Western|All levels|2013-2014,English,26462
+Western|All levels|2013-2014,French,191
+Western|All levels|2013-2014,Other,7359
+Western|All levels|2014-2015,English,26689
+Western|All levels|2014-2015,French,201
+Western|All levels|2014-2015,Other,7553
+Western|All levels|2015-2016,English,26648
+Western|All levels|2015-2016,French,197
+Western|All levels|2015-2016,Other,7452
+Western|All levels|2016-2017,English,27620
+Western|All levels|2016-2017,French,220
+Western|All levels|2016-2017,Other,7448
+Western|All levels|2017-2018,English,27874
+Western|All levels|2017-2018,French,221
+Western|All levels|2017-2018,Other,7736
+Western|All levels|2018-2019,English,27621
+Western|All levels|2018-2019,French,209
+Western|All levels|2018-2019,Other,8546
+Western|All levels|2019-2020,English,27698
+Western|All levels|2019-2020,French,207
+Western|All levels|2019-2020,Other,9331
+Western|All levels|2020-2021,English,28404
+Western|All levels|2020-2021,French,211
+Western|All levels|2020-2021,Other,9729
+Western|All levels|2021-2022,English,29797
+Western|All levels|2021-2022,French,222
+Western|All levels|2021-2022,Other,9910
+Western|All levels|2022-2023,English,30506
+Western|All levels|2022-2023,French,232
+Western|All levels|2022-2023,Other,10089
+Western|All levels|2023-2024,English,32073
+Western|All levels|2023-2024,French,256
+Western|All levels|2023-2024,Other,9819
+Western|All levels|2024-2025,English,32654
+Western|All levels|2024-2025,French,262
+Western|All levels|2024-2025,Other,10062
+Western|Graduate|2012-2013,English,3488
+Western|Graduate|2012-2013,French,56
+Western|Graduate|2012-2013,Other,1297
+Western|Graduate|2013-2014,English,3627
+Western|Graduate|2013-2014,French,56
+Western|Graduate|2013-2014,Other,1382
+Western|Graduate|2014-2015,English,3742
+Western|Graduate|2014-2015,French,48
+Western|Graduate|2014-2015,Other,1498
+Western|Graduate|2015-2016,English,3785
+Western|Graduate|2015-2016,French,46
+Western|Graduate|2015-2016,Other,1605
+Western|Graduate|2016-2017,English,3911
+Western|Graduate|2016-2017,French,56
+Western|Graduate|2016-2017,Other,1638
+Western|Graduate|2017-2018,English,4218
+Western|Graduate|2017-2018,French,54
+Western|Graduate|2017-2018,Other,1756
+Western|Graduate|2018-2019,English,4299
+Western|Graduate|2018-2019,French,47
+Western|Graduate|2018-2019,Other,1661
+Western|Graduate|2019-2020,English,4342
+Western|Graduate|2019-2020,French,40
+Western|Graduate|2019-2020,Other,1897
+Western|Graduate|2020-2021,English,4443
+Western|Graduate|2020-2021,French,40
+Western|Graduate|2020-2021,Other,1729
+Western|Graduate|2021-2022,English,4752
+Western|Graduate|2021-2022,French,40
+Western|Graduate|2021-2022,Other,2021
+Western|Graduate|2022-2023,English,4692
+Western|Graduate|2022-2023,French,33
+Western|Graduate|2022-2023,Other,2027
+Western|Graduate|2023-2024,English,4766
+Western|Graduate|2023-2024,French,34
+Western|Graduate|2023-2024,Other,2153
+Western|Graduate|2024-2025,English,4966
+Western|Graduate|2024-2025,French,33
+Western|Graduate|2024-2025,Other,2292
+Western|Undergraduate|2012-2013,English,22968
+Western|Undergraduate|2012-2013,French,127
+Western|Undergraduate|2012-2013,Other,5550
+Western|Undergraduate|2013-2014,English,22835
+Western|Undergraduate|2013-2014,French,135
+Western|Undergraduate|2013-2014,Other,5977
+Western|Undergraduate|2014-2015,English,22947
+Western|Undergraduate|2014-2015,French,153
+Western|Undergraduate|2014-2015,Other,6055
+Western|Undergraduate|2015-2016,English,22863
+Western|Undergraduate|2015-2016,French,151
+Western|Undergraduate|2015-2016,Other,5847
+Western|Undergraduate|2016-2017,English,23709
+Western|Undergraduate|2016-2017,French,164
+Western|Undergraduate|2016-2017,Other,5810
+Western|Undergraduate|2017-2018,English,23656
+Western|Undergraduate|2017-2018,French,167
+Western|Undergraduate|2017-2018,Other,5980
+Western|Undergraduate|2018-2019,English,23322
+Western|Undergraduate|2018-2019,French,162
+Western|Undergraduate|2018-2019,Other,6885
+Western|Undergraduate|2019-2020,English,23356
+Western|Undergraduate|2019-2020,French,167
+Western|Undergraduate|2019-2020,Other,7434
+Western|Undergraduate|2020-2021,English,23961
+Western|Undergraduate|2020-2021,French,171
+Western|Undergraduate|2020-2021,Other,8000
+Western|Undergraduate|2021-2022,English,25045
+Western|Undergraduate|2021-2022,French,182
+Western|Undergraduate|2021-2022,Other,7889
+Western|Undergraduate|2022-2023,English,25814
+Western|Undergraduate|2022-2023,French,199
+Western|Undergraduate|2022-2023,Other,8062
+Western|Undergraduate|2023-2024,English,27307
+Western|Undergraduate|2023-2024,French,222
+Western|Undergraduate|2023-2024,Other,7666
+Western|Undergraduate|2024-2025,English,27688
+Western|Undergraduate|2024-2025,French,229
+Western|Undergraduate|2024-2025,Other,7770
+Wilfrid Laurier|All levels|2012-2013,English,14079
+Wilfrid Laurier|All levels|2012-2013,French,92
+Wilfrid Laurier|All levels|2012-2013,Other,2028
+Wilfrid Laurier|All levels|2013-2014,English,14109
+Wilfrid Laurier|All levels|2013-2014,French,74
+Wilfrid Laurier|All levels|2013-2014,Other,2306
+Wilfrid Laurier|All levels|2014-2015,English,13852
+Wilfrid Laurier|All levels|2014-2015,French,76
+Wilfrid Laurier|All levels|2014-2015,Other,2111
+Wilfrid Laurier|All levels|2015-2016,English,13690
+Wilfrid Laurier|All levels|2015-2016,French,87
+Wilfrid Laurier|All levels|2015-2016,Other,2045
+Wilfrid Laurier|All levels|2016-2017,English,13886
+Wilfrid Laurier|All levels|2016-2017,French,90
+Wilfrid Laurier|All levels|2016-2017,Other,1875
+Wilfrid Laurier|All levels|2017-2018,English,13987
+Wilfrid Laurier|All levels|2017-2018,French,86
+Wilfrid Laurier|All levels|2017-2018,Other,2337
+Wilfrid Laurier|All levels|2018-2019,English,13697
+Wilfrid Laurier|All levels|2018-2019,French,79
+Wilfrid Laurier|All levels|2018-2019,Other,2679
+Wilfrid Laurier|All levels|2019-2020,English,13687
+Wilfrid Laurier|All levels|2019-2020,French,83
+Wilfrid Laurier|All levels|2019-2020,Other,3030
+Wilfrid Laurier|All levels|2020-2021,English,13818
+Wilfrid Laurier|All levels|2020-2021,French,93
+Wilfrid Laurier|All levels|2020-2021,Other,3145
+Wilfrid Laurier|All levels|2021-2022,English,14325
+Wilfrid Laurier|All levels|2021-2022,French,97
+Wilfrid Laurier|All levels|2021-2022,Other,3319
+Wilfrid Laurier|All levels|2022-2023,English,14133
+Wilfrid Laurier|All levels|2022-2023,French,114
+Wilfrid Laurier|All levels|2022-2023,Other,3560
+Wilfrid Laurier|All levels|2023-2024,English,14550
+Wilfrid Laurier|All levels|2023-2024,French,95
+Wilfrid Laurier|All levels|2023-2024,Other,3437
+Wilfrid Laurier|All levels|2024-2025,English,15130
+Wilfrid Laurier|All levels|2024-2025,French,110
+Wilfrid Laurier|All levels|2024-2025,Other,3815
+Wilfrid Laurier|Graduate|2012-2013,English,724
+Wilfrid Laurier|Graduate|2012-2013,Other,203
+Wilfrid Laurier|Graduate|2013-2014,English,737
+Wilfrid Laurier|Graduate|2013-2014,Other,236
+Wilfrid Laurier|Graduate|2014-2015,English,718
+Wilfrid Laurier|Graduate|2014-2015,Other,226
+Wilfrid Laurier|Graduate|2015-2016,English,769
+Wilfrid Laurier|Graduate|2015-2016,Other,214
+Wilfrid Laurier|Graduate|2016-2017,English,732
+Wilfrid Laurier|Graduate|2016-2017,French,12
+Wilfrid Laurier|Graduate|2016-2017,Other,234
+Wilfrid Laurier|Graduate|2017-2018,English,671
+Wilfrid Laurier|Graduate|2017-2018,Other,495
+Wilfrid Laurier|Graduate|2018-2019,English,599
+Wilfrid Laurier|Graduate|2018-2019,Other,612
+Wilfrid Laurier|Graduate|2019-2020,English,518
+Wilfrid Laurier|Graduate|2019-2020,Other,643
+Wilfrid Laurier|Graduate|2020-2021,English,519
+Wilfrid Laurier|Graduate|2020-2021,Other,654
+Wilfrid Laurier|Graduate|2021-2022,English,526
+Wilfrid Laurier|Graduate|2021-2022,Other,676
+Wilfrid Laurier|Graduate|2022-2023,English,472
+Wilfrid Laurier|Graduate|2022-2023,Other,652
+Wilfrid Laurier|Graduate|2023-2024,English,484
+Wilfrid Laurier|Graduate|2023-2024,Other,749
+Wilfrid Laurier|Graduate|2024-2025,English,488
+Wilfrid Laurier|Graduate|2024-2025,Other,929
+Wilfrid Laurier|Undergraduate|2012-2013,English,13355
+Wilfrid Laurier|Undergraduate|2012-2013,French,92
+Wilfrid Laurier|Undergraduate|2012-2013,Other,1825
+Wilfrid Laurier|Undergraduate|2013-2014,English,13372
+Wilfrid Laurier|Undergraduate|2013-2014,French,74
+Wilfrid Laurier|Undergraduate|2013-2014,Other,2070
+Wilfrid Laurier|Undergraduate|2014-2015,English,13134
+Wilfrid Laurier|Undergraduate|2014-2015,French,76
+Wilfrid Laurier|Undergraduate|2014-2015,Other,1885
+Wilfrid Laurier|Undergraduate|2015-2016,English,12921
+Wilfrid Laurier|Undergraduate|2015-2016,French,87
+Wilfrid Laurier|Undergraduate|2015-2016,Other,1831
+Wilfrid Laurier|Undergraduate|2016-2017,English,13154
+Wilfrid Laurier|Undergraduate|2016-2017,French,78
+Wilfrid Laurier|Undergraduate|2016-2017,Other,1641
+Wilfrid Laurier|Undergraduate|2017-2018,English,13316
+Wilfrid Laurier|Undergraduate|2017-2018,French,86
+Wilfrid Laurier|Undergraduate|2017-2018,Other,1842
+Wilfrid Laurier|Undergraduate|2018-2019,English,13098
+Wilfrid Laurier|Undergraduate|2018-2019,French,79
+Wilfrid Laurier|Undergraduate|2018-2019,Other,2067
+Wilfrid Laurier|Undergraduate|2019-2020,English,13169
+Wilfrid Laurier|Undergraduate|2019-2020,French,83
+Wilfrid Laurier|Undergraduate|2019-2020,Other,2387
+Wilfrid Laurier|Undergraduate|2020-2021,English,13299
+Wilfrid Laurier|Undergraduate|2020-2021,French,93
+Wilfrid Laurier|Undergraduate|2020-2021,Other,2491
+Wilfrid Laurier|Undergraduate|2021-2022,English,13799
+Wilfrid Laurier|Undergraduate|2021-2022,French,97
+Wilfrid Laurier|Undergraduate|2021-2022,Other,2643
+Wilfrid Laurier|Undergraduate|2022-2023,English,13661
+Wilfrid Laurier|Undergraduate|2022-2023,French,114
+Wilfrid Laurier|Undergraduate|2022-2023,Other,2908
+Wilfrid Laurier|Undergraduate|2023-2024,English,14066
+Wilfrid Laurier|Undergraduate|2023-2024,French,95
+Wilfrid Laurier|Undergraduate|2023-2024,Other,2688
+Wilfrid Laurier|Undergraduate|2024-2025,English,14642
+Wilfrid Laurier|Undergraduate|2024-2025,French,110
+Wilfrid Laurier|Undergraduate|2024-2025,Other,2886
+Windsor|All levels|2012-2013,English,10251
+Windsor|All levels|2012-2013,French,142
+Windsor|All levels|2012-2013,Other,3313
+Windsor|All levels|2013-2014,English,10291
+Windsor|All levels|2013-2014,French,141
+Windsor|All levels|2013-2014,Other,3668
+Windsor|All levels|2014-2015,English,10333
+Windsor|All levels|2014-2015,French,149
+Windsor|All levels|2014-2015,Other,3541
+Windsor|All levels|2015-2016,English,10003
+Windsor|All levels|2015-2016,French,139
+Windsor|All levels|2015-2016,Other,3411
+Windsor|All levels|2016-2017,English,10125
+Windsor|All levels|2016-2017,French,130
+Windsor|All levels|2016-2017,Other,3347
+Windsor|All levels|2017-2018,English,10307
+Windsor|All levels|2017-2018,French,119
+Windsor|All levels|2017-2018,Other,3643
+Windsor|All levels|2018-2019,English,10320
+Windsor|All levels|2018-2019,French,123
+Windsor|All levels|2018-2019,Other,4063
+Windsor|All levels|2019-2020,English,8203
+Windsor|All levels|2019-2020,French,109
+Windsor|All levels|2019-2020,Other,6457
+Windsor|All levels|2020-2021,English,5621
+Windsor|All levels|2020-2021,French,64
+Windsor|All levels|2020-2021,Other,9384
+Windsor|All levels|2021-2022,English,3456
+Windsor|All levels|2021-2022,French,40
+Windsor|All levels|2021-2022,Other,12014
+Windsor|All levels|2022-2023,English,1861
+Windsor|All levels|2022-2023,French,27
+Windsor|All levels|2022-2023,Other,14058
+Windsor|All levels|2023-2024,English,1211
+Windsor|All levels|2023-2024,Other,15139
+Windsor|All levels|2024-2025,English,934
+Windsor|All levels|2024-2025,Other,14476
+Windsor|Graduate|2012-2013,English,903
+Windsor|Graduate|2012-2013,Other,999
+Windsor|Graduate|2013-2014,English,999
+Windsor|Graduate|2013-2014,Other,1299
+Windsor|Graduate|2014-2015,English,1143
+Windsor|Graduate|2014-2015,Other,1291
+Windsor|Graduate|2015-2016,English,1227
+Windsor|Graduate|2015-2016,Other,1444
+Windsor|Graduate|2016-2017,English,1390
+Windsor|Graduate|2016-2017,Other,1647
+Windsor|Graduate|2017-2018,English,1529
+Windsor|Graduate|2017-2018,Other,1998
+Windsor|Graduate|2018-2019,English,1565
+Windsor|Graduate|2018-2019,French,10
+Windsor|Graduate|2018-2019,Other,2359
+Windsor|Graduate|2019-2020,English,1426
+Windsor|Graduate|2019-2020,French,10
+Windsor|Graduate|2019-2020,Other,2617
+Windsor|Graduate|2020-2021,English,1050
+Windsor|Graduate|2020-2021,Other,3247
+Windsor|Graduate|2021-2022,English,880
+Windsor|Graduate|2021-2022,Other,4039
+Windsor|Graduate|2022-2023,English,729
+Windsor|Graduate|2022-2023,Other,5021
+Windsor|Graduate|2023-2024,English,590
+Windsor|Graduate|2023-2024,Other,5270
+Windsor|Graduate|2024-2025,English,475
+Windsor|Graduate|2024-2025,Other,4192
+Windsor|Undergraduate|2012-2013,English,9348
+Windsor|Undergraduate|2012-2013,French,142
+Windsor|Undergraduate|2012-2013,Other,2314
+Windsor|Undergraduate|2013-2014,English,9292
+Windsor|Undergraduate|2013-2014,French,141
+Windsor|Undergraduate|2013-2014,Other,2369
+Windsor|Undergraduate|2014-2015,English,9190
+Windsor|Undergraduate|2014-2015,French,149
+Windsor|Undergraduate|2014-2015,Other,2250
+Windsor|Undergraduate|2015-2016,English,8776
+Windsor|Undergraduate|2015-2016,French,139
+Windsor|Undergraduate|2015-2016,Other,1967
+Windsor|Undergraduate|2016-2017,English,8735
+Windsor|Undergraduate|2016-2017,French,130
+Windsor|Undergraduate|2016-2017,Other,1700
+Windsor|Undergraduate|2017-2018,English,8778
+Windsor|Undergraduate|2017-2018,French,119
+Windsor|Undergraduate|2017-2018,Other,1645
+Windsor|Undergraduate|2018-2019,English,8755
+Windsor|Undergraduate|2018-2019,French,113
+Windsor|Undergraduate|2018-2019,Other,1704
+Windsor|Undergraduate|2019-2020,English,6777
+Windsor|Undergraduate|2019-2020,French,99
+Windsor|Undergraduate|2019-2020,Other,3840
+Windsor|Undergraduate|2020-2021,English,4571
+Windsor|Undergraduate|2020-2021,French,64
+Windsor|Undergraduate|2020-2021,Other,6137
+Windsor|Undergraduate|2021-2022,English,2576
+Windsor|Undergraduate|2021-2022,French,40
+Windsor|Undergraduate|2021-2022,Other,7975
+Windsor|Undergraduate|2022-2023,English,1132
+Windsor|Undergraduate|2022-2023,French,27
+Windsor|Undergraduate|2022-2023,Other,9037
+Windsor|Undergraduate|2023-2024,English,621
+Windsor|Undergraduate|2023-2024,Other,9869
+Windsor|Undergraduate|2024-2025,English,459
+Windsor|Undergraduate|2024-2025,Other,10284
+York|All levels|2012-2013,English,30103
+York|All levels|2012-2013,French,636
+York|All levels|2012-2013,Other,14425
+York|All levels|2013-2014,English,29691
+York|All levels|2013-2014,French,705
+York|All levels|2013-2014,Other,14443
+York|All levels|2014-2015,English,29635
+York|All levels|2014-2015,French,719
+York|All levels|2014-2015,Other,13378
+York|All levels|2015-2016,English,30241
+York|All levels|2015-2016,French,734
+York|All levels|2015-2016,Other,12705
+York|All levels|2016-2017,English,31158
+York|All levels|2016-2017,French,747
+York|All levels|2016-2017,Other,11834
+York|All levels|2017-2018,English,31955
+York|All levels|2017-2018,French,831
+York|All levels|2017-2018,Other,12671
+York|All levels|2018-2019,English,32229
+York|All levels|2018-2019,French,878
+York|All levels|2018-2019,Other,14290
+York|All levels|2019-2020,English,31098
+York|All levels|2019-2020,French,833
+York|All levels|2019-2020,Other,15609
+York|All levels|2020-2021,English,30470
+York|All levels|2020-2021,French,776
+York|All levels|2020-2021,Other,16206
+York|All levels|2021-2022,English,29676
+York|All levels|2021-2022,French,730
+York|All levels|2021-2022,Other,15929
+York|All levels|2022-2023,English,28566
+York|All levels|2022-2023,French,720
+York|All levels|2022-2023,Other,15552
+York|All levels|2023-2024,English,30178
+York|All levels|2023-2024,French,717
+York|All levels|2023-2024,Other,14835
+York|All levels|2024-2025,English,30160
+York|All levels|2024-2025,French,718
+York|All levels|2024-2025,Other,14678
+York|Graduate|2012-2013,English,2599
+York|Graduate|2012-2013,French,106
+York|Graduate|2012-2013,Other,1212
+York|Graduate|2013-2014,English,2597
+York|Graduate|2013-2014,French,102
+York|Graduate|2013-2014,Other,1236
+York|Graduate|2014-2015,English,2561
+York|Graduate|2014-2015,French,95
+York|Graduate|2014-2015,Other,1380
+York|Graduate|2015-2016,English,2587
+York|Graduate|2015-2016,French,89
+York|Graduate|2015-2016,Other,1400
+York|Graduate|2016-2017,English,2582
+York|Graduate|2016-2017,French,88
+York|Graduate|2016-2017,Other,1431
+York|Graduate|2017-2018,English,2627
+York|Graduate|2017-2018,French,96
+York|Graduate|2017-2018,Other,1514
+York|Graduate|2018-2019,English,2758
+York|Graduate|2018-2019,French,89
+York|Graduate|2018-2019,Other,1574
+York|Graduate|2019-2020,English,2663
+York|Graduate|2019-2020,French,86
+York|Graduate|2019-2020,Other,1750
+York|Graduate|2020-2021,English,2773
+York|Graduate|2020-2021,French,82
+York|Graduate|2020-2021,Other,1747
+York|Graduate|2021-2022,English,2717
+York|Graduate|2021-2022,French,79
+York|Graduate|2021-2022,Other,1872
+York|Graduate|2022-2023,English,2643
+York|Graduate|2022-2023,French,79
+York|Graduate|2022-2023,Other,1860
+York|Graduate|2023-2024,English,2623
+York|Graduate|2023-2024,French,87
+York|Graduate|2023-2024,Other,1972
+York|Graduate|2024-2025,English,2809
+York|Graduate|2024-2025,French,73
+York|Graduate|2024-2025,Other,1769
+York|Undergraduate|2012-2013,English,27504
+York|Undergraduate|2012-2013,French,530
+York|Undergraduate|2012-2013,Other,13213
+York|Undergraduate|2013-2014,English,27094
+York|Undergraduate|2013-2014,French,603
+York|Undergraduate|2013-2014,Other,13207
+York|Undergraduate|2014-2015,English,27074
+York|Undergraduate|2014-2015,French,624
+York|Undergraduate|2014-2015,Other,11998
+York|Undergraduate|2015-2016,English,27654
+York|Undergraduate|2015-2016,French,645
+York|Undergraduate|2015-2016,Other,11305
+York|Undergraduate|2016-2017,English,28576
+York|Undergraduate|2016-2017,French,659
+York|Undergraduate|2016-2017,Other,10403
+York|Undergraduate|2017-2018,English,29328
+York|Undergraduate|2017-2018,French,735
+York|Undergraduate|2017-2018,Other,11157
+York|Undergraduate|2018-2019,English,29471
+York|Undergraduate|2018-2019,French,789
+York|Undergraduate|2018-2019,Other,12716
+York|Undergraduate|2019-2020,English,28435
+York|Undergraduate|2019-2020,French,747
+York|Undergraduate|2019-2020,Other,13859
+York|Undergraduate|2020-2021,English,27697
+York|Undergraduate|2020-2021,French,694
+York|Undergraduate|2020-2021,Other,14459
+York|Undergraduate|2021-2022,English,26959
+York|Undergraduate|2021-2022,French,651
+York|Undergraduate|2021-2022,Other,14057
+York|Undergraduate|2022-2023,English,25923
+York|Undergraduate|2022-2023,French,641
+York|Undergraduate|2022-2023,Other,13692
+York|Undergraduate|2023-2024,English,27555
+York|Undergraduate|2023-2024,French,630
+York|Undergraduate|2023-2024,Other,12863
+York|Undergraduate|2024-2025,English,27351
+York|Undergraduate|2024-2025,French,645
+York|Undergraduate|2024-2025,Other,12909

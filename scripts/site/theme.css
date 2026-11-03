@@ -1,0 +1,84 @@
+/* Theme tokens the page's CSS expects (normally supplied by the dashboard runtime), light and dark. */
+:root {
+  color-scheme: light;
+  --color-fg: #1f1e1b;
+  --color-fg-muted: #6b6860;
+  --color-bg: #faf9f6;
+  --color-panel: #ffffff;
+  --color-border-line: #e3e0d8;
+  --color-ok: #2f7a3e;
+  --color-bad: #b3372d;
+  --series-0: #c4622d;
+  --series-1: #3b6ea8;
+  --series-2: #5a8f4e;
+  --series-3: #8a5aa8;
+  --series-4: #c49a2d;
+  --series-5: #3a9a9a;
+  --series-6: #a84a6e;
+  --series-7: #7a7468;
+  --cds-chart-muted: #cfcbc1;
+  --cds-chart-grid: #ece9e2;
+  --cds-chart-axis: #b9b5ab;
+  --cds-chart-reference: #9a958a;
+  --cds-chart-status-critical: #c2453a;
+  --cds-surface-popover: #ffffff;
+  --cds-border: #dcd8ce;
+  --cds-shadow-popover: 0 4px 16px rgb(0 0 0 / 0.12);
+  --cds-text-secondary: #6b6860;
+  --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-anthropic-serif: Georgia, "Times New Roman", serif;
+  --cds-font-size-caption: 0.8125rem;
+  --cds-font-size-body: 0.9375rem;
+  --cds-font-size-heading: 1.0625rem;
+  --cds-font-size-title: 1.75rem;
+  --cds-font-weight-medium: 550;
+  --cds-gap-xs: 0.25rem;
+  --cds-gap-sm: 0.5rem;
+  --cds-gap-md: 1rem;
+  --cds-gap-lg: 1.5rem;
+  --cds-pad-xs: 0.25rem;
+  --cds-pad-sm: 0.5rem;
+  --cds-pad-md: 0.75rem;
+  --cds-pad-lg: 1rem;
+  --cds-radius: 8px;
+  --cds-dur-slow: 300ms;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-fg: #ecebe6;
+    --color-fg-muted: #a29f96;
+    --color-bg: #1b1a18;
+    --color-panel: #252421;
+    --color-border-line: #3a3833;
+    --color-ok: #6cc07c;
+    --color-bad: #ec7b70;
+    --series-0: #e8834c;
+    --series-1: #6f9fd8;
+    --series-2: #85bb78;
+    --series-3: #b48ad2;
+    --series-4: #e0bb55;
+    --series-5: #63c2c2;
+    --series-6: #d77a9c;
+    --series-7: #a8a296;
+    --cds-chart-muted: #55524b;
+    --cds-chart-grid: #312f2b;
+    --cds-chart-axis: #5e5b54;
+    --cds-chart-reference: #7a766d;
+    --cds-chart-status-critical: #e5685c;
+    --cds-surface-popover: #2c2b28;
+    --cds-border: #45423c;
+    --cds-shadow-popover: 0 4px 16px rgb(0 0 0 / 0.5);
+    --cds-text-secondary: #a29f96;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); line-height: 1.45; }
+.site { max-width: 80rem; margin-inline: auto; padding: clamp(16px, 3vw, 40px); }
+.site-foot { margin-top: var(--cds-gap-lg); padding-top: var(--cds-gap-md); border-top: 1px solid var(--color-border-line); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.site-foot a { color: inherit; }
+.dash-skeleton { position: relative; color: transparent !important; }
+.dash-skeleton::after { content: ""; position: absolute; inset: 0; border-radius: var(--cds-radius); background: var(--cds-chart-grid); animation: skel 1.2s ease-in-out infinite alternate; }
+span.dash-skeleton, b.dash-skeleton { display: inline-block; min-width: 4ch; min-height: 1em; }
+@keyframes skel { from { opacity: 0.5; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dash-skeleton::after { animation: none; } }

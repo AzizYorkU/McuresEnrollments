@@ -278,3 +278,42 @@ writes.append(w("set", "files", "index.html", file_path=os.path.abspath(os.path.
 with open(os.path.join(OUT, "writes.json"), "w", encoding="utf-8") as f:
     json.dump(writes, f, ensure_ascii=False, indent=1)
 print("page bytes:", len(html.encode()), "writes:", len(writes))
+
+# Static site for GitHub Pages (repo-root docs/): same page, a small runtime stand-in (site/dash.js), CSVs alongside.
+import shutil
+SITE = os.path.join(os.path.dirname(HERE), "docs")
+os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
+ids = ["status", "peer_groups"] + [d for d, *_ in DIMS]
+for i in ids:
+    shutil.copyfile(os.path.join(HERE, "out", f"{i}.csv"), os.path.join(SITE, "data", f"{i}.csv"))
+for f in ["dash.js", "theme.css"]:
+    shutil.copyfile(os.path.join(HERE, "site", f), os.path.join(SITE, f))
+open(os.path.join(SITE, ".nojekyll"), "w").close()
+params = next(e["data"] for e in writes if e["collection"] == "dash" and e["doc_id"] == "params")
+body = html.replace('<meta name="dash-one-writer">\n', "").replace("the groups are an editable file in Sources", "the groups are listed in data/peer_groups.csv")
+page = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>York University vs Ontario Peers</title>
+<meta name="description" content="How York University's enrolment compares with other Ontario universities, 2012-13 to 2024-25.">
+<link rel="stylesheet" href="theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+window.DASH_SOURCES = {json.dumps({i: f"data/{i}.csv" for i in ids})};
+window.DASH_PARAMS = {json.dumps(params)};
+</script>
+<script src="dash.js"></script>
+</head>
+<body>
+<main class="site">
+{body}
+<footer class="site-foot">Data: Ontario university headcounts by institution, 2012-13 to 2024-25. Source code and data: <a href="https://github.com/AzizYorkU/McuresEnrollments">github.com/AzizYorkU/McuresEnrollments</a>.</footer>
+</main>
+</body>
+</html>
+"""
+with open(os.path.join(SITE, "index.html"), "w", encoding="utf-8") as f:
+    f.write(page)
+print("site:", SITE, "files:", sorted(os.listdir(SITE)))

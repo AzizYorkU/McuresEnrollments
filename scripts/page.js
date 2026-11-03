@@ -437,7 +437,10 @@ dash.draw('growth', (el) => {
   if (!york.pts.length || !years.length) return;
   const all = [york, comb, ...peers].flatMap((s) => s.pts.map((d) => d.v));
   const peerVals = peers.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
-  const hi = Math.max(d3.max([york, comb], (s) => d3.max(s.pts, (d) => d.v)) ?? 100, d3.quantile(peerVals, 0.9) ?? 100);
+  // Clip only outliers: peers far above the rest (a small school growing from a low base).
+  const q90 = d3.quantile(peerVals, 0.9) ?? 100, top = peerVals[peerVals.length - 1] ?? 100;
+  const peerHi = top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 : top;
+  const hi = Math.max(d3.max([york, comb], (s) => d3.max(s.pts, (d) => d.v)) ?? 100, peerHi);
   const y = d3.scaleLinear([Math.min(100, d3.min(all)), hi * 1.03], [H - 26, 10]).nice();
   const ticks = y.ticks(5);
   const left = measure(svg, ticks.map(fmtI)) + 8;
@@ -562,7 +565,7 @@ dash.draw('rank-bars', (el) => {
   const max = vals[vals.length - 1];
   const cap = q > 0 && max > 2 * q ? Math.max(q * 1.4, keep) : max;
   const lo = Math.min(0, vals[0]);
-  const labelW = Math.min(measure(svg, rows.map((r) => r.name), 'ux-lbl ux-lbl-strong') + 10, W * 0.38);
+  const labelW = Math.min(measure(svg, rows.map((r) => r.name), 'ux-lbl ux-lbl-strong') + 16, W * 0.38);
   const valW = measure(svg, rows.map((r) => m.fmt(r.v)), 'ux-lbl') + 8;
   const x = d3.scaleLinear([lo, Math.max(cap, 0)], [labelW + (lo < 0 ? valW : 0), W - valW]);
   const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
@@ -668,7 +671,7 @@ dash.draw('field-bars', (el) => {
   const { svg, tip } = svgIn(el, W, H);
   if (!rows.length) return;
   const ext = d3.max(rows, (r) => Math.abs(r.field_change)) || 1;
-  const labelW = Math.min(measure(svg, rows.map((r) => r.category), 'ux-lbl') + 10, W * 0.42);
+  const labelW = Math.min(measure(svg, rows.map((r) => r.category), 'ux-lbl') + 16, W * 0.45);
   const valW = measure(svg, rows.map((r) => fmtPt(r.field_change)), 'ux-lbl') + 8;
   const x = d3.scaleLinear([-ext, ext], [labelW + valW, W - valW]);
   const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
