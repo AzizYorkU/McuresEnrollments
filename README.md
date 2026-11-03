@@ -2,7 +2,7 @@
 
 How York University's enrolment compares with other Ontario universities, fiscal years 2012-13 to 2024-25. The data covers 24 institutions at the undergraduate and graduate levels.
 
-**Website:** https://azizyorku.github.io/McuresEnrollments/ (GitHub Pages, served from `docs/`)
+**Website:** a static copy of the dashboard in `docs/`. Double-click `serve.cmd` (needs Python) to open it at http://127.0.0.1:8000, reachable only from your own computer.
 
 **Claude dashboard:** https://claude.ai/artifact/74HZbzDpJKKZejBnGEivkX
 
