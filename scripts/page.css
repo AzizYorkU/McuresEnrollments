@@ -133,4 +133,7 @@
 .ux-li.is-comb { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); margin-top: 2px; }
 .ux-li.is-comb .ux-li-v { color: var(--color-fg-muted); }
 .ux-spark { position: relative; min-height: 120px; margin-top: auto; padding-top: var(--cds-gap-xs); border-top: 1px solid var(--color-border-line); }
-.ux-field-select { max-width: 20rem; }
+.ux-field-select { max-width: 26rem; }
+.ux-field-select option.is-above, .ux-field-select.is-above { color: var(--color-ok); }
+.ux-field-select option.is-below, .ux-field-select.is-below { color: var(--color-bad); }
+.ux-field-select option, .ux-field-select optgroup { color: var(--color-fg); background: var(--color-panel); }

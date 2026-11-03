@@ -218,7 +218,7 @@ html = f"""<meta name="dash-one-writer">
         </select>
       </label>
       <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals"></select></label>
+      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals cmp_cip2"></select></label>
       <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
@@ -258,7 +258,7 @@ html = f"""<meta name="dash-one-writer">
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
         </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s share of its students in that field against the comparison group’s: green where York’s is higher, red where lower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>

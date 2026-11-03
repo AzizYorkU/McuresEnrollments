@@ -380,12 +380,14 @@ dash.draw('sel-field', (el) => {
   const f = fieldOf(P());
   el.textContent = f === ALL_F ? 'all fields' : f.replace(/^\d+ /, '');
 });
-// Field list: fields with York students in the selected year and level first, with York's headcount.
+// Field list: fields with York students first, with York's headcount and York's share of its students
+// in the field against the comparison group's share (green when York's is higher, red when lower).
 dash.draw('field-select', (sel) => {
   const t = dash.data('totals');
+  const mix = dash.data('cmp_cip2');
   const p = P();
   sel.onchange = () => dash.setParams({ field: sel.value });
-  if (t.status !== 'ok') {
+  if (t.status !== 'ok' || mix.status !== 'ok') {
     sel.replaceChildren(...[ALL_F, fieldOf(p)].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
     sel.value = fieldOf(p);
     return;
@@ -393,16 +395,33 @@ dash.draw('field-select', (sel) => {
   const fields = [...new Set(t.data.filter((r) => r.field !== ALL_F).map((r) => r.field))].sort(d3.ascending);
   const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && r.field !== ALL_F)
     .map((r) => [r.field, r.headcount]));
+  const share = new Map((bySel(mix.data).get(cmpKey(p)) ?? []).map((r) => [r.category, r]));
+  const tone = (f) => {
+    const r = share.get(f);
+    if (!r || r.york_share == null || r.peer_share == null || r.york_share === r.peer_share) return '';
+    return r.york_share > r.peer_share ? 'is-above' : 'is-below';
+  };
   const at = fields.filter((f) => york.get(f) > 0);
   const not = fields.filter((f) => !(york.get(f) > 0));
+  const option = (f, withCount) => {
+    const r = share.get(f);
+    const pct = r && r.york_share != null && r.peer_share != null ? `  ·  ${fmtP(r.york_share)} vs ${fmtP(r.peer_share)}` : '';
+    const o = new Option(withCount ? `${f}  ·  York ${fmtN(york.get(f))}${pct}` : f, f);
+    o.className = withCount ? tone(f) : '';
+    return o;
+  };
   const group = (label, list, withCount) => {
     const og = document.createElement('optgroup');
     og.label = label;
-    og.append(...list.map((f) => new Option(withCount ? `${f}  ·  York ${fmtN(york.get(f))}` : f, f)));
+    og.append(...list.map((f) => option(f, withCount)));
     return og;
   };
-  sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length})`, at, true), group(`No York students (${not.length})`, not, false));
+  sel.replaceChildren(new Option(ALL_F), group(`Fields with York students (${at.length}): York’s share vs ${p.group}`, at, true),
+    group(`No York students (${not.length})`, not, false));
   sel.value = fieldOf(p);
+  sel.classList.remove('is-above', 'is-below');
+  const cur = fieldOf(p) !== ALL_F && york.get(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
+  if (cur) sel.classList.add(cur);
 });
 dash.draw('members', (el) => {
   if (!gate(el, ['peer_groups'])) return;
