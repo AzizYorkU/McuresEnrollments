@@ -1,0 +1,8 @@
+# source data (not published)
+*.sas7bdat
+
+# generated
+scripts/out/
+scripts/docs/
+__pycache__/
+*.pyc
