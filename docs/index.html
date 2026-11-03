@@ -1930,7 +1930,8 @@ const selRows = (id) => {
   const p = P();
   const code = id === 'cmp_cip' ? fieldCode(p) : null;
   return (bySel(dash.data(id).data).get(cmpKey(p)) ?? [])
-    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')));
+    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')))
+    .map((r) => (id === 'cmp_cip2' ? { ...r, category: fieldName(r.category) } : r)); // field names without the CIP code
 };
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
