@@ -13,7 +13,9 @@ An interactive explorer of Ontario university enrolment headcounts, fiscal years
 
 ## Data
 
-The source is ten SAS datasets (`age`, `campus`, `cip`, `country`, `credential`, `gender`, `program`, `status`, `studyyear`, `tongue`.sas7bdat). They are **not included in this repository**. Put them in the repo root to rebuild.
+The source is ten SAS datasets (`age`, `campus`, `cip`, `country`, `credential`, `gender`, `program`, `status`, `studyyear`, `tongue`.sas7bdat). The repository has them as CSVs in `data/`: UTF-8, every original column, headcounts as whole numbers, one row per institution × fiscal year × study level × category. `scripts/to_csv.py` regenerates the CSVs. The `.sas7bdat` originals are not committed; put them in the repo root to rebuild.
+
+**This data is private.** Keep the repository private, or remove `data/`, before making it public.
 
 Notes on the data:
 - Use `cp1252` encoding to read the files, except `program`, which needs `latin1`.
@@ -26,6 +28,7 @@ Notes on the data:
 | File | Purpose |
 |---|---|
 | `load.py` | Shared loader: reads a SAS file with the right encoding and normalizes column names |
+| `to_csv.py` | Converts each SAS file to a raw CSV in `data/` |
 | `build.py` | Converts each SAS file to `scripts/out/<dim>.csv` (`slice` = `institution\|level\|year`, `category`, `headcount`) and adds "All institutions" / "All levels" rollups |
 | `gen.py` | Combines `page.css` + `page.js` into the dashboard page and the dataset docs (`scripts/docs/`) |
 | `page.css`, `page.js` | Dashboard page source |
