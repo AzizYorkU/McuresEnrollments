@@ -128,6 +128,7 @@ const P = () => dash.params();
 const ALL_F = 'All fields';
 const fieldOf = (p) => p.field || ALL_F;
 const isCip2 = (f) => /^\d\d /.test(f);
+const fieldName = (f) => f.replace(/^\d\d /, '');
 const fieldCode = (p) => (isCip2(fieldOf(p)) ? fieldOf(p).split(' ')[0] : null);
 // One-file filters. The files aren't cross-tabulated, so one filter (these or field of study) applies at a time;
 // the active one is stored in the field param as prefix + category.
@@ -410,11 +411,11 @@ dash.draw('field-select', (sel) => {
   sel.onchange = () => dash.setParams({ field: sel.value });
   if (t.status !== 'ok' || mix.status !== 'ok') {
     const cur = fieldCode(p) ? fieldOf(p) : ALL_F;
-    sel.replaceChildren(...[ALL_F, cur].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(f)));
+    sel.replaceChildren(...[ALL_F, cur].filter((f, i, a) => a.indexOf(f) === i).map((f) => new Option(fieldName(f), f)));
     sel.value = cur;
     return;
   }
-  const fields = [...new Set(t.data.filter((r) => isCip2(r.field)).map((r) => r.field))].sort(d3.ascending);
+  const fields = [...new Set(t.data.filter((r) => isCip2(r.field)).map((r) => r.field))].sort((a, b) => d3.ascending(fieldName(a), fieldName(b)));
   const york = new Map(t.data.filter((r) => r.institution === FOCUS && r.level === p.level && r.year === p.year && isCip2(r.field))
     .map((r) => [r.field, r.headcount]));
   const share = new Map((bySel(mix.data).get(cmpKey(p)) ?? []).map((r) => [r.category, r]));
@@ -428,7 +429,7 @@ dash.draw('field-select', (sel) => {
   const option = (f, withCount) => {
     const r = share.get(f);
     const pct = r && r.york_share != null && r.peer_share != null ? `  ·  ${fmtP(r.york_share)} vs ${fmtP(r.peer_share)}` : '';
-    const o = new Option(withCount ? `${f}  ·  York ${fmtN(york.get(f))}${pct}` : f, f);
+    const o = new Option(withCount ? `${fieldName(f)}  ·  York ${fmtN(york.get(f))}${pct}` : fieldName(f), f);
     o.className = withCount ? tone(f) : '';
     return o;
   };
@@ -506,6 +507,15 @@ dash.draw('subset-select', (sel) => {
   if (cur && !cats.has(cur)) opts.push(new Option(label(cur), cur));
   sel.replaceChildren(...opts);
   sel.value = cur;
+});
+
+dash.draw('year-select', (sel) => {
+  const t = dash.data('totals');
+  const p = P();
+  const years = t.status === 'ok' ? [...new Set(t.data.map((r) => r.year))].sort(d3.descending) : [p.year];
+  sel.replaceChildren(...years.map((y) => new Option(shortYear(y), y)));
+  sel.value = p.year;
+  sel.onchange = () => dash.setParams({ year: sel.value });
 });
 
 // Headline figures. Each reads one row of one source.

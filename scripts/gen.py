@@ -127,8 +127,8 @@ CMP_FN = """dash.calc('cmp___D__', {
 def section(d, tab, col, note):
     note_html = f'\n          <p class="ux-note">{note}</p>' if note else ""
     low = col.lower()
-    mixnote = ('Share of each one’s students in the field, for its 12 largest programs, 2024-25.' if d == 'cip'
-               else 'Share of each one’s students in the 12 largest groups, 2024-25.')
+    mixnote = ('Share of each one’s students in the field, for its 12 largest programs, selected year.' if d == 'cip'
+               else 'Share of each one’s students in the 12 largest groups, selected year.')
     pick = ('\n      <p class="ux-msg ux-pick-field" hidden>Pick a field of study in the filters to see the programs within it. Showing the largest programs across all fields.</p>'
             if d == "cip" else "")
     return f"""
@@ -217,6 +217,7 @@ html = f"""<meta name="dash-one-writer">
           <option>Graduate</option>
         </select>
       </label>
+      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
       <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals cmp_cip2"></select></label>
       <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
       <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
@@ -224,7 +225,7 @@ html = f"""<meta name="dash-one-writer">
       <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
       <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
-    <p class="ux-note ux-filter-note">Field of study, gender, citizenship, credential and year of study come from separate files that aren’t cross-tabulated, so one of them applies at a time: picking one clears the others. Year of study is reported for undergraduates only. Figures are for 2024-25; the trend charts cover every year from 2012-13.</p>
+    <p class="ux-note ux-filter-note">Field of study, gender, citizenship, credential and year of study come from separate files that aren’t cross-tabulated, so one of them applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
@@ -241,12 +242,6 @@ html = f"""<meta name="dash-one-writer">
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_base" data-source="totals group_totals peer_groups"></ol>
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="change_base" data-source="totals group_totals"></div>
         </div>
-        <div class="ux-card ux-list-card" id="list-change_prev">
-          <p class="ux-list-l">From previous year</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-change_prev" data-source="york_standing">—</b></h3>
-          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_prev" data-source="totals group_totals peer_groups"></ol>
-          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="change_prev" data-source="totals group_totals"></div>
-        </div>
         <div class="ux-card ux-list-card" id="list-intl_share">
           <p class="ux-list-l">International share</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
@@ -262,7 +257,7 @@ html = f"""<meta name="dash-one-writer">
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
         </div>
       </div>
-      <p class="ux-note">2024-25 and the selected study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s share of its students in that field against the comparison group’s: green where York’s is higher, red where lower. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s share of its students in that field against the comparison group’s: green where York’s is higher, red where lower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
@@ -292,7 +287,7 @@ html = f"""<meta name="dash-one-writer">
           <button class="ux-tab ux-metric" data-metric="headcount" aria-pressed="false">Headcount</button>
           <button class="ux-tab ux-metric" data-metric="intl_share" aria-pressed="false">International share</button>
         </div>
-        <p class="ux-note">2024-25 and the selected study level. A › marks a bar cut short to keep the others readable.</p>
+        <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
         <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
@@ -301,7 +296,7 @@ html = f"""<meta name="dash-one-writer">
     <section class="ux-page" data-page="institutions" id="institutions" hidden>
       <div class="ux-card" id="inst-card">
         <h2>Institutions in the comparison</h2>
-        <p class="ux-note">2024-25 and the selected study level. York is highlighted.</p>
+        <p class="ux-note">Selected year and study level. York is highlighted.</p>
         <div class="ux-scroll ux-scroll-tall">
           <table class="ux-table ux-inst-table" id="table-inst" data-rows="inst-rows" data-source="totals peer_groups" data-row-key="slice">
             <thead><tr>
