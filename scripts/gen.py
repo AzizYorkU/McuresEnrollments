@@ -286,7 +286,7 @@ os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
 ids = ["status", "peer_groups"] + [d for d, *_ in DIMS]
 for i in ids:
     shutil.copyfile(os.path.join(HERE, "out", f"{i}.csv"), os.path.join(SITE, "data", f"{i}.csv"))
-for f in ["dash.js", "theme.css"]:
+for f in ["dash.js", "theme.css", "d3.min.js"]:
     shutil.copyfile(os.path.join(HERE, "site", f), os.path.join(SITE, f))
 open(os.path.join(SITE, ".nojekyll"), "w").close()
 params = next(e["data"] for e in writes if e["collection"] == "dash" and e["doc_id"] == "params")
@@ -299,7 +299,7 @@ page = f"""<!doctype html>
 <title>York University vs Ontario Peers</title>
 <meta name="description" content="How York University's enrolment compares with other Ontario universities, 2012-13 to 2024-25.">
 <link rel="stylesheet" href="theme.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="d3.min.js"></script>
 <script>
 window.DASH_SOURCES = {json.dumps({i: f"data/{i}.csv" for i in ids})};
 window.DASH_PARAMS = {json.dumps(params)};
