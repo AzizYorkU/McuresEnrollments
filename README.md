@@ -14,9 +14,6 @@ An interactive explorer of Ontario university enrolment headcounts, fiscal years
 ## Data
 
 The source is ten SAS datasets (`age`, `campus`, `cip`, `country`, `credential`, `gender`, `program`, `status`, `studyyear`, `tongue`.sas7bdat). The repository has them as CSVs in `data/`: UTF-8, every original column, headcounts as whole numbers, one row per institution × fiscal year × study level × category. `scripts/to_csv.py` regenerates the CSVs. The `.sas7bdat` originals are not committed; put them in the repo root to rebuild.
-
-**This data is private.** Keep the repository private, or remove `data/`, before making it public.
-
 Notes on the data:
 - Use `cp1252` encoding to read the files, except `program`, which needs `latin1`.
 - `campus` uses different column names (`Institution_Name__D_`, `Study_Level_1_Desc`). The loader renames them.
