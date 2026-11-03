@@ -1,4 +1,4 @@
-/* Layout: header + filters, figure row, trend beside institution ranking, then one breakdown at a time behind tabs. */
+/* Layout: header + filters, York-vs-peer figures, growth and share charts, ranking, then one breakdown at a time behind tabs. */
 .ux { container-type: inline-size; display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
 .ux h1 { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); text-wrap: balance; }
 .ux h2 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
@@ -82,3 +82,15 @@
 [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
 [data-dash-source-state=empty] { color: transparent; }
 @container (max-width: 34rem) { .ux-hide-narrow { display: none; } }
+
+/* York-vs-peers additions */
+.ux-sub { display: flex; flex-wrap: wrap; gap: 0 var(--cds-gap-sm); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.ux .ux-sub b { color: var(--color-fg); font-weight: 600; }
+.ux .ux-sub b .ux-up { color: var(--color-ok); }
+.ux .ux-sub b .ux-down { color: var(--color-bad); }
+.ux-members { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+.ux-lbl { fill: var(--color-fg); font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); font-variant-numeric: tabular-nums; }
+.ux-lbl-strong { font-weight: 600; }
+.ux-bar-thin { height: 5px; }
+.ux-hbars { position: relative; min-height: 120px; }
+.ux-section { display: grid; gap: var(--cds-gap-sm); }

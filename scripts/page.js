@@ -30,16 +30,98 @@ dash.calc('totals', {
   },
 });
 
+dash.calc('group_totals', {
+  inputs: ['totals', 'peer_groups'],
+  title: 'Comparison groups combined',
+  description: 'Each comparison group’s members added together: headcount, international share, and change from the previous year and from 2012-13.',
+  fn: (totals, peer_groups) => {
+    const by = new Map();
+    for (const t of totals) {
+      for (const g of peer_groups) {
+        if (g.institution !== t.institution) continue;
+        const key = `${g.group}|${t.level}|${t.year}`;
+        const s = by.get(key) ?? { key, group: g.group, level: t.level, year: t.year, headcount: 0, international: 0, members: 0 };
+        s.headcount += t.headcount;
+        s.international += t.international;
+        s.members += 1;
+        by.set(key, s);
+      }
+    }
+    const rows = [...by.values()];
+    for (const s of rows) {
+      const y = Number(s.year.slice(0, 4));
+      const prev = by.get(`${s.group}|${s.level}|${y - 1}-${y}`);
+      const base = by.get(`${s.group}|${s.level}|2012-2013`);
+      s.intl_share = s.international / s.headcount;
+      s.change_prev = prev ? s.headcount / prev.headcount - 1 : null;
+      s.change_base = base && s.year !== '2012-2013' ? s.headcount / base.headcount - 1 : null;
+    }
+    return rows;
+  },
+});
+
+dash.calc('york_standing', {
+  inputs: ['totals', 'peer_groups'],
+  title: 'York’s rank in each comparison group',
+  description: 'York’s place among itself and the group’s members on headcount, growth and international share (1 = highest).',
+  fn: (totals, peer_groups) => {
+    const slices = new Map();
+    for (const t of totals) {
+      const k = t.level + '|' + t.year;
+      if (!slices.has(k)) slices.set(k, []);
+      slices.get(k).push(t);
+    }
+    const rows = [];
+    for (const group of new Set(peer_groups.map((g) => g.group))) {
+      const members = new Set(peer_groups.filter((g) => g.group === group).map((g) => g.institution));
+      for (const [k, list] of slices) {
+        const york = list.find((t) => t.institution === 'York');
+        if (!york) continue;
+        const pool = list.filter((t) => t.institution === 'York' || members.has(t.institution));
+        const [level, year] = k.split('|');
+        const r = { key: `${group}|${k}`, group, level, year };
+        for (const f of ['headcount', 'change_prev', 'change_base', 'intl_share']) {
+          const vals = pool.filter((t) => t[f] != null);
+          r['rank_' + f] = york[f] == null ? null : 1 + vals.filter((t) => t[f] > york[f]).length;
+          r['n_' + f] = york[f] == null ? null : vals.length;
+        }
+        rows.push(r);
+      }
+    }
+    return rows;
+  },
+});
+
+dash.calc('york_ontario', {
+  inputs: ['totals'],
+  title: 'York’s share of Ontario',
+  description: 'York’s headcount as a share of all Ontario institutions combined, and its change since 2012-13 in percentage points.',
+  fn: (totals) => {
+    const all = new Map(totals.filter((t) => t.institution === 'All institutions').map((t) => [t.level + '|' + t.year, t.headcount]));
+    const share = new Map(totals.filter((t) => t.institution === 'York').map((t) => [t.level + '|' + t.year, t.headcount / all.get(t.level + '|' + t.year)]));
+    return [...share].map(([key, s]) => {
+      const [level, year] = key.split('|');
+      const base = share.get(level + '|2012-2013');
+      return { key, level, year, share: s, change_base: year === '2012-2013' || base == null ? null : (s - base) * 100 };
+    });
+  },
+});
+
+const FOCUS = 'York';
 const FIRST = '2012-2013';
-const ALL_I = 'All institutions';
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
+const fmtPt = (v) => d3.format('+.1f')(v) + ' pts';
+const fmtI = d3.format('.0f');
 const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 const shortYear = (y) => y.slice(0, 5) + y.slice(7);
 const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
 const P = () => dash.params();
-const sliceOf = (p) => `${p.inst}|${p.level}|${p.year}`;
+const instKey = (inst, p) => `${inst}|${p.level}|${p.year}`;
+const groupKey = (p) => `${p.group}|${p.level}|${p.year}`;
+const MUTED = 'var(--cds-chart-muted)';
+const LOSS = 'var(--cds-chart-status-critical)';
 const memo = (f) => {
   const m = new WeakMap();
   return (rows) => {
@@ -47,9 +129,14 @@ const memo = (f) => {
     return m.get(rows);
   };
 };
-const bySlice = memo((rows) => d3.group(rows, (r) => r.slice));
-const byKey = memo((rows) => new Map(rows.map((r) => [r.slice + '\n' + r.category, r])));
-const totalBySlice = memo((rows) => new Map(rows.map((r) => [r.slice, r])));
+const byField = (field) => memo((rows) => new Map(rows.map((r) => [r[field], r])));
+const bySliceRow = byField('slice');
+const byKeyRow = byField('key');
+const bySel = memo((rows) => d3.group(rows, (r) => `${r.group}|${r.level}|${r.year}`));
+const membersOf = (group) => {
+  const g = dash.data('peer_groups');
+  return g.status === 'ok' ? g.data.filter((r) => r.group === group).map((r) => r.institution) : [];
+};
 const FAILED = ['error', 'missing', 'declined'];
 
 function failLine() {
@@ -75,15 +162,15 @@ function gate(el, ids, box) {
 function gateRows(tb, ids, cols) {
   const st = ids.map((id) => dash.data(id).status);
   if (st.every((s) => s === 'ok')) return true;
-  const td = document.createElement('td');
-  td.colSpan = cols;
-  if (st.some((s) => FAILED.includes(s))) td.append(failLine());
+  const cell = document.createElement('td');
+  cell.colSpan = cols;
+  if (st.some((s) => FAILED.includes(s))) cell.append(failLine());
   else {
-    td.className = 'dash-skeleton';
-    td.textContent = '—';
+    cell.className = 'dash-skeleton';
+    cell.textContent = '—';
   }
   const tr = document.createElement('tr');
-  tr.append(td);
+  tr.append(cell);
   tb.replaceChildren(tr);
   return false;
 }
@@ -95,7 +182,8 @@ function cite(tag, text, source, field, where) {
   if (where) e.dataset.where = where;
   return e;
 }
-const signed = (v) => (v == null ? 'ux-num' : v >= 0 ? 'ux-num ux-up' : 'ux-num ux-down');
+const tone = (v) => (v == null ? '' : v >= 0 ? 'ux-up' : 'ux-down');
+const signed = (v) => ('ux-num ' + tone(v)).trim();
 function td(text, cls) {
   const e = document.createElement('td');
   e.textContent = text;
@@ -105,9 +193,8 @@ function td(text, cls) {
 
 // Table sorting, shared by every table on the page.
 const sortBy = new Map();
-const DEFAULT_SORT = { key: 'headcount', dir: 'desc' };
 function sortRows(list, table) {
-  const s = sortBy.get(table.id) ?? DEFAULT_SORT;
+  const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
   list.sort((a, b) => {
     const x = a[s.key], y = b[s.key];
     if (x == null) return y == null ? 0 : 1;
@@ -129,11 +216,24 @@ function svgIn(el, W, H) {
   el.replaceChildren(svg.node(), tip);
   return { svg, tip };
 }
-function measure(svg, texts) {
-  const g = svg.append('g').attr('class', 'ux-tick');
+function measure(svg, texts, cls = 'ux-tick') {
+  const g = svg.append('g').attr('class', cls);
   const w = d3.max(texts, (t) => g.append('text').text(t).node().getComputedTextLength()) || 0;
   g.remove();
   return w;
+}
+// Shortens a label until it fits in max px.
+function fit(svg, text, max, cls = 'ux-tick') {
+  const g = svg.append('g').attr('class', cls);
+  const t = g.append('text').text(text);
+  let s = text;
+  while (s.length > 3 && t.node().getComputedTextLength() > max) {
+    s = s.slice(0, -1);
+    t.text(s.trimEnd() + '…');
+  }
+  const out = t.text();
+  g.remove();
+  return out;
 }
 function showTip(el, tip, event, head, lines) {
   const h = document.createElement('div');
@@ -175,13 +275,28 @@ function yearAxis(svg, years, x, H, selected) {
     .attr('x', (y) => x(y) + off).attr('y', H - 6).attr('text-anchor', 'middle')
     .attr('class', (y) => (y === selected ? 'is-on' : null)).text(shortYear);
 }
+function yGrid(svg, y, ticks, tf, left, W) {
+  svg.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ux-grid-line')
+    .attr('x1', left).attr('x2', W).attr('y1', y).attr('y2', y);
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(ticks).join('text')
+    .attr('x', left - 8).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(tf);
+}
+// Spreads end labels so they don't meet: items {y}, sorted, min gap px.
+function spread(items, gap, lo, hi) {
+  items.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < items.length; i++) items[i].y = Math.max(items[i].y, items[i - 1].y + gap);
+  const over = items.length ? items[items.length - 1].y - hi : 0;
+  if (over > 0) items.forEach((d) => { d.y -= over; });
+  for (let i = items.length - 2; i >= 0; i--) items[i].y = Math.min(items[i].y, items[i + 1].y - gap);
+  items.forEach((d) => { d.y = Math.max(lo, d.y); });
+}
 
 // Filters and controls.
 document.addEventListener('click', (e) => {
   const sort = e.target.closest('.ux .ux-sort');
   if (sort) {
     const table = sort.closest('table');
-    const cur = sortBy.get(table.id) ?? DEFAULT_SORT;
+    const cur = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
     const key = sort.dataset.sort;
     const text = key === 'category' || key === 'institution';
     const dir = cur.key === key ? (cur.dir === 'asc' ? 'desc' : 'asc') : text ? 'asc' : 'desc';
@@ -189,12 +304,12 @@ document.addEventListener('click', (e) => {
     dash.draw(table.dataset.rows);
     return;
   }
-  const pick = e.target.closest('.ux-inst-table .ux-link');
-  if (pick) {
-    dash.setParams({ inst: pick.closest('tr').dataset.inst });
+  const metric = e.target.closest('.ux .ux-metric');
+  if (metric) {
+    dash.setParams({ metric: metric.dataset.metric });
     return;
   }
-  const tab = e.target.closest('.ux .ux-tab');
+  const tab = e.target.closest('.ux .ux-dimtab');
   if (tab) {
     dash.setParams({ dim: tab.dataset.dim });
     dash.setLink('by-' + tab.dataset.dim);
@@ -213,34 +328,38 @@ dash.onData(() => {
   const p = P();
   document.querySelectorAll('.ux .ux-level').forEach((s) => { s.value = p.level; });
   document.querySelectorAll('.ux .ux-sw[data-i]').forEach((s) => { s.style.background = dash.colors[Number(s.dataset.i)]; });
-  document.querySelectorAll('.ux .ux-tab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
-  const allInst = p.inst === ALL_I;
-  const blocked = p.dim === 'program' && allInst;
-  const d = blocked ? null : dash.data(p.dim);
-  const empty = !!d && d.status === 'ok' && !bySlice(d.data).has(sliceOf(p));
+  document.querySelectorAll('.ux .ux-sw[data-muted]').forEach((s) => { s.style.background = MUTED; });
+  document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
+  document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
+  document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
+  const d = dash.data('cmp_' + p.dim);
+  const empty = d.status === 'ok' && !(bySel(d.data).get(groupKey(p)) ?? []).some((r) => r.york > 0);
   document.querySelectorAll('.ux .ux-dim').forEach((s) => {
     const on = s.dataset.dim === p.dim;
     s.hidden = !on;
-    s.querySelectorAll('.ux-need-inst').forEach((n) => { n.hidden = !(on && blocked); });
     s.querySelectorAll('.ux-empty').forEach((n) => { n.hidden = !(on && empty); });
-    s.querySelectorAll('.ux-dim-body').forEach((b) => { b.hidden = !on || blocked || empty; });
+    s.querySelectorAll('.ux-dim-body').forEach((b) => { b.hidden = !on || empty; });
   });
 });
 
-// Words in the summary line.
-dash.draw('sel-inst', (el) => { el.textContent = P().inst; });
-dash.draw('sel-level', (el) => { el.textContent = P().level; });
+// Words that follow the filters.
+dash.draw('sel-level', (el) => { el.textContent = P().level.toLowerCase(); });
 dash.draw('sel-year', (el) => { el.textContent = shortYear(P().year); });
+dash.draw('sel-group', (el) => { el.textContent = P().group; });
+dash.draw('members', (el) => {
+  if (!gate(el, ['peer_groups'])) return;
+  el.textContent = membersOf(P().group).join(', ') || '—';
+});
 
-dash.draw('inst-select', (sel) => {
-  const t = dash.data('totals');
+dash.draw('group-select', (sel) => {
+  const g = dash.data('peer_groups');
   const p = P();
-  const names = t.status === 'ok'
-    ? [...new Set(t.data.map((r) => r.institution))].filter((n) => n !== ALL_I).sort(d3.ascending)
-    : [p.inst].filter((n) => n !== ALL_I);
-  sel.replaceChildren(new Option(ALL_I), ...names.map((n) => new Option(n)));
-  sel.value = p.inst;
-  sel.onchange = () => dash.setParams({ inst: sel.value });
+  const names = g.status === 'ok'
+    ? [...new Set(g.data.slice().sort((a, b) => Number(a.order) - Number(b.order)).map((r) => r.group))]
+    : [p.group];
+  sel.replaceChildren(...names.map((n) => new Option(n)));
+  sel.value = p.group;
+  sel.onchange = () => dash.setParams({ group: sel.value });
 });
 dash.draw('year-select', (sel) => {
   const t = dash.data('totals');
@@ -251,85 +370,235 @@ dash.draw('year-select', (sel) => {
   sel.onchange = () => dash.setParams({ year: sel.value });
 });
 
-// Headline figures, from the totals for the selected slice.
-const figure = (field, fmt, colored) => (el) => {
-  if (!gate(el, ['totals'])) return;
-  const r = totalBySlice(dash.data('totals').data).get(sliceOf(P()));
+// Headline figures. Each reads one row of one source.
+const SOURCES = {
+  totals: { index: bySliceRow, key: (p) => instKey(FOCUS, p), col: 'slice' },
+  group_totals: { index: byKeyRow, key: groupKey, col: 'key' },
+  york_standing: { index: byKeyRow, key: groupKey, col: 'key' },
+  york_ontario: { index: byKeyRow, key: (p) => `${p.level}|${p.year}`, col: 'key' },
+};
+const rowOf = (id) => SOURCES[id].index(dash.data(id).data).get(SOURCES[id].key(P()));
+const figure = (id, field, fmt, colored) => (el) => {
+  if (!gate(el, [id])) return;
+  const r = rowOf(id);
   if (!r || r[field] == null) {
     el.replaceChildren('—');
     return;
   }
-  const s = cite('span', fmt(r[field]), 'totals', field, 'slice=' + enc(r.slice));
-  if (colored) s.className = r[field] >= 0 ? 'ux-up' : 'ux-down';
+  const s = cite('span', fmt(r[field]), id, field, SOURCES[id].col + '=' + enc(r[SOURCES[id].col]));
+  if (colored) s.className = tone(r[field]);
   el.replaceChildren(s);
 };
-dash.draw('tile-headcount', figure('headcount', fmtN));
-dash.draw('tile-prev', figure('change_prev', fmtD, true));
-dash.draw('tile-base', figure('change_base', fmtD, true));
-dash.draw('tile-intl', figure('intl_share', fmtP));
-dash.draw('lede-total', figure('headcount', fmtN));
-dash.draw('lede-change', figure('change_base', fmtD));
+dash.draw('lede-york', figure('totals', 'headcount', fmtN));
+dash.draw('lede-york-chg', figure('totals', 'change_base', fmtD));
+dash.draw('lede-peer-chg', figure('group_totals', 'change_base', fmtD));
+dash.draw('t-headcount', figure('totals', 'headcount', fmtN));
+dash.draw('t-base', figure('totals', 'change_base', fmtD, true));
+dash.draw('t-prev', figure('totals', 'change_prev', fmtD, true));
+dash.draw('t-intl', figure('totals', 'intl_share', fmtP));
+dash.draw('t-ont', figure('york_ontario', 'share', fmtP));
+dash.draw('g-base', figure('group_totals', 'change_base', fmtD, true));
+dash.draw('g-prev', figure('group_totals', 'change_prev', fmtD, true));
+dash.draw('g-intl', figure('group_totals', 'intl_share', fmtP));
+dash.draw('o-base', figure('york_ontario', 'change_base', fmtPt, true));
+// "2 of 10": York's rank and how many were ranked.
+const rank = (f) => (el) => {
+  if (!gate(el, ['york_standing'])) return;
+  const r = rowOf('york_standing');
+  if (!r || r['rank_' + f] == null) {
+    el.replaceChildren('—');
+    return;
+  }
+  const where = 'key=' + enc(r.key);
+  el.replaceChildren(cite('span', String(r['rank_' + f]), 'york_standing', 'rank_' + f, where), ' of ',
+    cite('span', String(r['n_' + f]), 'york_standing', 'n_' + f, where));
+};
+['headcount', 'change_base', 'change_prev', 'intl_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
 
-// Enrolment by year: stacked domestic and international bars.
-dash.draw('trend', (el) => {
-  if (!gate(el, ['totals'], true)) return;
+// Growth since 2012-13, indexed to 100: York, peers combined, and each peer.
+dash.draw('growth', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
-  const rows = dash.data('totals').data
-    .filter((r) => r.institution === p.inst && r.level === p.level)
-    .sort((a, b) => d3.ascending(a.year, b.year));
-  const W = Math.max(260, el.clientWidth), H = 240;
+  const tot = dash.data('totals').data.filter((r) => r.level === p.level);
+  const years = [...new Set(tot.map((r) => r.year))].sort(d3.ascending);
+  const index = (rows) => {
+    const base = rows.find((r) => r.year === FIRST);
+    if (!base) return null;
+    return rows.filter((r) => years.includes(r.year)).sort((a, b) => d3.ascending(a.year, b.year))
+      .map((r) => ({ year: r.year, v: (r.headcount / base.headcount) * 100 }));
+  };
+  const byInst = d3.group(tot, (r) => r.institution);
+  const peers = membersOf(p.group).map((m) => ({ name: m, pts: index(byInst.get(m) ?? []) })).filter((s) => s.pts && s.pts.length > 1);
+  const york = { name: FOCUS, color: dash.colors[0], pts: index(byInst.get(FOCUS) ?? []) ?? [] };
+  const comb = { name: 'Peers combined', color: dash.colors[1],
+    pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level)) ?? [] };
+  const W = Math.max(260, el.clientWidth), H = 260;
   const { svg, tip } = svgIn(el, W, H);
-  if (!rows.length) return;
-  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.headcount)], [H - 26, 10]).nice();
-  const ticks = y.ticks(4);
-  const tf = (v) => compact.format(v);
-  const left = measure(svg, ticks.map(tf)) + 8;
-  const years = rows.map((r) => r.year);
-  const x = d3.scaleBand(years, [left, W - 2]).paddingInner(0.25).paddingOuter(0.1);
-  svg.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ux-grid-line')
-    .attr('x1', left).attr('x2', W - 2).attr('y1', y).attr('y2', y);
-  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(ticks).join('text')
-    .attr('x', left - 8).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(tf);
+  if (!york.pts.length || !years.length) return;
+  const all = [york, comb, ...peers].flatMap((s) => s.pts.map((d) => d.v));
+  const peerVals = peers.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
+  const hi = Math.max(d3.max([york, comb], (s) => d3.max(s.pts, (d) => d.v)) ?? 100, d3.quantile(peerVals, 0.9) ?? 100);
+  const y = d3.scaleLinear([Math.min(100, d3.min(all)), hi * 1.03], [H - 26, 10]).nice();
+  const ticks = y.ticks(5);
+  const left = measure(svg, ticks.map(fmtI)) + 8;
+  const last = (s) => s.pts[s.pts.length - 1];
+  const ends = [york, comb].filter((s) => s.pts.length).map((s) => ({ s, text: `${s.name === FOCUS ? 'York' : 'Peers'} ${fmtI(last(s).v)}` }));
+  const right = measure(svg, ends.map((e) => e.text), 'ux-lbl') + 12;
+  const x = d3.scalePoint(years, [left + 6, W - right]);
+  yGrid(svg, y, ticks, fmtI, left, W - right + 4);
+  svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
   yearAxis(svg, years, x, H, p.year);
-  const col = svg.append('g').selectAll('g').data(rows).join('g').attr('opacity', (r) => (r.year === p.year ? 1 : 0.45));
-  col.append('rect').attr('x', (r) => x(r.year)).attr('width', x.bandwidth()).attr('rx', 2)
-    .attr('y', (r) => y(r.headcount - r.international)).attr('height', (r) => y(0) - y(r.headcount - r.international))
-    .style('fill', dash.colors[0]);
-  col.append('rect').attr('x', (r) => x(r.year)).attr('width', x.bandwidth()).attr('rx', 2)
-    .attr('y', (r) => y(r.headcount)).attr('height', (r) => Math.max(0, y(r.headcount - r.international) - y(r.headcount) - 1))
-    .style('fill', dash.colors[1]);
-  svg.append('line').attr('class', 'ux-axis-line').attr('x1', left).attr('x2', W - 2).attr('y1', y(0)).attr('y2', y(0));
-  svg.append('g').selectAll('rect').data(rows).join('rect')
-    .attr('x', (r) => x(r.year) - (x.step() - x.bandwidth()) / 2).attr('width', x.step())
-    .attr('y', 0).attr('height', H).style('fill', 'transparent').style('cursor', 'pointer')
-    .on('mousemove', (e, r) => showTip(el, tip, e, shortYear(r.year), [
-      { color: dash.colors[0], name: 'Domestic', value: fmtN(r.headcount - r.international) },
-      { color: dash.colors[1], name: 'International', value: fmtN(r.international) },
-      { name: 'Total', value: fmtN(r.headcount) },
-    ]))
-    .on('mouseleave', () => { tip.hidden = true; })
-    .on('click', (e, r) => dash.setParams({ year: r.year }));
+  const clip = 'clip-growth-' + Math.random().toString(36).slice(2, 8);
+  svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', H - 24);
+  const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
+  const peerPaths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(peers).join('path')
+    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', MUTED).attr('stroke-width', 1.25)
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  svg.append('g').selectAll('path').data([comb, york].filter((s) => s.pts.length)).join('path')
+    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', (s) => s.color).attr('stroke-width', (s) => (s === york ? 2.5 : 2))
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const labels = ends.map((e) => ({ ...e, y: y(last(e.s).v) }));
+  spread(labels, 14, 8, H - 30);
+  svg.append('g').selectAll('text').data(labels).join('text').attr('class', 'ux-lbl ux-lbl-strong')
+    .attr('x', W - right + 8).attr('y', (d) => d.y).attr('dy', '0.32em').style('fill', (d) => d.s.color).text((d) => d.text);
+  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 10).attr('y2', H - 26).attr('opacity', 0);
+  const dots = svg.append('g');
+  svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
+    .on('mousemove', (e) => {
+      const [mx, my] = d3.pointer(e, svg.node());
+      const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
+      const at = (s) => s.pts.find((d) => d.year === yr);
+      let near = null;
+      for (const s of peers) {
+        const d = at(s);
+        if (d && Math.abs(y(d.v) - my) < 14 && (!near || Math.abs(y(d.v) - my) < Math.abs(y(at(near).v) - my))) near = s;
+      }
+      peerPaths.style('stroke', (s) => (s === near ? 'var(--color-fg-muted)' : MUTED)).attr('stroke-width', (s) => (s === near ? 2 : 1.25));
+      rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+      const shown = [york, comb].filter((s) => at(s));
+      dots.selectAll('circle').data(shown).join('circle').attr('r', 3.5).attr('cx', x(yr)).attr('cy', (s) => y(at(s).v)).style('fill', (s) => s.color);
+      const lines = shown.map((s) => ({ color: s.color, name: s.name, value: fmtI(at(s).v) }));
+      if (near) lines.push({ color: 'var(--color-fg-muted)', name: near.name, value: fmtI(at(near).v) });
+      showTip(el, tip, e, shortYear(yr) + ' · 2012-13 = 100', lines);
+    })
+    .on('mouseleave', () => {
+      tip.hidden = true;
+      rule.attr('opacity', 0);
+      dots.selectAll('circle').remove();
+      peerPaths.style('stroke', MUTED).attr('stroke-width', 1.25);
+    });
 });
 
-// Institution ranking for the selected year and level.
+// York's share of all Ontario students over time.
+dash.draw('share', (el) => {
+  if (!gate(el, ['york_ontario'], true)) return;
+  const p = P();
+  const rows = dash.data('york_ontario').data.filter((r) => r.level === p.level).sort((a, b) => d3.ascending(a.year, b.year));
+  const W = Math.max(260, el.clientWidth), H = 260;
+  const { svg, tip } = svgIn(el, W, H);
+  if (!rows.length) return;
+  const years = rows.map((r) => r.year);
+  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.share)], [H - 26, 10]).nice();
+  const ticks = y.ticks(4);
+  const tf = y.tickFormat(4, '%');
+  const left = measure(svg, ticks.map(tf)) + 8;
+  const end = fmtP(rows[rows.length - 1].share);
+  const right = measure(svg, [end], 'ux-lbl') + 12;
+  const x = d3.scalePoint(years, [left + 6, W - right]);
+  yGrid(svg, y, ticks, tf, left, W - right + 4);
+  yearAxis(svg, years, x, H, p.year);
+  const grad = 'grad-share-' + Math.random().toString(36).slice(2, 8);
+  const lg = svg.append('defs').append('linearGradient').attr('id', grad).attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', 1);
+  [[0, 0.26], [0.25, 0.16], [0.5, 0.08], [0.75, 0.03], [1, 0]].forEach(([o, a]) => {
+    lg.append('stop').attr('offset', o).style('stop-color', dash.colors[0]).style('stop-opacity', a);
+  });
+  svg.append('path').attr('d', d3.area().x((r) => x(r.year)).y0(y(0)).y1((r) => y(r.share))(rows)).style('fill', `url(#${grad})`);
+  svg.append('path').attr('d', d3.line().x((r) => x(r.year)).y((r) => y(r.share))(rows)).style('fill', 'none')
+    .style('stroke', dash.colors[0]).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(0)).attr('y2', y(0));
+  const sel = rows.find((r) => r.year === p.year);
+  if (sel) svg.append('circle').attr('r', 3.5).attr('cx', x(sel.year)).attr('cy', y(sel.share)).style('fill', dash.colors[0]);
+  svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', W - right + 8).attr('y', y(rows[rows.length - 1].share))
+    .attr('dy', '0.32em').style('fill', dash.colors[0]).text(end);
+  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 10).attr('y2', H - 26).attr('opacity', 0);
+  svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
+    .on('mousemove', (e) => {
+      const mx = d3.pointer(e, svg.node())[0];
+      const r = rows[d3.leastIndex(rows, (d) => Math.abs(x(d.year) - mx))];
+      rule.attr('x1', x(r.year)).attr('x2', x(r.year)).attr('opacity', 1);
+      showTip(el, tip, e, shortYear(r.year), [
+        { name: 'York’s share', value: fmtP(r.share) },
+        { name: 'Since 2012-13', value: r.change_base == null ? '—' : fmtPt(r.change_base) },
+      ]);
+    })
+    .on('mouseleave', () => { tip.hidden = true; rule.attr('opacity', 0); });
+});
+
+// Ranking: York, peers combined and each peer on the chosen measure.
+const METRICS = {
+  change_base: { fmt: fmtD, signed: true },
+  change_prev: { fmt: fmtD, signed: true },
+  headcount: { fmt: fmtN, signed: false },
+  intl_share: { fmt: fmtP, signed: false },
+};
+dash.draw('rank-bars', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const m = METRICS[p.metric] ?? METRICS.change_base;
+  const f = METRICS[p.metric] ? p.metric : 'change_base';
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const rows = dash.data('totals').data
+    .filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
+    .map((r) => ({ name: r.institution, v: r[f], kind: r.institution === FOCUS ? 'york' : 'peer' }));
+  const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
+  if (comb && comb[f] != null && f !== 'headcount') rows.push({ name: 'Peers combined', v: comb[f], kind: 'comb' });
+  rows.sort((a, b) => b.v - a.v);
+  const W = Math.max(260, el.clientWidth), rowH = 24, H = Math.max(rowH, rows.length * rowH) + 4;
+  const { svg, tip } = svgIn(el, W, H);
+  if (!rows.length) return;
+  const vals = rows.map((r) => r.v).sort(d3.ascending);
+  const q = d3.quantile(vals, 0.85);
+  const keep = d3.max(rows.filter((r) => r.kind !== 'peer'), (r) => r.v) ?? 0;
+  const max = vals[vals.length - 1];
+  const cap = q > 0 && max > 2 * q ? Math.max(q * 1.4, keep) : max;
+  const lo = Math.min(0, vals[0]);
+  const labelW = Math.min(measure(svg, rows.map((r) => r.name), 'ux-lbl ux-lbl-strong') + 10, W * 0.38);
+  const valW = measure(svg, rows.map((r) => m.fmt(r.v)), 'ux-lbl') + 8;
+  const x = d3.scaleLinear([lo, Math.max(cap, 0)], [labelW + (lo < 0 ? valW : 0), W - valW]);
+  const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
+  g.append('text').attr('class', (r) => (r.kind === 'peer' ? 'ux-lbl' : 'ux-lbl ux-lbl-strong')).attr('x', labelW - 10).attr('y', rowH / 2)
+    .attr('dy', '0.32em').attr('text-anchor', 'end').text((r) => fit(svg, r.name, labelW - 12, 'ux-lbl ux-lbl-strong'));
+  const fill = (r) => (r.kind === 'york' ? dash.colors[0] : r.kind === 'comb' ? dash.colors[1] : MUTED);
+  g.append('rect').attr('y', 5).attr('height', rowH - 10).attr('rx', 2).style('fill', fill)
+    .attr('x', (r) => x(Math.min(0, r.v))).attr('width', (r) => Math.max(1, Math.abs(x(Math.min(r.v, cap)) - x(0))));
+  g.append('text').attr('class', 'ux-lbl').attr('y', rowH / 2).attr('dy', '0.32em')
+    .attr('x', (r) => (r.v < 0 ? x(r.v) - 4 : x(Math.min(r.v, cap)) + 4)).attr('text-anchor', (r) => (r.v < 0 ? 'end' : 'start'))
+    .text((r) => m.fmt(r.v) + (r.v > cap ? ' ›' : ''));
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H);
+  g.append('rect').attr('x', 0).attr('width', W).attr('height', rowH).style('fill', 'transparent')
+    .on('mousemove', (e, r) => {
+      const place = rows.filter((d) => d.kind !== 'comb').findIndex((d) => d.name === r.name) + 1;
+      showTip(el, tip, e, r.name, [
+        { name: 'Value', value: m.fmt(r.v) },
+        ...(r.kind === 'comb' ? [] : [{ name: 'Rank', value: `${place} of ${rows.filter((d) => d.kind !== 'comb').length}` }]),
+      ]);
+    })
+    .on('mouseleave', () => { tip.hidden = true; });
+});
+
+// York and its peers in a table for the selected year and level.
 dash.draw('inst-rows', (tb) => {
   const table = tb.closest('table');
-  if (!gateRows(tb, ['totals'], 5)) return;
+  if (!gateRows(tb, ['totals', 'peer_groups'], 5)) return;
   const p = P();
-  const list = dash.data('totals').data.filter((r) => r.level === p.level && r.year === p.year && r.institution !== ALL_I);
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const list = dash.data('totals').data.filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution));
   sortRows(list, table);
   const max = d3.max(list, (r) => r.headcount) || 1;
   tb.replaceChildren(...list.map((r) => {
     const tr = document.createElement('tr');
     tr.dataset.key = r.slice;
-    tr.dataset.inst = r.institution;
-    if (r.institution === p.inst) tr.className = 'is-picked';
-    const name = document.createElement('td');
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'ux-link';
-    b.textContent = r.institution;
-    name.append(b);
+    if (r.institution === FOCUS) tr.className = 'is-picked';
     const hc = document.createElement('td');
     hc.className = 'ux-num';
     const cell = document.createElement('div');
@@ -339,11 +608,11 @@ dash.draw('inst-rows', (tb) => {
     const bar = document.createElement('span');
     bar.className = 'ux-cellbar';
     bar.style.width = (r.headcount / max) * 100 + '%';
-    bar.style.background = dash.colors[0];
+    bar.style.background = r.institution === FOCUS ? dash.colors[0] : MUTED;
     cell.append(num, bar);
     hc.append(cell);
     tr.append(
-      name,
+      td(r.institution),
       hc,
       td(r.change_prev == null ? '—' : fmtD(r.change_prev), signed(r.change_prev) + ' ux-hide-narrow'),
       td(r.change_base == null ? '—' : fmtD(r.change_base), signed(r.change_base)),
@@ -353,17 +622,17 @@ dash.draw('inst-rows', (tb) => {
   }));
 });
 
-// Breakdown: largest groups as bars over a thin 2012-13 bar.
-dash.draw('bars', (el) => {
-  const [id, sid] = el.dataset.source.split(' ');
-  if (!gate(el, [id, sid], true)) return;
-  const p = P();
-  const g = bySlice(dash.data(id).data);
-  const share = byKey(dash.data(sid).data);
-  const rows = (g.get(sliceOf(p)) ?? []).map((r) => ({ ...r, n: Number(r.headcount) }))
-    .sort((a, b) => b.n - a.n).slice(0, 15);
-  const base = new Map(p.year === FIRST ? [] : (g.get(sliceOf({ ...p, year: FIRST })) ?? []).map((r) => [r.category, Number(r.headcount)]));
-  const max = d3.max(rows, (r) => Math.max(r.n, base.get(r.category) ?? 0)) || 1;
+// Breakdown rows for the selected group, level and year, largest first.
+const TOP = 12;
+const selRows = (id) => (bySel(dash.data(id).data).get(groupKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
+
+// York's mix against the group's: paired bars of share.
+dash.draw('mix-bars', (el) => {
+  const id = el.dataset.source;
+  if (!gate(el, [id], true)) return;
+  const rows = topRows(id);
+  const max = d3.max(rows, (r) => Math.max(r.york_share ?? 0, r.peer_share ?? 0)) || 1;
   el.replaceChildren(...rows.map((r) => {
     const row = document.createElement('div');
     row.className = 'ux-bar-row';
@@ -375,113 +644,78 @@ dash.draw('bars', (el) => {
     label.title = r.category;
     const val = document.createElement('span');
     val.className = 'ux-bar-val';
-    const s = share.get(r.slice + '\n' + r.category);
-    val.textContent = fmtN(r.n) + (s ? ' · ' + fmtP(s.share) : '');
+    val.textContent = `${fmtP(r.york_share ?? 0)} vs ${fmtP(r.peer_share ?? 0)}`;
     head.append(label, val);
-    const bar = document.createElement('div');
-    bar.className = 'ux-bar';
-    bar.style.width = (r.n / max) * 100 + '%';
-    bar.style.background = dash.colors[0];
-    row.append(head, bar);
-    const b = base.get(r.category);
-    if (b) {
-      const bb = document.createElement('div');
-      bb.className = 'ux-bar-base';
-      bb.style.width = (b / max) * 100 + '%';
-      row.append(bb);
-    }
+    const yb = document.createElement('div');
+    yb.className = 'ux-bar';
+    yb.style.width = ((r.york_share ?? 0) / max) * 100 + '%';
+    yb.style.background = dash.colors[0];
+    const pb = document.createElement('div');
+    pb.className = 'ux-bar ux-bar-thin';
+    pb.style.width = ((r.peer_share ?? 0) / max) * 100 + '%';
+    pb.style.background = dash.colors[1];
+    row.append(head, yb, pb);
     return row;
   }));
 });
 
-// Breakdown: share over time for the six largest groups.
-dash.draw('mix', (el) => {
-  const [id, sid] = el.dataset.source.split(' ');
-  if (!gate(el, [id, sid], true)) return;
-  const p = P();
-  const pre = `${p.inst}|${p.level}|`;
-  const g = bySlice(dash.data(id).data);
-  const share = byKey(dash.data(sid).data);
-  const years = [...g.keys()].filter((k) => k.startsWith(pre)).map((k) => k.slice(pre.length)).sort(d3.ascending);
-  const top = (g.get(sliceOf(p)) ?? []).slice().sort((a, b) => Number(b.headcount) - Number(a.headcount)).slice(0, 6);
-  const series = top.map((r, i) => ({
-    name: r.category,
-    color: dash.colors[i],
-    pts: years.map((yr) => ({ year: yr, v: share.get(pre + yr + '\n' + r.category)?.share ?? 0 })),
-  }));
-  const W = Math.max(260, el.clientWidth), H = 220;
+// York's share of each category (York ÷ York + peers), change since 2012-13 in points.
+dash.draw('field-bars', (el) => {
+  const id = el.dataset.source;
+  if (!gate(el, [id], true)) return;
+  const rows = topRows(id).filter((r) => r.field_change != null).sort((a, b) => b.field_change - a.field_change);
+  const W = Math.max(260, el.clientWidth), rowH = 24, H = Math.max(rowH, rows.length * rowH) + 4;
   const { svg, tip } = svgIn(el, W, H);
-  const legend = document.createElement('div');
-  legend.className = 'ux-legend';
-  el.append(legend);
-  if (!series.length || !years.length) return;
-  const y = d3.scaleLinear([0, d3.max(series, (s) => d3.max(s.pts, (d) => d.v)) || 0.01], [H - 26, 10]).nice();
-  const ticks = y.ticks(4);
-  const tf = y.tickFormat(4, '%');
-  const left = measure(svg, ticks.map(tf)) + 8;
-  const x = d3.scalePoint(years, [left + 8, W - 8]);
-  svg.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ux-grid-line')
-    .attr('x1', left).attr('x2', W - 2).attr('y1', y).attr('y2', y);
-  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(ticks).join('text')
-    .attr('x', left - 8).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(tf);
-  yearAxis(svg, years, x, H, p.year);
-  const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
-  svg.append('g').selectAll('path').data(series).join('path')
-    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', (s) => s.color)
-    .attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-  if (x(p.year) != null) {
-    svg.append('g').selectAll('circle').data(series).join('circle')
-      .attr('cx', x(p.year)).attr('cy', (s) => y(s.pts.find((d) => d.year === p.year)?.v ?? 0)).attr('r', 3.5)
-      .style('fill', (s) => s.color);
-  }
-  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 10).attr('y2', H - 26).attr('opacity', 0);
-  svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
-    .on('mousemove', (e) => {
-      const mx = d3.pointer(e, svg.node())[0];
-      const i = d3.leastIndex(years, (yr) => Math.abs(x(yr) - mx));
-      const yr = years[i];
-      rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
-      showTip(el, tip, e, shortYear(yr), series.map((s) => ({ color: s.color, name: s.name, value: fmtP(s.pts[i].v) })));
-    })
-    .on('mouseleave', () => { tip.hidden = true; rule.attr('opacity', 0); });
-  legend.replaceChildren(...series.map((s) => {
-    const k = document.createElement('span');
-    k.className = 'ux-key';
-    k.title = s.name;
-    const sw = document.createElement('i');
-    sw.className = 'ux-sw';
-    sw.style.background = s.color;
-    const t = document.createElement('span');
-    t.textContent = s.name;
-    k.append(sw, t);
-    return k;
-  }));
+  if (!rows.length) return;
+  const ext = d3.max(rows, (r) => Math.abs(r.field_change)) || 1;
+  const labelW = Math.min(measure(svg, rows.map((r) => r.category), 'ux-lbl') + 10, W * 0.42);
+  const valW = measure(svg, rows.map((r) => fmtPt(r.field_change)), 'ux-lbl') + 8;
+  const x = d3.scaleLinear([-ext, ext], [labelW + valW, W - valW]);
+  const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
+  g.append('text').attr('class', 'ux-lbl').attr('x', labelW - 10).attr('y', rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+    .text((r) => fit(svg, r.category, labelW - 12, 'ux-lbl'));
+  g.append('rect').attr('y', 5).attr('height', rowH - 10).attr('rx', 2)
+    .style('fill', (r) => (r.field_change >= 0 ? dash.colors[0] : LOSS))
+    .attr('x', (r) => x(Math.min(0, r.field_change))).attr('width', (r) => Math.max(1, Math.abs(x(r.field_change) - x(0))));
+  g.append('text').attr('class', 'ux-lbl').attr('y', rowH / 2).attr('dy', '0.32em')
+    .attr('x', (r) => (r.field_change < 0 ? x(r.field_change) - 4 : x(r.field_change) + 4))
+    .attr('text-anchor', (r) => (r.field_change < 0 ? 'end' : 'start')).text((r) => fmtPt(r.field_change));
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H);
+  g.append('rect').attr('x', 0).attr('width', W).attr('height', rowH).style('fill', 'transparent')
+    .on('mousemove', (e, r) => showTip(el, tip, e, r.category, [
+      { name: 'York’s share now', value: fmtP(r.field_share) },
+      { name: 'Change since 2012-13', value: fmtPt(r.field_change) },
+      { color: dash.colors[0], name: 'York', value: fmtN(r.york) },
+      { color: dash.colors[1], name: 'Peers combined', value: fmtN(r.peers) },
+    ]))
+    .on('mouseleave', () => { tip.hidden = true; });
 });
 
-// Breakdown: every group, searchable and sortable.
+// Every category, searchable and sortable.
 dash.draw('dim-rows', (tb) => {
   const table = tb.closest('table');
   const id = table.dataset.source;
-  const sid = 'share_' + id;
-  if (!gateRows(tb, [id, sid], 4)) return;
-  const p = P();
-  const share = byKey(dash.data(sid).data);
+  if (!gateRows(tb, [id], 9)) return;
   const search = table.closest('.ux-dim')?.querySelector('.ux-search');
   const q = (search?.value ?? '').trim().toLowerCase();
-  let list = (bySlice(dash.data(id).data).get(sliceOf(p)) ?? []).map((r) => {
-    const s = share.get(r.slice + '\n' + r.category);
-    return { slice: r.slice, category: r.category, headcount: Number(r.headcount), share: s?.share ?? null, change_base: s?.change_base ?? null };
-  });
+  let list = selRows(id);
   if (q) list = list.filter((r) => r.category.toLowerCase().includes(q));
   sortRows(list, table);
+  const pct = (v) => (v == null ? '—' : fmtP(v));
+  const chg = (v) => (v == null ? '—' : fmtD(v));
   tb.replaceChildren(...list.map((r) => {
     const tr = document.createElement('tr');
-    tr.dataset.key = encodeURIComponent(r.slice) + ',' + encodeURIComponent(r.category);
+    tr.dataset.key = r.key;
     tr.append(
       td(r.category),
-      td(fmtN(r.headcount), 'ux-num'),
-      td(r.share == null ? '—' : fmtP(r.share), 'ux-num'),
-      td(r.change_base == null ? '—' : fmtD(r.change_base), signed(r.change_base)),
+      td(fmtN(r.york), 'ux-num'),
+      td(pct(r.york_share), 'ux-num'),
+      td(pct(r.peer_share), 'ux-num'),
+      td(r.gap == null ? '—' : fmtPt(r.gap), 'ux-num ux-hide-narrow'),
+      td(pct(r.field_share), 'ux-num'),
+      td(r.field_change == null ? '—' : fmtPt(r.field_change), signed(r.field_change)),
+      td(chg(r.york_change), signed(r.york_change) + ' ux-hide-narrow'),
+      td(chg(r.peer_change), signed(r.peer_change) + ' ux-hide-narrow'),
     );
     return tr;
   }));
