@@ -1,0 +1,1443 @@
+Institution,Fiscal_Year,Study_Level,Gender_Group,headcount
+Algoma,2012-2013,Undergraduate,Female,569
+Algoma,2012-2013,Undergraduate,Male,539
+Algoma,2013-2014,Undergraduate,Female,570
+Algoma,2013-2014,Undergraduate,Male,648
+Algoma,2014-2015,Undergraduate,Female,559
+Algoma,2014-2015,Undergraduate,Male,630
+Algoma,2015-2016,Undergraduate,Female,515
+Algoma,2015-2016,Undergraduate,Male,566
+Algoma,2016-2017,Undergraduate,Female,501
+Algoma,2016-2017,Undergraduate,Male,497
+Algoma,2017-2018,Undergraduate,Female,475
+Algoma,2017-2018,Undergraduate,Male,418
+Algoma,2017-2018,Undergraduate,N/A or Another,0
+Algoma,2018-2019,Undergraduate,Female,537
+Algoma,2018-2019,Undergraduate,Male,417
+Algoma,2019-2020,Undergraduate,Female,892
+Algoma,2019-2020,Undergraduate,Male,719
+Algoma,2019-2020,Undergraduate,N/A or Another,0
+Algoma,2020-2021,Undergraduate,Female,764
+Algoma,2020-2021,Undergraduate,Male,648
+Algoma,2020-2021,Undergraduate,N/A or Another,0
+Algoma,2021-2022,Undergraduate,Female,1247
+Algoma,2021-2022,Undergraduate,Male,1186
+Algoma,2021-2022,Undergraduate,N/A or Another,10
+Algoma,2022-2023,Undergraduate,Female,1644
+Algoma,2022-2023,Undergraduate,Male,1647
+Algoma,2022-2023,Undergraduate,N/A or Another,13
+Algoma,2023-2024,Undergraduate,Female,3074
+Algoma,2023-2024,Undergraduate,Male,3432
+Algoma,2023-2024,Undergraduate,N/A or Another,12
+Algoma,2024-2025,Undergraduate,Female,2610
+Algoma,2024-2025,Undergraduate,Male,3025
+Algoma,2024-2025,Undergraduate,N/A or Another,18
+Algoma,2024-2025,Graduate,Female,34
+Algoma,2024-2025,Graduate,Male,37
+Brock,2012-2013,Undergraduate,Female,8419
+Brock,2012-2013,Undergraduate,Male,6255
+Brock,2012-2013,Graduate,Female,709
+Brock,2012-2013,Graduate,Male,471
+Brock,2013-2014,Undergraduate,Female,8386
+Brock,2013-2014,Undergraduate,Male,6466
+Brock,2013-2014,Graduate,Female,754
+Brock,2013-2014,Graduate,Male,544
+Brock,2014-2015,Undergraduate,Female,8415
+Brock,2014-2015,Undergraduate,Male,6496
+Brock,2014-2015,Graduate,Female,782
+Brock,2014-2015,Graduate,Male,477
+Brock,2015-2016,Undergraduate,Female,8268
+Brock,2015-2016,Undergraduate,Male,6385
+Brock,2015-2016,Graduate,Female,801
+Brock,2015-2016,Graduate,Male,463
+Brock,2016-2017,Undergraduate,Female,8454
+Brock,2016-2017,Undergraduate,Male,6384
+Brock,2016-2017,Undergraduate,N/A or Another,0
+Brock,2016-2017,Graduate,Female,831
+Brock,2016-2017,Graduate,Male,505
+Brock,2017-2018,Undergraduate,Female,8341
+Brock,2017-2018,Undergraduate,Male,6312
+Brock,2017-2018,Undergraduate,N/A or Another,113
+Brock,2017-2018,Graduate,Female,873
+Brock,2017-2018,Graduate,Male,485
+Brock,2017-2018,Graduate,N/A or Another,23
+Brock,2018-2019,Undergraduate,Female,8329
+Brock,2018-2019,Undergraduate,Male,6388
+Brock,2018-2019,Undergraduate,N/A or Another,205
+Brock,2018-2019,Graduate,Female,887
+Brock,2018-2019,Graduate,Male,503
+Brock,2018-2019,Graduate,N/A or Another,45
+Brock,2019-2020,Undergraduate,Female,8578
+Brock,2019-2020,Undergraduate,Male,6630
+Brock,2019-2020,Undergraduate,N/A or Another,261
+Brock,2019-2020,Graduate,Female,992
+Brock,2019-2020,Graduate,Male,546
+Brock,2019-2020,Graduate,N/A or Another,59
+Brock,2020-2021,Undergraduate,Female,8600
+Brock,2020-2021,Undergraduate,Male,6386
+Brock,2020-2021,Undergraduate,N/A or Another,277
+Brock,2020-2021,Graduate,Female,961
+Brock,2020-2021,Graduate,Male,560
+Brock,2020-2021,Graduate,N/A or Another,54
+Brock,2021-2022,Undergraduate,Female,8503
+Brock,2021-2022,Undergraduate,Male,6377
+Brock,2021-2022,Undergraduate,N/A or Another,279
+Brock,2021-2022,Graduate,Female,883
+Brock,2021-2022,Graduate,Male,586
+Brock,2021-2022,Graduate,N/A or Another,64
+Brock,2022-2023,Undergraduate,Female,8584
+Brock,2022-2023,Undergraduate,Male,6382
+Brock,2022-2023,Undergraduate,N/A or Another,261
+Brock,2022-2023,Graduate,Female,870
+Brock,2022-2023,Graduate,Male,564
+Brock,2022-2023,Graduate,N/A or Another,56
+Brock,2023-2024,Undergraduate,Female,8502
+Brock,2023-2024,Undergraduate,Male,6305
+Brock,2023-2024,Undergraduate,N/A or Another,300
+Brock,2023-2024,Graduate,Female,944
+Brock,2023-2024,Graduate,Male,516
+Brock,2023-2024,Graduate,N/A or Another,70
+Brock,2024-2025,Undergraduate,Female,8803
+Brock,2024-2025,Undergraduate,Male,6237
+Brock,2024-2025,Undergraduate,N/A or Another,361
+Brock,2024-2025,Graduate,Female,927
+Brock,2024-2025,Graduate,Male,473
+Brock,2024-2025,Graduate,N/A or Another,63
+Carleton,2012-2013,Undergraduate,Female,9288
+Carleton,2012-2013,Undergraduate,Male,10168
+Carleton,2012-2013,Graduate,Female,1434
+Carleton,2012-2013,Graduate,Male,1546
+Carleton,2013-2014,Undergraduate,Female,9700
+Carleton,2013-2014,Undergraduate,Male,10338
+Carleton,2013-2014,Graduate,Female,1464
+Carleton,2013-2014,Graduate,Male,1616
+Carleton,2014-2015,Undergraduate,Female,9901
+Carleton,2014-2015,Undergraduate,Male,10502
+Carleton,2014-2015,Graduate,Female,1513
+Carleton,2014-2015,Graduate,Male,1644
+Carleton,2015-2016,Undergraduate,Female,10033
+Carleton,2015-2016,Undergraduate,Male,10569
+Carleton,2015-2016,Graduate,Female,1639
+Carleton,2015-2016,Graduate,Male,1720
+Carleton,2016-2017,Undergraduate,Female,10265
+Carleton,2016-2017,Undergraduate,Male,10712
+Carleton,2016-2017,Graduate,Female,1720
+Carleton,2016-2017,Graduate,Male,1765
+Carleton,2017-2018,Undergraduate,Female,10685
+Carleton,2017-2018,Undergraduate,Male,10913
+Carleton,2017-2018,Undergraduate,N/A or Another,109
+Carleton,2017-2018,Graduate,Female,1745
+Carleton,2017-2018,Graduate,Male,1788
+Carleton,2017-2018,Graduate,N/A or Another,54
+Carleton,2018-2019,Undergraduate,Female,10872
+Carleton,2018-2019,Undergraduate,Male,10715
+Carleton,2018-2019,Undergraduate,N/A or Another,168
+Carleton,2018-2019,Graduate,Female,1738
+Carleton,2018-2019,Graduate,Male,1648
+Carleton,2018-2019,Graduate,N/A or Another,101
+Carleton,2019-2020,Undergraduate,Female,10924
+Carleton,2019-2020,Undergraduate,Male,10658
+Carleton,2019-2020,Undergraduate,N/A or Another,225
+Carleton,2019-2020,Graduate,Female,1776
+Carleton,2019-2020,Graduate,Male,1764
+Carleton,2019-2020,Graduate,N/A or Another,99
+Carleton,2020-2021,Undergraduate,Female,10807
+Carleton,2020-2021,Undergraduate,Male,10164
+Carleton,2020-2021,Undergraduate,N/A or Another,258
+Carleton,2020-2021,Graduate,Female,1935
+Carleton,2020-2021,Graduate,Male,1836
+Carleton,2020-2021,Graduate,N/A or Another,74
+Carleton,2021-2022,Undergraduate,Female,10422
+Carleton,2021-2022,Undergraduate,Male,9873
+Carleton,2021-2022,Undergraduate,N/A or Another,268
+Carleton,2021-2022,Graduate,Female,1966
+Carleton,2021-2022,Graduate,Male,1836
+Carleton,2021-2022,Graduate,N/A or Another,70
+Carleton,2022-2023,Undergraduate,Female,9871
+Carleton,2022-2023,Undergraduate,Male,9718
+Carleton,2022-2023,Undergraduate,N/A or Another,334
+Carleton,2022-2023,Graduate,Female,1942
+Carleton,2022-2023,Graduate,Male,1784
+Carleton,2022-2023,Graduate,N/A or Another,78
+Carleton,2023-2024,Undergraduate,Female,9716
+Carleton,2023-2024,Undergraduate,Male,9861
+Carleton,2023-2024,Undergraduate,N/A or Another,478
+Carleton,2023-2024,Graduate,Female,1984
+Carleton,2023-2024,Graduate,Male,1810
+Carleton,2023-2024,Graduate,N/A or Another,126
+Carleton,2024-2025,Undergraduate,Female,9502
+Carleton,2024-2025,Undergraduate,Male,9621
+Carleton,2024-2025,Undergraduate,N/A or Another,598
+Carleton,2024-2025,Graduate,Female,2076
+Carleton,2024-2025,Graduate,Male,1858
+Carleton,2024-2025,Graduate,N/A or Another,151
+Dominican,2012-2013,Undergraduate,Female,19
+Dominican,2012-2013,Undergraduate,Male,38
+Dominican,2012-2013,Graduate,Female,11
+Dominican,2012-2013,Graduate,Male,39
+Guelph,2012-2013,Undergraduate,Female,13601
+Guelph,2012-2013,Undergraduate,Male,8904
+Guelph,2012-2013,Undergraduate,N/A or Another,0
+Guelph,2012-2013,Graduate,Female,1355
+Guelph,2012-2013,Graduate,Male,1058
+Guelph,2013-2014,Undergraduate,Female,13615
+Guelph,2013-2014,Undergraduate,Male,9090
+Guelph,2013-2014,Undergraduate,N/A or Another,0
+Guelph,2013-2014,Graduate,Female,1334
+Guelph,2013-2014,Graduate,Male,1001
+Guelph,2014-2015,Undergraduate,Female,13787
+Guelph,2014-2015,Undergraduate,Male,9155
+Guelph,2014-2015,Undergraduate,N/A or Another,0
+Guelph,2014-2015,Graduate,Female,1307
+Guelph,2014-2015,Graduate,Male,983
+Guelph,2015-2016,Undergraduate,Female,14076
+Guelph,2015-2016,Undergraduate,Male,9630
+Guelph,2015-2016,Graduate,Female,1359
+Guelph,2015-2016,Graduate,Male,939
+Guelph,2016-2017,Undergraduate,Female,14546
+Guelph,2016-2017,Undergraduate,Male,9723
+Guelph,2016-2017,Undergraduate,N/A or Another,0
+Guelph,2016-2017,Graduate,Female,1428
+Guelph,2016-2017,Graduate,Male,1060
+Guelph,2016-2017,Graduate,N/A or Another,0
+Guelph,2017-2018,Undergraduate,Female,14568
+Guelph,2017-2018,Undergraduate,Male,9593
+Guelph,2017-2018,Undergraduate,N/A or Another,39
+Guelph,2017-2018,Graduate,Female,1504
+Guelph,2017-2018,Graduate,Male,1106
+Guelph,2017-2018,Graduate,N/A or Another,11
+Guelph,2018-2019,Undergraduate,Female,14552
+Guelph,2018-2019,Undergraduate,Male,9503
+Guelph,2018-2019,Undergraduate,N/A or Another,62
+Guelph,2018-2019,Graduate,Female,1553
+Guelph,2018-2019,Graduate,Male,1103
+Guelph,2018-2019,Graduate,N/A or Another,31
+Guelph,2019-2020,Undergraduate,Female,14774
+Guelph,2019-2020,Undergraduate,Male,9474
+Guelph,2019-2020,Undergraduate,N/A or Another,213
+Guelph,2019-2020,Graduate,Female,1633
+Guelph,2019-2020,Graduate,Male,1138
+Guelph,2019-2020,Graduate,N/A or Another,65
+Guelph,2020-2021,Undergraduate,Female,14485
+Guelph,2020-2021,Undergraduate,Male,9111
+Guelph,2020-2021,Undergraduate,N/A or Another,402
+Guelph,2020-2021,Graduate,Female,1610
+Guelph,2020-2021,Graduate,Male,1113
+Guelph,2020-2021,Graduate,N/A or Another,111
+Guelph,2021-2022,Undergraduate,Female,14020
+Guelph,2021-2022,Undergraduate,Male,8801
+Guelph,2021-2022,Undergraduate,N/A or Another,479
+Guelph,2021-2022,Graduate,Female,1650
+Guelph,2021-2022,Graduate,Male,1105
+Guelph,2021-2022,Graduate,N/A or Another,158
+Guelph,2022-2023,Undergraduate,Female,14813
+Guelph,2022-2023,Undergraduate,Male,9330
+Guelph,2022-2023,Undergraduate,N/A or Another,571
+Guelph,2022-2023,Graduate,Female,1594
+Guelph,2022-2023,Graduate,Male,1110
+Guelph,2022-2023,Graduate,N/A or Another,148
+Guelph,2023-2024,Undergraduate,Female,15154
+Guelph,2023-2024,Undergraduate,Male,9491
+Guelph,2023-2024,Undergraduate,N/A or Another,669
+Guelph,2023-2024,Graduate,Female,1614
+Guelph,2023-2024,Graduate,Male,1067
+Guelph,2023-2024,Graduate,N/A or Another,144
+Guelph,2024-2025,Undergraduate,Female,16543
+Guelph,2024-2025,Undergraduate,Male,10575
+Guelph,2024-2025,Undergraduate,N/A or Another,854
+Guelph,2024-2025,Graduate,Female,1711
+Guelph,2024-2025,Graduate,Male,967
+Guelph,2024-2025,Graduate,N/A or Another,149
+Hearst,2012-2013,Undergraduate,Female,57
+Hearst,2012-2013,Undergraduate,Male,12
+Hearst,2013-2014,Undergraduate,Female,57
+Hearst,2013-2014,Undergraduate,Male,11
+Hearst,2014-2015,Undergraduate,Female,56
+Hearst,2014-2015,Undergraduate,Male,17
+Hearst,2015-2016,Undergraduate,Female,76
+Hearst,2015-2016,Undergraduate,Male,33
+Hearst,2016-2017,Undergraduate,Female,65
+Hearst,2016-2017,Undergraduate,Male,42
+Hearst,2017-2018,Undergraduate,Female,83
+Hearst,2017-2018,Undergraduate,Male,47
+Hearst,2018-2019,Undergraduate,Female,92
+Hearst,2018-2019,Undergraduate,Male,55
+Hearst,2019-2020,Undergraduate,Female,118
+Hearst,2019-2020,Undergraduate,Male,87
+Hearst,2020-2021,Undergraduate,Female,94
+Hearst,2020-2021,Undergraduate,Male,68
+Hearst,2020-2021,Undergraduate,N/A or Another,0
+Hearst,2021-2022,Undergraduate,Female,122
+Hearst,2021-2022,Undergraduate,Male,91
+Hearst,2021-2022,Undergraduate,N/A or Another,0
+Hearst,2022-2023,Undergraduate,Female,119
+Hearst,2022-2023,Undergraduate,Male,99
+Hearst,2022-2023,Undergraduate,N/A or Another,0
+Hearst,2022-2023,Graduate,Female,10
+Hearst,2023-2024,Undergraduate,Female,162
+Hearst,2023-2024,Undergraduate,Male,151
+Hearst,2023-2024,Graduate,Female,0
+Hearst,2023-2024,Graduate,Male,0
+Hearst,2024-2025,Undergraduate,Female,154
+Hearst,2024-2025,Undergraduate,Male,147
+Hearst,2024-2025,Graduate,Female,12
+Hearst,2024-2025,Graduate,Male,0
+Lakehead,2012-2013,Undergraduate,Female,3707
+Lakehead,2012-2013,Undergraduate,Male,2641
+Lakehead,2012-2013,Graduate,Female,451
+Lakehead,2012-2013,Graduate,Male,301
+Lakehead,2013-2014,Undergraduate,Female,3708
+Lakehead,2013-2014,Undergraduate,Male,2596
+Lakehead,2013-2014,Graduate,Female,484
+Lakehead,2013-2014,Graduate,Male,313
+Lakehead,2014-2015,Undergraduate,Female,3589
+Lakehead,2014-2015,Undergraduate,Male,2646
+Lakehead,2014-2015,Graduate,Female,461
+Lakehead,2014-2015,Graduate,Male,334
+Lakehead,2015-2016,Undergraduate,Female,3240
+Lakehead,2015-2016,Undergraduate,Male,2485
+Lakehead,2015-2016,Graduate,Female,523
+Lakehead,2015-2016,Graduate,Male,368
+Lakehead,2016-2017,Undergraduate,Female,3330
+Lakehead,2016-2017,Undergraduate,Male,2593
+Lakehead,2016-2017,Graduate,Female,589
+Lakehead,2016-2017,Graduate,Male,454
+Lakehead,2017-2018,Undergraduate,Female,3107
+Lakehead,2017-2018,Undergraduate,Male,2589
+Lakehead,2017-2018,Undergraduate,N/A or Another,0
+Lakehead,2017-2018,Graduate,Female,646
+Lakehead,2017-2018,Graduate,Male,572
+Lakehead,2017-2018,Graduate,N/A or Another,0
+Lakehead,2018-2019,Undergraduate,Female,3148
+Lakehead,2018-2019,Undergraduate,Male,2693
+Lakehead,2018-2019,Undergraduate,N/A or Another,0
+Lakehead,2018-2019,Graduate,Female,693
+Lakehead,2018-2019,Graduate,Male,606
+Lakehead,2018-2019,Graduate,N/A or Another,0
+Lakehead,2019-2020,Undergraduate,Female,3255
+Lakehead,2019-2020,Undergraduate,Male,2605
+Lakehead,2019-2020,Graduate,Female,761
+Lakehead,2019-2020,Graduate,Male,686
+Lakehead,2020-2021,Undergraduate,Female,3284
+Lakehead,2020-2021,Undergraduate,Male,2416
+Lakehead,2020-2021,Undergraduate,N/A or Another,56
+Lakehead,2020-2021,Graduate,Female,703
+Lakehead,2020-2021,Graduate,Male,603
+Lakehead,2021-2022,Undergraduate,Female,3289
+Lakehead,2021-2022,Undergraduate,Male,2246
+Lakehead,2021-2022,Undergraduate,N/A or Another,126
+Lakehead,2021-2022,Graduate,Female,788
+Lakehead,2021-2022,Graduate,Male,639
+Lakehead,2021-2022,Graduate,N/A or Another,0
+Lakehead,2022-2023,Undergraduate,Female,3273
+Lakehead,2022-2023,Undergraduate,Male,2175
+Lakehead,2022-2023,Undergraduate,N/A or Another,139
+Lakehead,2022-2023,Graduate,Female,823
+Lakehead,2022-2023,Graduate,Male,637
+Lakehead,2022-2023,Graduate,N/A or Another,0
+Lakehead,2023-2024,Undergraduate,Female,3292
+Lakehead,2023-2024,Undergraduate,Male,2213
+Lakehead,2023-2024,Undergraduate,N/A or Another,170
+Lakehead,2023-2024,Graduate,Female,975
+Lakehead,2023-2024,Graduate,Male,760
+Lakehead,2023-2024,Graduate,N/A or Another,12
+Lakehead,2024-2025,Undergraduate,Female,3399
+Lakehead,2024-2025,Undergraduate,Male,2245
+Lakehead,2024-2025,Undergraduate,N/A or Another,205
+Lakehead,2024-2025,Graduate,Female,978
+Lakehead,2024-2025,Graduate,Male,806
+Lakehead,2024-2025,Graduate,N/A or Another,17
+Laurentian,2012-2013,Undergraduate,Female,3862
+Laurentian,2012-2013,Undergraduate,Male,2417
+Laurentian,2012-2013,Graduate,Female,225
+Laurentian,2012-2013,Graduate,Male,178
+Laurentian,2013-2014,Undergraduate,Female,3791
+Laurentian,2013-2014,Undergraduate,Male,2501
+Laurentian,2013-2014,Graduate,Female,260
+Laurentian,2013-2014,Graduate,Male,202
+Laurentian,2014-2015,Undergraduate,Female,3794
+Laurentian,2014-2015,Undergraduate,Male,2541
+Laurentian,2014-2015,Graduate,Female,280
+Laurentian,2014-2015,Graduate,Male,196
+Laurentian,2015-2016,Undergraduate,Female,3970
+Laurentian,2015-2016,Undergraduate,Male,2654
+Laurentian,2015-2016,Graduate,Female,308
+Laurentian,2015-2016,Graduate,Male,199
+Laurentian,2016-2017,Undergraduate,Female,3873
+Laurentian,2016-2017,Undergraduate,Male,2649
+Laurentian,2016-2017,Graduate,Female,302
+Laurentian,2016-2017,Graduate,Male,204
+Laurentian,2017-2018,Undergraduate,Female,3719
+Laurentian,2017-2018,Undergraduate,Male,2603
+Laurentian,2017-2018,Undergraduate,N/A or Another,0
+Laurentian,2017-2018,Graduate,Female,291
+Laurentian,2017-2018,Graduate,Male,201
+Laurentian,2018-2019,Undergraduate,Female,3656
+Laurentian,2018-2019,Undergraduate,Male,2486
+Laurentian,2018-2019,Undergraduate,N/A or Another,14
+Laurentian,2018-2019,Graduate,Female,339
+Laurentian,2018-2019,Graduate,Male,232
+Laurentian,2019-2020,Undergraduate,Female,3706
+Laurentian,2019-2020,Undergraduate,Male,2471
+Laurentian,2019-2020,Undergraduate,N/A or Another,19
+Laurentian,2019-2020,Graduate,Female,380
+Laurentian,2019-2020,Graduate,Male,264
+Laurentian,2019-2020,Graduate,N/A or Another,0
+Laurentian,2020-2021,Undergraduate,Female,3936
+Laurentian,2020-2021,Undergraduate,Male,2357
+Laurentian,2020-2021,Undergraduate,N/A or Another,33
+Laurentian,2020-2021,Graduate,Female,405
+Laurentian,2020-2021,Graduate,Male,304
+Laurentian,2020-2021,Graduate,N/A or Another,0
+Laurentian,2021-2022,Undergraduate,Female,3346
+Laurentian,2021-2022,Undergraduate,Male,1971
+Laurentian,2021-2022,Undergraduate,N/A or Another,18
+Laurentian,2021-2022,Graduate,Female,344
+Laurentian,2021-2022,Graduate,Male,290
+Laurentian,2021-2022,Graduate,N/A or Another,0
+Laurentian,2022-2023,Undergraduate,Female,3124
+Laurentian,2022-2023,Undergraduate,Male,1724
+Laurentian,2022-2023,Undergraduate,N/A or Another,25
+Laurentian,2022-2023,Graduate,Female,392
+Laurentian,2022-2023,Graduate,Male,357
+Laurentian,2022-2023,Graduate,N/A or Another,0
+Laurentian,2023-2024,Undergraduate,Female,3025
+Laurentian,2023-2024,Undergraduate,Male,1629
+Laurentian,2023-2024,Undergraduate,N/A or Another,76
+Laurentian,2023-2024,Graduate,Female,641
+Laurentian,2023-2024,Graduate,Male,870
+Laurentian,2023-2024,Graduate,N/A or Another,0
+Laurentian,2024-2025,Undergraduate,Female,2977
+Laurentian,2024-2025,Undergraduate,Male,1530
+Laurentian,2024-2025,Undergraduate,N/A or Another,118
+Laurentian,2024-2025,Graduate,Female,723
+Laurentian,2024-2025,Graduate,Male,984
+Laurentian,2024-2025,Graduate,N/A or Another,0
+McMaster,2012-2013,Undergraduate,Female,12125
+McMaster,2012-2013,Undergraduate,Male,10124
+McMaster,2012-2013,Graduate,Female,1722
+McMaster,2012-2013,Graduate,Male,1822
+McMaster,2013-2014,Undergraduate,Female,12260
+McMaster,2013-2014,Undergraduate,Male,10352
+McMaster,2013-2014,Graduate,Female,1713
+McMaster,2013-2014,Graduate,Male,1809
+McMaster,2014-2015,Undergraduate,Female,12488
+McMaster,2014-2015,Undergraduate,Male,10372
+McMaster,2014-2015,Graduate,Female,1743
+McMaster,2014-2015,Graduate,Male,1880
+McMaster,2015-2016,Undergraduate,Female,13429
+McMaster,2015-2016,Undergraduate,Male,11365
+McMaster,2015-2016,Graduate,Female,1824
+McMaster,2015-2016,Graduate,Male,1792
+McMaster,2016-2017,Undergraduate,Female,14011
+McMaster,2016-2017,Undergraduate,Male,11996
+McMaster,2016-2017,Undergraduate,N/A or Another,0
+McMaster,2016-2017,Graduate,Female,1936
+McMaster,2016-2017,Graduate,Male,1879
+McMaster,2017-2018,Undergraduate,Female,14452
+McMaster,2017-2018,Undergraduate,Male,12082
+McMaster,2017-2018,Undergraduate,N/A or Another,100
+McMaster,2017-2018,Graduate,Female,1967
+McMaster,2017-2018,Graduate,Male,1941
+McMaster,2017-2018,Graduate,N/A or Another,0
+McMaster,2018-2019,Undergraduate,Female,15062
+McMaster,2018-2019,Undergraduate,Male,12460
+McMaster,2018-2019,Undergraduate,N/A or Another,197
+McMaster,2018-2019,Graduate,Female,2142
+McMaster,2018-2019,Graduate,Male,2028
+McMaster,2018-2019,Graduate,N/A or Another,12
+McMaster,2019-2020,Undergraduate,Female,15757
+McMaster,2019-2020,Undergraduate,Male,12814
+McMaster,2019-2020,Undergraduate,N/A or Another,263
+McMaster,2019-2020,Graduate,Female,2289
+McMaster,2019-2020,Graduate,Male,2056
+McMaster,2019-2020,Graduate,N/A or Another,27
+McMaster,2020-2021,Undergraduate,Female,16706
+McMaster,2020-2021,Undergraduate,Male,13467
+McMaster,2020-2021,Undergraduate,N/A or Another,387
+McMaster,2020-2021,Graduate,Female,2288
+McMaster,2020-2021,Graduate,Male,1889
+McMaster,2020-2021,Graduate,N/A or Another,38
+McMaster,2021-2022,Undergraduate,Female,17159
+McMaster,2021-2022,Undergraduate,Male,13574
+McMaster,2021-2022,Undergraduate,N/A or Another,436
+McMaster,2021-2022,Graduate,Female,2406
+McMaster,2021-2022,Graduate,Male,2023
+McMaster,2021-2022,Graduate,N/A or Another,50
+McMaster,2022-2023,Undergraduate,Female,17273
+McMaster,2022-2023,Undergraduate,Male,13597
+McMaster,2022-2023,Undergraduate,N/A or Another,505
+McMaster,2022-2023,Graduate,Female,2489
+McMaster,2022-2023,Graduate,Male,2129
+McMaster,2022-2023,Graduate,N/A or Another,51
+McMaster,2023-2024,Undergraduate,Female,17378
+McMaster,2023-2024,Undergraduate,Male,13440
+McMaster,2023-2024,Undergraduate,N/A or Another,557
+McMaster,2023-2024,Graduate,Female,2545
+McMaster,2023-2024,Graduate,Male,2209
+McMaster,2023-2024,Graduate,N/A or Another,52
+McMaster,2024-2025,Undergraduate,Female,17473
+McMaster,2024-2025,Undergraduate,Male,13200
+McMaster,2024-2025,Undergraduate,N/A or Another,613
+McMaster,2024-2025,Graduate,Female,2603
+McMaster,2024-2025,Graduate,Male,2120
+McMaster,2024-2025,Graduate,N/A or Another,53
+Metropolitan,2012-2013,Undergraduate,Female,11251
+Metropolitan,2012-2013,Undergraduate,Male,9478
+Metropolitan,2012-2013,Undergraduate,N/A or Another,0
+Metropolitan,2012-2013,Graduate,Female,910
+Metropolitan,2012-2013,Graduate,Male,1073
+Metropolitan,2012-2013,Graduate,N/A or Another,14
+Metropolitan,2013-2014,Undergraduate,Female,12062
+Metropolitan,2013-2014,Undergraduate,Male,9953
+Metropolitan,2013-2014,Undergraduate,N/A or Another,0
+Metropolitan,2013-2014,Graduate,Female,955
+Metropolitan,2013-2014,Graduate,Male,1026
+Metropolitan,2013-2014,Graduate,N/A or Another,0
+Metropolitan,2014-2015,Undergraduate,Female,13528
+Metropolitan,2014-2015,Undergraduate,Male,10877
+Metropolitan,2014-2015,Undergraduate,N/A or Another,0
+Metropolitan,2014-2015,Graduate,Female,1021
+Metropolitan,2014-2015,Graduate,Male,1033
+Metropolitan,2014-2015,Graduate,N/A or Another,0
+Metropolitan,2015-2016,Undergraduate,Female,14504
+Metropolitan,2015-2016,Undergraduate,Male,11516
+Metropolitan,2015-2016,Undergraduate,N/A or Another,0
+Metropolitan,2015-2016,Graduate,Female,1022
+Metropolitan,2015-2016,Graduate,Male,1105
+Metropolitan,2015-2016,Graduate,N/A or Another,0
+Metropolitan,2016-2017,Undergraduate,Female,15753
+Metropolitan,2016-2017,Undergraduate,Male,11956
+Metropolitan,2016-2017,Undergraduate,N/A or Another,31
+Metropolitan,2016-2017,Graduate,Female,1123
+Metropolitan,2016-2017,Graduate,Male,1133
+Metropolitan,2016-2017,Graduate,N/A or Another,13
+Metropolitan,2017-2018,Undergraduate,Female,16101
+Metropolitan,2017-2018,Undergraduate,Male,12035
+Metropolitan,2017-2018,Undergraduate,N/A or Another,126
+Metropolitan,2017-2018,Graduate,Female,1178
+Metropolitan,2017-2018,Graduate,Male,1141
+Metropolitan,2017-2018,Graduate,N/A or Another,13
+Metropolitan,2018-2019,Undergraduate,Female,16386
+Metropolitan,2018-2019,Undergraduate,Male,12184
+Metropolitan,2018-2019,Undergraduate,N/A or Another,262
+Metropolitan,2018-2019,Graduate,Female,1256
+Metropolitan,2018-2019,Graduate,Male,1132
+Metropolitan,2018-2019,Graduate,N/A or Another,16
+Metropolitan,2019-2020,Undergraduate,Female,16349
+Metropolitan,2019-2020,Undergraduate,Male,12041
+Metropolitan,2019-2020,Undergraduate,N/A or Another,317
+Metropolitan,2019-2020,Graduate,Female,1352
+Metropolitan,2019-2020,Graduate,Male,1215
+Metropolitan,2019-2020,Graduate,N/A or Another,0
+Metropolitan,2020-2021,Undergraduate,Female,17655
+Metropolitan,2020-2021,Undergraduate,Male,13300
+Metropolitan,2020-2021,Undergraduate,N/A or Another,349
+Metropolitan,2020-2021,Graduate,Female,1460
+Metropolitan,2020-2021,Graduate,Male,1225
+Metropolitan,2020-2021,Graduate,N/A or Another,16
+Metropolitan,2021-2022,Undergraduate,Female,17996
+Metropolitan,2021-2022,Undergraduate,Male,13445
+Metropolitan,2021-2022,Undergraduate,N/A or Another,365
+Metropolitan,2021-2022,Graduate,Female,1446
+Metropolitan,2021-2022,Graduate,Male,1276
+Metropolitan,2021-2022,Graduate,N/A or Another,16
+Metropolitan,2022-2023,Undergraduate,Female,17104
+Metropolitan,2022-2023,Undergraduate,Male,12888
+Metropolitan,2022-2023,Undergraduate,N/A or Another,446
+Metropolitan,2022-2023,Graduate,Female,1425
+Metropolitan,2022-2023,Graduate,Male,1185
+Metropolitan,2022-2023,Graduate,N/A or Another,28
+Metropolitan,2023-2024,Undergraduate,Female,17280
+Metropolitan,2023-2024,Undergraduate,Male,13387
+Metropolitan,2023-2024,Undergraduate,N/A or Another,552
+Metropolitan,2023-2024,Graduate,Female,1350
+Metropolitan,2023-2024,Graduate,Male,1187
+Metropolitan,2023-2024,Graduate,N/A or Another,60
+Metropolitan,2024-2025,Undergraduate,Female,17375
+Metropolitan,2024-2025,Undergraduate,Male,14040
+Metropolitan,2024-2025,Undergraduate,N/A or Another,681
+Metropolitan,2024-2025,Graduate,Female,1413
+Metropolitan,2024-2025,Graduate,Male,1196
+Metropolitan,2024-2025,Graduate,N/A or Another,53
+Nipissing,2012-2013,Undergraduate,Female,2506
+Nipissing,2012-2013,Undergraduate,Male,1166
+Nipissing,2012-2013,Graduate,Female,54
+Nipissing,2012-2013,Graduate,Male,40
+Nipissing,2013-2014,Undergraduate,Female,2331
+Nipissing,2013-2014,Undergraduate,Male,1088
+Nipissing,2013-2014,Graduate,Female,63
+Nipissing,2013-2014,Graduate,Male,38
+Nipissing,2014-2015,Undergraduate,Female,2203
+Nipissing,2014-2015,Undergraduate,Male,1081
+Nipissing,2014-2015,Graduate,Female,94
+Nipissing,2014-2015,Graduate,Male,41
+Nipissing,2015-2016,Undergraduate,Female,2141
+Nipissing,2015-2016,Undergraduate,Male,964
+Nipissing,2015-2016,Graduate,Female,118
+Nipissing,2015-2016,Graduate,Male,41
+Nipissing,2016-2017,Undergraduate,Female,2123
+Nipissing,2016-2017,Undergraduate,Male,964
+Nipissing,2016-2017,Graduate,Female,108
+Nipissing,2016-2017,Graduate,Male,36
+Nipissing,2017-2018,Undergraduate,Female,2063
+Nipissing,2017-2018,Undergraduate,Male,908
+Nipissing,2017-2018,Undergraduate,N/A or Another,45
+Nipissing,2017-2018,Graduate,Female,107
+Nipissing,2017-2018,Graduate,Male,44
+Nipissing,2017-2018,Graduate,N/A or Another,0
+Nipissing,2018-2019,Undergraduate,Female,2313
+Nipissing,2018-2019,Undergraduate,Male,996
+Nipissing,2018-2019,Undergraduate,N/A or Another,90
+Nipissing,2018-2019,Graduate,Female,113
+Nipissing,2018-2019,Graduate,Male,53
+Nipissing,2018-2019,Graduate,N/A or Another,0
+Nipissing,2019-2020,Undergraduate,Female,2524
+Nipissing,2019-2020,Undergraduate,Male,1077
+Nipissing,2019-2020,Undergraduate,N/A or Another,14
+Nipissing,2019-2020,Graduate,Female,107
+Nipissing,2019-2020,Graduate,Male,54
+Nipissing,2020-2021,Undergraduate,Female,2480
+Nipissing,2020-2021,Undergraduate,Male,1109
+Nipissing,2020-2021,Undergraduate,N/A or Another,15
+Nipissing,2020-2021,Graduate,Female,113
+Nipissing,2020-2021,Graduate,Male,65
+Nipissing,2020-2021,Graduate,N/A or Another,0
+Nipissing,2021-2022,Undergraduate,Female,2596
+Nipissing,2021-2022,Undergraduate,Male,1137
+Nipissing,2021-2022,Undergraduate,N/A or Another,20
+Nipissing,2021-2022,Graduate,Female,121
+Nipissing,2021-2022,Graduate,Male,63
+Nipissing,2021-2022,Graduate,N/A or Another,0
+Nipissing,2022-2023,Undergraduate,Female,2439
+Nipissing,2022-2023,Undergraduate,Male,1145
+Nipissing,2022-2023,Undergraduate,N/A or Another,31
+Nipissing,2022-2023,Graduate,Female,113
+Nipissing,2022-2023,Graduate,Male,56
+Nipissing,2022-2023,Graduate,N/A or Another,0
+Nipissing,2023-2024,Undergraduate,Female,2506
+Nipissing,2023-2024,Undergraduate,Male,1256
+Nipissing,2023-2024,Undergraduate,N/A or Another,106
+Nipissing,2023-2024,Graduate,Female,114
+Nipissing,2023-2024,Graduate,Male,53
+Nipissing,2023-2024,Graduate,N/A or Another,0
+Nipissing,2024-2025,Undergraduate,Female,2768
+Nipissing,2024-2025,Undergraduate,Male,1315
+Nipissing,2024-2025,Undergraduate,N/A or Another,192
+Nipissing,2024-2025,Graduate,Female,107
+Nipissing,2024-2025,Graduate,Male,53
+Nipissing,2024-2025,Graduate,N/A or Another,10
+NOSMU,2012-2013,Undergraduate,Female,248
+NOSMU,2012-2013,Undergraduate,Male,139
+NOSMU,2013-2014,Undergraduate,Female,268
+NOSMU,2013-2014,Undergraduate,Male,148
+NOSMU,2014-2015,Undergraduate,Female,271
+NOSMU,2014-2015,Undergraduate,Male,154
+NOSMU,2015-2016,Undergraduate,Female,273
+NOSMU,2015-2016,Undergraduate,Male,160
+NOSMU,2016-2017,Undergraduate,Female,267
+NOSMU,2016-2017,Undergraduate,Male,170
+NOSMU,2017-2018,Undergraduate,Female,269
+NOSMU,2017-2018,Undergraduate,Male,169
+NOSMU,2018-2019,Undergraduate,Female,279
+NOSMU,2018-2019,Undergraduate,Male,169
+NOSMU,2019-2020,Undergraduate,Female,274
+NOSMU,2019-2020,Undergraduate,Male,173
+NOSMU,2020-2021,Undergraduate,Female,281
+NOSMU,2020-2021,Undergraduate,Male,176
+NOSMU,2021-2022,Undergraduate,Female,285
+NOSMU,2021-2022,Undergraduate,Male,160
+NOSMU,2021-2022,Undergraduate,N/A or Another,0
+NOSMU,2021-2022,Graduate,Female,0
+NOSMU,2021-2022,Graduate,N/A or Another,0
+NOSMU,2022-2023,Undergraduate,Female,274
+NOSMU,2022-2023,Undergraduate,Male,140
+NOSMU,2022-2023,Undergraduate,N/A or Another,53
+NOSMU,2022-2023,Graduate,Female,0
+NOSMU,2022-2023,Graduate,N/A or Another,0
+NOSMU,2023-2024,Undergraduate,Female,295
+NOSMU,2023-2024,Undergraduate,Male,133
+NOSMU,2023-2024,Undergraduate,N/A or Another,57
+NOSMU,2023-2024,Graduate,Female,0
+NOSMU,2023-2024,Graduate,N/A or Another,0
+NOSMU,2024-2025,Undergraduate,Female,305
+NOSMU,2024-2025,Undergraduate,Male,143
+NOSMU,2024-2025,Undergraduate,N/A or Another,65
+NOSMU,2024-2025,Graduate,Female,0
+NOSMU,2024-2025,Graduate,Male,0
+NOSMU,2024-2025,Graduate,N/A or Another,0
+OCADU,2012-2013,Undergraduate,Female,2351
+OCADU,2012-2013,Undergraduate,Male,1087
+OCADU,2012-2013,Graduate,Female,84
+OCADU,2012-2013,Graduate,Male,49
+OCADU,2013-2014,Undergraduate,Female,2357
+OCADU,2013-2014,Undergraduate,Male,1038
+OCADU,2013-2014,Graduate,Female,99
+OCADU,2013-2014,Graduate,Male,61
+OCADU,2014-2015,Undergraduate,Female,2320
+OCADU,2014-2015,Undergraduate,Male,1038
+OCADU,2014-2015,Graduate,Female,108
+OCADU,2014-2015,Graduate,Male,59
+OCADU,2015-2016,Undergraduate,Female,2285
+OCADU,2015-2016,Undergraduate,Male,1033
+OCADU,2015-2016,Graduate,Female,109
+OCADU,2015-2016,Graduate,Male,63
+OCADU,2015-2016,Graduate,N/A or Another,0
+OCADU,2016-2017,Undergraduate,Female,2194
+OCADU,2016-2017,Undergraduate,Male,986
+OCADU,2016-2017,Graduate,Female,116
+OCADU,2016-2017,Graduate,Male,56
+OCADU,2016-2017,Graduate,N/A or Another,0
+OCADU,2017-2018,Undergraduate,Female,2194
+OCADU,2017-2018,Undergraduate,Male,962
+OCADU,2017-2018,Undergraduate,N/A or Another,48
+OCADU,2017-2018,Graduate,Female,128
+OCADU,2017-2018,Graduate,Male,50
+OCADU,2017-2018,Graduate,N/A or Another,0
+OCADU,2018-2019,Undergraduate,Female,2166
+OCADU,2018-2019,Undergraduate,Male,936
+OCADU,2018-2019,Undergraduate,N/A or Another,103
+OCADU,2018-2019,Graduate,Female,143
+OCADU,2018-2019,Graduate,Male,54
+OCADU,2018-2019,Graduate,N/A or Another,0
+OCADU,2019-2020,Undergraduate,Female,2224
+OCADU,2019-2020,Undergraduate,Male,973
+OCADU,2019-2020,Undergraduate,N/A or Another,147
+OCADU,2019-2020,Graduate,Female,162
+OCADU,2019-2020,Graduate,Male,51
+OCADU,2019-2020,Graduate,N/A or Another,0
+OCADU,2020-2021,Undergraduate,Female,2729
+OCADU,2020-2021,Undergraduate,Male,1100
+OCADU,2020-2021,Undergraduate,N/A or Another,211
+OCADU,2020-2021,Graduate,Female,165
+OCADU,2020-2021,Graduate,Male,53
+OCADU,2020-2021,Graduate,N/A or Another,12
+OCADU,2021-2022,Undergraduate,Female,2775
+OCADU,2021-2022,Undergraduate,Male,1072
+OCADU,2021-2022,Undergraduate,N/A or Another,266
+OCADU,2021-2022,Graduate,Female,163
+OCADU,2021-2022,Graduate,Male,74
+OCADU,2021-2022,Graduate,N/A or Another,15
+OCADU,2022-2023,Undergraduate,Female,2849
+OCADU,2022-2023,Undergraduate,Male,1160
+OCADU,2022-2023,Undergraduate,N/A or Another,313
+OCADU,2022-2023,Graduate,Female,156
+OCADU,2022-2023,Graduate,Male,61
+OCADU,2022-2023,Graduate,N/A or Another,15
+OCADU,2023-2024,Undergraduate,Female,2915
+OCADU,2023-2024,Undergraduate,Male,1196
+OCADU,2023-2024,Undergraduate,N/A or Another,382
+OCADU,2023-2024,Graduate,Female,178
+OCADU,2023-2024,Graduate,Male,57
+OCADU,2023-2024,Graduate,N/A or Another,21
+OCADU,2024-2025,Undergraduate,Female,2814
+OCADU,2024-2025,Undergraduate,Male,1137
+OCADU,2024-2025,Undergraduate,N/A or Another,422
+OCADU,2024-2025,Graduate,Female,156
+OCADU,2024-2025,Graduate,Male,52
+OCADU,2024-2025,Graduate,N/A or Another,23
+Ontario Tech,2012-2013,Undergraduate,Female,3316
+Ontario Tech,2012-2013,Undergraduate,Male,4823
+Ontario Tech,2012-2013,Graduate,Female,102
+Ontario Tech,2012-2013,Graduate,Male,231
+Ontario Tech,2013-2014,Undergraduate,Female,3552
+Ontario Tech,2013-2014,Undergraduate,Male,5049
+Ontario Tech,2013-2014,Graduate,Female,134
+Ontario Tech,2013-2014,Graduate,Male,242
+Ontario Tech,2014-2015,Undergraduate,Female,3616
+Ontario Tech,2014-2015,Undergraduate,Male,5132
+Ontario Tech,2014-2015,Graduate,Female,138
+Ontario Tech,2014-2015,Graduate,Male,260
+Ontario Tech,2015-2016,Undergraduate,Female,3534
+Ontario Tech,2015-2016,Undergraduate,Male,5083
+Ontario Tech,2015-2016,Graduate,Female,156
+Ontario Tech,2015-2016,Graduate,Male,263
+Ontario Tech,2016-2017,Undergraduate,Female,3728
+Ontario Tech,2016-2017,Undergraduate,Male,5067
+Ontario Tech,2016-2017,Graduate,Female,147
+Ontario Tech,2016-2017,Graduate,Male,240
+Ontario Tech,2017-2018,Undergraduate,Female,3722
+Ontario Tech,2017-2018,Undergraduate,Male,5103
+Ontario Tech,2017-2018,Undergraduate,N/A or Another,0
+Ontario Tech,2017-2018,Graduate,Female,160
+Ontario Tech,2017-2018,Graduate,Male,279
+Ontario Tech,2018-2019,Undergraduate,Female,3787
+Ontario Tech,2018-2019,Undergraduate,Male,5123
+Ontario Tech,2018-2019,Undergraduate,N/A or Another,32
+Ontario Tech,2018-2019,Graduate,Female,194
+Ontario Tech,2018-2019,Graduate,Male,281
+Ontario Tech,2018-2019,Graduate,N/A or Another,0
+Ontario Tech,2019-2020,Undergraduate,Female,3768
+Ontario Tech,2019-2020,Undergraduate,Male,5167
+Ontario Tech,2019-2020,Undergraduate,N/A or Another,58
+Ontario Tech,2019-2020,Graduate,Female,207
+Ontario Tech,2019-2020,Graduate,Male,308
+Ontario Tech,2019-2020,Graduate,N/A or Another,0
+Ontario Tech,2020-2021,Undergraduate,Female,3839
+Ontario Tech,2020-2021,Undergraduate,Male,5234
+Ontario Tech,2020-2021,Undergraduate,N/A or Another,100
+Ontario Tech,2020-2021,Graduate,Female,241
+Ontario Tech,2020-2021,Graduate,Male,313
+Ontario Tech,2020-2021,Graduate,N/A or Another,0
+Ontario Tech,2021-2022,Undergraduate,Female,3900
+Ontario Tech,2021-2022,Undergraduate,Male,5323
+Ontario Tech,2021-2022,Undergraduate,N/A or Another,131
+Ontario Tech,2021-2022,Graduate,Female,302
+Ontario Tech,2021-2022,Graduate,Male,370
+Ontario Tech,2021-2022,Graduate,N/A or Another,0
+Ontario Tech,2022-2023,Undergraduate,Female,3866
+Ontario Tech,2022-2023,Undergraduate,Male,5294
+Ontario Tech,2022-2023,Undergraduate,N/A or Another,178
+Ontario Tech,2022-2023,Graduate,Female,335
+Ontario Tech,2022-2023,Graduate,Male,408
+Ontario Tech,2022-2023,Graduate,N/A or Another,13
+Ontario Tech,2023-2024,Undergraduate,Female,4275
+Ontario Tech,2023-2024,Undergraduate,Male,5535
+Ontario Tech,2023-2024,Undergraduate,N/A or Another,196
+Ontario Tech,2023-2024,Graduate,Female,370
+Ontario Tech,2023-2024,Graduate,Male,358
+Ontario Tech,2023-2024,Graduate,N/A or Another,10
+Ontario Tech,2024-2025,Undergraduate,Female,4559
+Ontario Tech,2024-2025,Undergraduate,Male,5754
+Ontario Tech,2024-2025,Undergraduate,N/A or Another,237
+Ontario Tech,2024-2025,Graduate,Female,428
+Ontario Tech,2024-2025,Graduate,Male,461
+Ontario Tech,2024-2025,Graduate,N/A or Another,13
+Ottawa,2012-2013,Undergraduate,Female,18221
+Ottawa,2012-2013,Undergraduate,Male,11699
+Ottawa,2012-2013,Graduate,Female,2868
+Ottawa,2012-2013,Graduate,Male,2344
+Ottawa,2013-2014,Undergraduate,Female,18241
+Ottawa,2013-2014,Undergraduate,Male,11794
+Ottawa,2013-2014,Graduate,Female,2941
+Ottawa,2013-2014,Graduate,Male,2562
+Ottawa,2014-2015,Undergraduate,Female,18296
+Ottawa,2014-2015,Undergraduate,Male,11973
+Ottawa,2014-2015,Graduate,Female,2946
+Ottawa,2014-2015,Graduate,Male,2709
+Ottawa,2015-2016,Undergraduate,Female,18188
+Ottawa,2015-2016,Undergraduate,Male,12153
+Ottawa,2015-2016,Graduate,Female,2989
+Ottawa,2015-2016,Graduate,Male,2612
+Ottawa,2016-2017,Undergraduate,Female,18515
+Ottawa,2016-2017,Undergraduate,Male,12481
+Ottawa,2016-2017,Undergraduate,N/A or Another,0
+Ottawa,2016-2017,Graduate,Female,2913
+Ottawa,2016-2017,Graduate,Male,2618
+Ottawa,2017-2018,Undergraduate,Female,18257
+Ottawa,2017-2018,Undergraduate,Male,12276
+Ottawa,2017-2018,Undergraduate,N/A or Another,276
+Ottawa,2017-2018,Graduate,Female,3047
+Ottawa,2017-2018,Graduate,Male,2575
+Ottawa,2017-2018,Graduate,N/A or Another,114
+Ottawa,2018-2019,Undergraduate,Female,18456
+Ottawa,2018-2019,Undergraduate,Male,12393
+Ottawa,2018-2019,Undergraduate,N/A or Another,462
+Ottawa,2018-2019,Graduate,Female,3146
+Ottawa,2018-2019,Graduate,Male,2631
+Ottawa,2018-2019,Graduate,N/A or Another,230
+Ottawa,2019-2020,Undergraduate,Female,18714
+Ottawa,2019-2020,Undergraduate,Male,12198
+Ottawa,2019-2020,Undergraduate,N/A or Another,641
+Ottawa,2019-2020,Graduate,Female,3340
+Ottawa,2019-2020,Graduate,Male,2679
+Ottawa,2019-2020,Graduate,N/A or Another,285
+Ottawa,2020-2021,Undergraduate,Female,19373
+Ottawa,2020-2021,Undergraduate,Male,12403
+Ottawa,2020-2021,Undergraduate,N/A or Another,838
+Ottawa,2020-2021,Graduate,Female,3490
+Ottawa,2020-2021,Graduate,Male,2651
+Ottawa,2020-2021,Graduate,N/A or Another,314
+Ottawa,2021-2022,Undergraduate,Female,20274
+Ottawa,2021-2022,Undergraduate,Male,12822
+Ottawa,2021-2022,Undergraduate,N/A or Another,903
+Ottawa,2021-2022,Graduate,Female,3660
+Ottawa,2021-2022,Graduate,Male,2761
+Ottawa,2021-2022,Graduate,N/A or Another,357
+Ottawa,2022-2023,Undergraduate,Female,20364
+Ottawa,2022-2023,Undergraduate,Male,12944
+Ottawa,2022-2023,Undergraduate,N/A or Another,974
+Ottawa,2022-2023,Graduate,Female,3742
+Ottawa,2022-2023,Graduate,Male,2982
+Ottawa,2022-2023,Graduate,N/A or Another,347
+Ottawa,2023-2024,Undergraduate,Female,20443
+Ottawa,2023-2024,Undergraduate,Male,13248
+Ottawa,2023-2024,Undergraduate,N/A or Another,1064
+Ottawa,2023-2024,Graduate,Female,3817
+Ottawa,2023-2024,Graduate,Male,2964
+Ottawa,2023-2024,Graduate,N/A or Another,347
+Ottawa,2024-2025,Undergraduate,Female,20935
+Ottawa,2024-2025,Undergraduate,Male,13452
+Ottawa,2024-2025,Undergraduate,N/A or Another,1063
+Ottawa,2024-2025,Graduate,Female,3818
+Ottawa,2024-2025,Graduate,Male,2755
+Ottawa,2024-2025,Graduate,N/A or Another,355
+Queen's,2012-2013,Undergraduate,Female,10279
+Queen's,2012-2013,Undergraduate,Male,7024
+Queen's,2012-2013,Graduate,Female,1783
+Queen's,2012-2013,Graduate,Male,1963
+Queen's,2013-2014,Undergraduate,Female,10497
+Queen's,2013-2014,Undergraduate,Male,7214
+Queen's,2013-2014,Graduate,Female,1781
+Queen's,2013-2014,Graduate,Male,2017
+Queen's,2014-2015,Undergraduate,Female,10913
+Queen's,2014-2015,Undergraduate,Male,7606
+Queen's,2014-2015,Graduate,Female,1831
+Queen's,2014-2015,Graduate,Male,2125
+Queen's,2015-2016,Undergraduate,Female,11229
+Queen's,2015-2016,Undergraduate,Male,7873
+Queen's,2015-2016,Graduate,Female,1948
+Queen's,2015-2016,Graduate,Male,2120
+Queen's,2016-2017,Undergraduate,Female,11464
+Queen's,2016-2017,Undergraduate,Male,7962
+Queen's,2016-2017,Undergraduate,N/A or Another,0
+Queen's,2016-2017,Graduate,Female,1960
+Queen's,2016-2017,Graduate,Male,2114
+Queen's,2017-2018,Undergraduate,Female,11942
+Queen's,2017-2018,Undergraduate,Male,8258
+Queen's,2017-2018,Undergraduate,N/A or Another,21
+Queen's,2017-2018,Graduate,Female,2074
+Queen's,2017-2018,Graduate,Male,2241
+Queen's,2018-2019,Undergraduate,Female,12445
+Queen's,2018-2019,Undergraduate,Male,8450
+Queen's,2018-2019,Undergraduate,N/A or Another,18
+Queen's,2018-2019,Graduate,Female,2308
+Queen's,2018-2019,Graduate,Male,2314
+Queen's,2019-2020,Undergraduate,Female,12602
+Queen's,2019-2020,Undergraduate,Male,8456
+Queen's,2019-2020,Undergraduate,N/A or Another,211
+Queen's,2019-2020,Graduate,Female,2418
+Queen's,2019-2020,Graduate,Male,2318
+Queen's,2019-2020,Graduate,N/A or Another,51
+Queen's,2020-2021,Undergraduate,Female,12824
+Queen's,2020-2021,Undergraduate,Male,8686
+Queen's,2020-2021,Undergraduate,N/A or Another,303
+Queen's,2020-2021,Graduate,Female,2391
+Queen's,2020-2021,Graduate,Male,2328
+Queen's,2020-2021,Graduate,N/A or Another,63
+Queen's,2021-2022,Undergraduate,Female,13458
+Queen's,2021-2022,Undergraduate,Male,9022
+Queen's,2021-2022,Undergraduate,N/A or Another,346
+Queen's,2021-2022,Graduate,Female,2894
+Queen's,2021-2022,Graduate,Male,2642
+Queen's,2021-2022,Graduate,N/A or Another,76
+Queen's,2022-2023,Undergraduate,Female,13794
+Queen's,2022-2023,Undergraduate,Male,9310
+Queen's,2022-2023,Undergraduate,N/A or Another,401
+Queen's,2022-2023,Graduate,Female,2907
+Queen's,2022-2023,Graduate,Male,2473
+Queen's,2022-2023,Graduate,N/A or Another,85
+Queen's,2023-2024,Undergraduate,Female,14130
+Queen's,2023-2024,Undergraduate,Male,9480
+Queen's,2023-2024,Undergraduate,N/A or Another,641
+Queen's,2023-2024,Graduate,Female,2907
+Queen's,2023-2024,Graduate,Male,2305
+Queen's,2023-2024,Graduate,N/A or Another,89
+Queen's,2024-2025,Undergraduate,Female,14357
+Queen's,2024-2025,Undergraduate,Male,9740
+Queen's,2024-2025,Undergraduate,N/A or Another,670
+Queen's,2024-2025,Graduate,Female,2847
+Queen's,2024-2025,Graduate,Male,2374
+Queen's,2024-2025,Graduate,N/A or Another,74
+Toronto,2012-2013,Undergraduate,Female,33186
+Toronto,2012-2013,Undergraduate,Male,26035
+Toronto,2012-2013,Undergraduate,N/A or Another,14
+Toronto,2012-2013,Graduate,Female,7493
+Toronto,2012-2013,Graduate,Male,6480
+Toronto,2012-2013,Graduate,N/A or Another,0
+Toronto,2013-2014,Undergraduate,Female,34018
+Toronto,2013-2014,Undergraduate,Male,26685
+Toronto,2013-2014,Undergraduate,N/A or Another,0
+Toronto,2013-2014,Graduate,Female,7830
+Toronto,2013-2014,Graduate,Male,6852
+Toronto,2013-2014,Graduate,N/A or Another,0
+Toronto,2014-2015,Undergraduate,Female,34510
+Toronto,2014-2015,Undergraduate,Male,27405
+Toronto,2014-2015,Undergraduate,N/A or Another,10
+Toronto,2014-2015,Graduate,Female,8187
+Toronto,2014-2015,Graduate,Male,7058
+Toronto,2014-2015,Graduate,N/A or Another,12
+Toronto,2015-2016,Undergraduate,Female,35478
+Toronto,2015-2016,Undergraduate,Male,28230
+Toronto,2015-2016,Undergraduate,N/A or Another,12
+Toronto,2015-2016,Graduate,Female,8585
+Toronto,2015-2016,Graduate,Male,7218
+Toronto,2015-2016,Graduate,N/A or Another,15
+Toronto,2016-2017,Undergraduate,Female,35807
+Toronto,2016-2017,Undergraduate,Male,28503
+Toronto,2016-2017,Undergraduate,N/A or Another,26
+Toronto,2016-2017,Graduate,Female,9056
+Toronto,2016-2017,Graduate,Male,7521
+Toronto,2016-2017,Graduate,N/A or Another,29
+Toronto,2017-2018,Undergraduate,Female,36187
+Toronto,2017-2018,Undergraduate,Male,28397
+Toronto,2017-2018,Undergraduate,N/A or Another,363
+Toronto,2017-2018,Graduate,Female,9452
+Toronto,2017-2018,Graduate,Male,7560
+Toronto,2017-2018,Graduate,N/A or Another,45
+Toronto,2018-2019,Undergraduate,Female,36658
+Toronto,2018-2019,Undergraduate,Male,28357
+Toronto,2018-2019,Undergraduate,N/A or Another,705
+Toronto,2018-2019,Graduate,Female,9922
+Toronto,2018-2019,Graduate,Male,7828
+Toronto,2018-2019,Graduate,N/A or Another,84
+Toronto,2019-2020,Undergraduate,Female,36831
+Toronto,2019-2020,Undergraduate,Male,28775
+Toronto,2019-2020,Undergraduate,N/A or Another,1029
+Toronto,2019-2020,Graduate,Female,10586
+Toronto,2019-2020,Graduate,Male,7944
+Toronto,2019-2020,Graduate,N/A or Another,150
+Toronto,2020-2021,Undergraduate,Female,37399
+Toronto,2020-2021,Undergraduate,Male,29224
+Toronto,2020-2021,Undergraduate,N/A or Another,1379
+Toronto,2020-2021,Graduate,Female,10974
+Toronto,2020-2021,Graduate,Male,7913
+Toronto,2020-2021,Graduate,N/A or Another,168
+Toronto,2021-2022,Undergraduate,Female,37695
+Toronto,2021-2022,Undergraduate,Male,29581
+Toronto,2021-2022,Undergraduate,N/A or Another,1649
+Toronto,2021-2022,Graduate,Female,11466
+Toronto,2021-2022,Graduate,Male,8160
+Toronto,2021-2022,Graduate,N/A or Another,196
+Toronto,2022-2023,Undergraduate,Female,37942
+Toronto,2022-2023,Undergraduate,Male,29831
+Toronto,2022-2023,Undergraduate,N/A or Another,1895
+Toronto,2022-2023,Graduate,Female,11683
+Toronto,2022-2023,Graduate,Male,8120
+Toronto,2022-2023,Graduate,N/A or Another,213
+Toronto,2023-2024,Undergraduate,Female,38853
+Toronto,2023-2024,Undergraduate,Male,31096
+Toronto,2023-2024,Undergraduate,N/A or Another,2001
+Toronto,2023-2024,Graduate,Female,11708
+Toronto,2023-2024,Graduate,Male,7984
+Toronto,2023-2024,Graduate,N/A or Another,238
+Toronto,2024-2025,Undergraduate,Female,40238
+Toronto,2024-2025,Undergraduate,Male,31854
+Toronto,2024-2025,Undergraduate,N/A or Another,2102
+Toronto,2024-2025,Graduate,Female,11926
+Toronto,2024-2025,Graduate,Male,8122
+Toronto,2024-2025,Graduate,N/A or Another,256
+Trent,2012-2013,Undergraduate,Female,4174
+Trent,2012-2013,Undergraduate,Male,2235
+Trent,2012-2013,Graduate,Female,245
+Trent,2012-2013,Graduate,Male,170
+Trent,2013-2014,Undergraduate,Female,4284
+Trent,2013-2014,Undergraduate,Male,2214
+Trent,2013-2014,Graduate,Female,248
+Trent,2013-2014,Graduate,Male,169
+Trent,2014-2015,Undergraduate,Female,4347
+Trent,2014-2015,Undergraduate,Male,2193
+Trent,2014-2015,Graduate,Female,237
+Trent,2014-2015,Graduate,Male,142
+Trent,2015-2016,Undergraduate,Female,4423
+Trent,2015-2016,Undergraduate,Male,2278
+Trent,2015-2016,Graduate,Female,235
+Trent,2015-2016,Graduate,Male,137
+Trent,2016-2017,Undergraduate,Female,4894
+Trent,2016-2017,Undergraduate,Male,2384
+Trent,2016-2017,Undergraduate,N/A or Another,0
+Trent,2016-2017,Graduate,Female,228
+Trent,2016-2017,Graduate,Male,131
+Trent,2017-2018,Undergraduate,Female,5187
+Trent,2017-2018,Undergraduate,Male,2484
+Trent,2017-2018,Undergraduate,N/A or Another,62
+Trent,2017-2018,Graduate,Female,246
+Trent,2017-2018,Graduate,Male,171
+Trent,2017-2018,Graduate,N/A or Another,0
+Trent,2018-2019,Undergraduate,Female,5505
+Trent,2018-2019,Undergraduate,Male,2583
+Trent,2018-2019,Undergraduate,N/A or Another,135
+Trent,2018-2019,Graduate,Female,295
+Trent,2018-2019,Graduate,Male,193
+Trent,2018-2019,Graduate,N/A or Another,0
+Trent,2019-2020,Undergraduate,Female,5913
+Trent,2019-2020,Undergraduate,Male,2816
+Trent,2019-2020,Undergraduate,N/A or Another,174
+Trent,2019-2020,Graduate,Female,308
+Trent,2019-2020,Graduate,Male,209
+Trent,2019-2020,Graduate,N/A or Another,16
+Trent,2020-2021,Undergraduate,Female,6022
+Trent,2020-2021,Undergraduate,Male,2920
+Trent,2020-2021,Undergraduate,N/A or Another,210
+Trent,2020-2021,Graduate,Female,338
+Trent,2020-2021,Graduate,Male,192
+Trent,2020-2021,Graduate,N/A or Another,16
+Trent,2021-2022,Undergraduate,Female,6243
+Trent,2021-2022,Undergraduate,Male,3049
+Trent,2021-2022,Undergraduate,N/A or Another,194
+Trent,2021-2022,Graduate,Female,340
+Trent,2021-2022,Graduate,Male,268
+Trent,2021-2022,Graduate,N/A or Another,23
+Trent,2022-2023,Undergraduate,Female,6513
+Trent,2022-2023,Undergraduate,Male,3221
+Trent,2022-2023,Undergraduate,N/A or Another,248
+Trent,2022-2023,Graduate,Female,381
+Trent,2022-2023,Graduate,Male,270
+Trent,2022-2023,Graduate,N/A or Another,26
+Trent,2023-2024,Undergraduate,Female,6954
+Trent,2023-2024,Undergraduate,Male,3594
+Trent,2023-2024,Undergraduate,N/A or Another,336
+Trent,2023-2024,Graduate,Female,506
+Trent,2023-2024,Graduate,Male,509
+Trent,2023-2024,Graduate,N/A or Another,27
+Trent,2024-2025,Undergraduate,Female,6857
+Trent,2024-2025,Undergraduate,Male,3542
+Trent,2024-2025,Undergraduate,N/A or Another,409
+Trent,2024-2025,Graduate,Female,578
+Trent,2024-2025,Graduate,Male,483
+Trent,2024-2025,Graduate,N/A or Another,27
+UOF,2021-2022,Undergraduate,Female,14
+UOF,2021-2022,Undergraduate,Male,13
+UOF,2022-2023,Undergraduate,Female,43
+UOF,2022-2023,Undergraduate,Male,55
+UOF,2022-2023,Undergraduate,N/A or Another,0
+UOF,2023-2024,Undergraduate,Female,107
+UOF,2023-2024,Undergraduate,Male,86
+UOF,2023-2024,Undergraduate,N/A or Another,0
+UOF,2024-2025,Undergraduate,Female,202
+UOF,2024-2025,Undergraduate,Male,105
+UOF,2024-2025,Undergraduate,N/A or Another,10
+Waterloo,2012-2013,Undergraduate,Female,12409
+Waterloo,2012-2013,Undergraduate,Male,15940
+Waterloo,2012-2013,Graduate,Female,1435
+Waterloo,2012-2013,Graduate,Male,2403
+Waterloo,2013-2014,Undergraduate,Female,12863
+Waterloo,2013-2014,Undergraduate,Male,16243
+Waterloo,2013-2014,Graduate,Female,1551
+Waterloo,2013-2014,Graduate,Male,2409
+Waterloo,2014-2015,Undergraduate,Female,13215
+Waterloo,2014-2015,Undergraduate,Male,16345
+Waterloo,2014-2015,Graduate,Female,1580
+Waterloo,2014-2015,Graduate,Male,2383
+Waterloo,2015-2016,Undergraduate,Female,13647
+Waterloo,2015-2016,Undergraduate,Male,16267
+Waterloo,2015-2016,Graduate,Female,1628
+Waterloo,2015-2016,Graduate,Male,2420
+Waterloo,2016-2017,Undergraduate,Female,14314
+Waterloo,2016-2017,Undergraduate,Male,16596
+Waterloo,2016-2017,Undergraduate,N/A or Another,0
+Waterloo,2016-2017,Graduate,Female,1752
+Waterloo,2016-2017,Graduate,Male,2457
+Waterloo,2017-2018,Undergraduate,Female,14919
+Waterloo,2017-2018,Undergraduate,Male,16831
+Waterloo,2017-2018,Undergraduate,N/A or Another,29
+Waterloo,2017-2018,Graduate,Female,1848
+Waterloo,2017-2018,Graduate,Male,2650
+Waterloo,2017-2018,Graduate,N/A or Another,0
+Waterloo,2018-2019,Undergraduate,Female,15433
+Waterloo,2018-2019,Undergraduate,Male,16936
+Waterloo,2018-2019,Undergraduate,N/A or Another,149
+Waterloo,2018-2019,Graduate,Female,1877
+Waterloo,2018-2019,Graduate,Male,2627
+Waterloo,2018-2019,Graduate,N/A or Another,66
+Waterloo,2019-2020,Undergraduate,Female,15769
+Waterloo,2019-2020,Undergraduate,Male,17160
+Waterloo,2019-2020,Undergraduate,N/A or Another,273
+Waterloo,2019-2020,Graduate,Female,1910
+Waterloo,2019-2020,Graduate,Male,2646
+Waterloo,2019-2020,Graduate,N/A or Another,183
+Waterloo,2020-2021,Undergraduate,Female,16024
+Waterloo,2020-2021,Undergraduate,Male,17833
+Waterloo,2020-2021,Undergraduate,N/A or Another,367
+Waterloo,2020-2021,Graduate,Female,1970
+Waterloo,2020-2021,Graduate,Male,2498
+Waterloo,2020-2021,Graduate,N/A or Another,248
+Waterloo,2021-2022,Undergraduate,Female,16166
+Waterloo,2021-2022,Undergraduate,Male,17903
+Waterloo,2021-2022,Undergraduate,N/A or Another,439
+Waterloo,2021-2022,Graduate,Female,2038
+Waterloo,2021-2022,Graduate,Male,2608
+Waterloo,2021-2022,Graduate,N/A or Another,310
+Waterloo,2022-2023,Undergraduate,Female,16092
+Waterloo,2022-2023,Undergraduate,Male,17889
+Waterloo,2022-2023,Undergraduate,N/A or Another,419
+Waterloo,2022-2023,Graduate,Female,1996
+Waterloo,2022-2023,Graduate,Male,2437
+Waterloo,2022-2023,Graduate,N/A or Another,208
+Waterloo,2023-2024,Undergraduate,Female,16208
+Waterloo,2023-2024,Undergraduate,Male,17762
+Waterloo,2023-2024,Undergraduate,N/A or Another,491
+Waterloo,2023-2024,Graduate,Female,1927
+Waterloo,2023-2024,Graduate,Male,2495
+Waterloo,2023-2024,Graduate,N/A or Another,132
+Waterloo,2024-2025,Undergraduate,Female,15981
+Waterloo,2024-2025,Undergraduate,Male,17623
+Waterloo,2024-2025,Undergraduate,N/A or Another,544
+Waterloo,2024-2025,Graduate,Female,1955
+Waterloo,2024-2025,Graduate,Male,2410
+Waterloo,2024-2025,Graduate,N/A or Another,109
+Western,2012-2013,Undergraduate,Female,15917
+Western,2012-2013,Undergraduate,Male,12728
+Western,2012-2013,Undergraduate,N/A or Another,0
+Western,2012-2013,Graduate,Female,2482
+Western,2012-2013,Graduate,Male,2359
+Western,2013-2014,Undergraduate,Female,16177
+Western,2013-2014,Undergraduate,Male,12770
+Western,2013-2014,Graduate,Female,2627
+Western,2013-2014,Graduate,Male,2438
+Western,2013-2014,Graduate,N/A or Another,0
+Western,2014-2015,Undergraduate,Female,16282
+Western,2014-2015,Undergraduate,Male,12873
+Western,2014-2015,Undergraduate,N/A or Another,0
+Western,2014-2015,Graduate,Female,2821
+Western,2014-2015,Graduate,Male,2467
+Western,2014-2015,Graduate,N/A or Another,0
+Western,2015-2016,Undergraduate,Female,16224
+Western,2015-2016,Undergraduate,Male,12637
+Western,2015-2016,Graduate,Female,2908
+Western,2015-2016,Graduate,Male,2528
+Western,2016-2017,Undergraduate,Female,16885
+Western,2016-2017,Undergraduate,Male,12798
+Western,2016-2017,Graduate,Female,3033
+Western,2016-2017,Graduate,Male,2572
+Western,2017-2018,Undergraduate,Female,17079
+Western,2017-2018,Undergraduate,Male,12718
+Western,2017-2018,Undergraduate,N/A or Another,0
+Western,2017-2018,Graduate,Female,3324
+Western,2017-2018,Graduate,Male,2704
+Western,2018-2019,Undergraduate,Female,17417
+Western,2018-2019,Undergraduate,Male,12942
+Western,2018-2019,Undergraduate,N/A or Another,10
+Western,2018-2019,Graduate,Female,3443
+Western,2018-2019,Graduate,Male,2563
+Western,2018-2019,Graduate,N/A or Another,0
+Western,2019-2020,Undergraduate,Female,17870
+Western,2019-2020,Undergraduate,Male,13073
+Western,2019-2020,Undergraduate,N/A or Another,14
+Western,2019-2020,Graduate,Female,3595
+Western,2019-2020,Graduate,Male,2677
+Western,2019-2020,Graduate,N/A or Another,0
+Western,2020-2021,Undergraduate,Female,18514
+Western,2020-2021,Undergraduate,Male,13495
+Western,2020-2021,Undergraduate,N/A or Another,123
+Western,2020-2021,Graduate,Female,3641
+Western,2020-2021,Graduate,Male,2546
+Western,2020-2021,Graduate,N/A or Another,25
+Western,2021-2022,Undergraduate,Female,18918
+Western,2021-2022,Undergraduate,Male,13864
+Western,2021-2022,Undergraduate,N/A or Another,334
+Western,2021-2022,Graduate,Female,3959
+Western,2021-2022,Graduate,Male,2791
+Western,2021-2022,Graduate,N/A or Another,63
+Western,2022-2023,Undergraduate,Female,19039
+Western,2022-2023,Undergraduate,Male,14525
+Western,2022-2023,Undergraduate,N/A or Another,511
+Western,2022-2023,Graduate,Female,3889
+Western,2022-2023,Graduate,Male,2777
+Western,2022-2023,Graduate,N/A or Another,86
+Western,2023-2024,Undergraduate,Female,19326
+Western,2023-2024,Undergraduate,Male,15193
+Western,2023-2024,Undergraduate,N/A or Another,676
+Western,2023-2024,Graduate,Female,4049
+Western,2023-2024,Graduate,Male,2801
+Western,2023-2024,Graduate,N/A or Another,103
+Western,2024-2025,Undergraduate,Female,19484
+Western,2024-2025,Undergraduate,Male,15446
+Western,2024-2025,Undergraduate,N/A or Another,757
+Western,2024-2025,Graduate,Female,4334
+Western,2024-2025,Graduate,Male,2816
+Western,2024-2025,Graduate,N/A or Another,141
+Wilfrid Laurier,2012-2013,Undergraduate,Female,8858
+Wilfrid Laurier,2012-2013,Undergraduate,Male,6414
+Wilfrid Laurier,2012-2013,Graduate,Female,578
+Wilfrid Laurier,2012-2013,Graduate,Male,353
+Wilfrid Laurier,2013-2014,Undergraduate,Female,8920
+Wilfrid Laurier,2013-2014,Undergraduate,Male,6596
+Wilfrid Laurier,2013-2014,Graduate,Female,602
+Wilfrid Laurier,2013-2014,Graduate,Male,377
+Wilfrid Laurier,2014-2015,Undergraduate,Female,8609
+Wilfrid Laurier,2014-2015,Undergraduate,Male,6486
+Wilfrid Laurier,2014-2015,Graduate,Female,595
+Wilfrid Laurier,2014-2015,Graduate,Male,355
+Wilfrid Laurier,2015-2016,Undergraduate,Female,8363
+Wilfrid Laurier,2015-2016,Undergraduate,Male,6476
+Wilfrid Laurier,2015-2016,Graduate,Female,639
+Wilfrid Laurier,2015-2016,Graduate,Male,351
+Wilfrid Laurier,2016-2017,Undergraduate,Female,8474
+Wilfrid Laurier,2016-2017,Undergraduate,Male,6399
+Wilfrid Laurier,2016-2017,Graduate,Female,650
+Wilfrid Laurier,2016-2017,Graduate,Male,328
+Wilfrid Laurier,2017-2018,Undergraduate,Female,8613
+Wilfrid Laurier,2017-2018,Undergraduate,Male,6631
+Wilfrid Laurier,2017-2018,Graduate,Female,733
+Wilfrid Laurier,2017-2018,Graduate,Male,437
+Wilfrid Laurier,2018-2019,Undergraduate,Female,8591
+Wilfrid Laurier,2018-2019,Undergraduate,Male,6653
+Wilfrid Laurier,2018-2019,Graduate,Female,767
+Wilfrid Laurier,2018-2019,Graduate,Male,448
+Wilfrid Laurier,2019-2020,Undergraduate,Female,8779
+Wilfrid Laurier,2019-2020,Undergraduate,Male,6860
+Wilfrid Laurier,2019-2020,Graduate,Female,710
+Wilfrid Laurier,2019-2020,Graduate,Male,453
+Wilfrid Laurier,2020-2021,Undergraduate,Female,8777
+Wilfrid Laurier,2020-2021,Undergraduate,Male,7106
+Wilfrid Laurier,2020-2021,Graduate,Female,724
+Wilfrid Laurier,2020-2021,Graduate,Male,451
+Wilfrid Laurier,2021-2022,Undergraduate,Female,8921
+Wilfrid Laurier,2021-2022,Undergraduate,Male,7618
+Wilfrid Laurier,2021-2022,Graduate,Female,768
+Wilfrid Laurier,2021-2022,Graduate,Male,432
+Wilfrid Laurier,2021-2022,Graduate,N/A or Another,0
+Wilfrid Laurier,2022-2023,Undergraduate,Female,8829
+Wilfrid Laurier,2022-2023,Undergraduate,Male,7751
+Wilfrid Laurier,2022-2023,Undergraduate,N/A or Another,103
+Wilfrid Laurier,2022-2023,Graduate,Female,714
+Wilfrid Laurier,2022-2023,Graduate,Male,396
+Wilfrid Laurier,2022-2023,Graduate,N/A or Another,17
+Wilfrid Laurier,2023-2024,Undergraduate,Female,8831
+Wilfrid Laurier,2023-2024,Undergraduate,Male,7867
+Wilfrid Laurier,2023-2024,Undergraduate,N/A or Another,151
+Wilfrid Laurier,2023-2024,Graduate,Female,757
+Wilfrid Laurier,2023-2024,Graduate,Male,459
+Wilfrid Laurier,2023-2024,Graduate,N/A or Another,21
+Wilfrid Laurier,2024-2025,Undergraduate,Female,9065
+Wilfrid Laurier,2024-2025,Undergraduate,Male,8267
+Wilfrid Laurier,2024-2025,Undergraduate,N/A or Another,306
+Wilfrid Laurier,2024-2025,Graduate,Female,864
+Wilfrid Laurier,2024-2025,Graduate,Male,521
+Wilfrid Laurier,2024-2025,Graduate,N/A or Another,33
+Windsor,2012-2013,Undergraduate,Female,6353
+Windsor,2012-2013,Undergraduate,Male,5451
+Windsor,2012-2013,Graduate,Female,962
+Windsor,2012-2013,Graduate,Male,944
+Windsor,2013-2014,Undergraduate,Female,6323
+Windsor,2013-2014,Undergraduate,Male,5479
+Windsor,2013-2014,Graduate,Female,1121
+Windsor,2013-2014,Graduate,Male,1180
+Windsor,2014-2015,Undergraduate,Female,6186
+Windsor,2014-2015,Undergraduate,Male,5403
+Windsor,2014-2015,Graduate,Female,1206
+Windsor,2014-2015,Graduate,Male,1233
+Windsor,2015-2016,Undergraduate,Female,5794
+Windsor,2015-2016,Undergraduate,Male,5088
+Windsor,2015-2016,Graduate,Female,1336
+Windsor,2015-2016,Graduate,Male,1342
+Windsor,2016-2017,Undergraduate,Female,5609
+Windsor,2016-2017,Undergraduate,Male,4950
+Windsor,2016-2017,Undergraduate,N/A or Another,0
+Windsor,2016-2017,Graduate,Female,1459
+Windsor,2016-2017,Graduate,Male,1585
+Windsor,2016-2017,Graduate,N/A or Another,0
+Windsor,2017-2018,Undergraduate,Female,5643
+Windsor,2017-2018,Undergraduate,Male,4783
+Windsor,2017-2018,Undergraduate,N/A or Another,116
+Windsor,2017-2018,Graduate,Female,1508
+Windsor,2017-2018,Graduate,Male,1958
+Windsor,2017-2018,Graduate,N/A or Another,70
+Windsor,2018-2019,Undergraduate,Female,5674
+Windsor,2018-2019,Undergraduate,Male,4673
+Windsor,2018-2019,Undergraduate,N/A or Another,225
+Windsor,2018-2019,Graduate,Female,1570
+Windsor,2018-2019,Graduate,Male,2219
+Windsor,2018-2019,Graduate,N/A or Another,145
+Windsor,2019-2020,Undergraduate,Female,5788
+Windsor,2019-2020,Undergraduate,Male,4592
+Windsor,2019-2020,Undergraduate,N/A or Another,336
+Windsor,2019-2020,Graduate,Female,1691
+Windsor,2019-2020,Graduate,Male,2211
+Windsor,2019-2020,Graduate,N/A or Another,151
+Windsor,2020-2021,Undergraduate,Female,5863
+Windsor,2020-2021,Undergraduate,Male,4545
+Windsor,2020-2021,Undergraduate,N/A or Another,364
+Windsor,2020-2021,Graduate,Female,1759
+Windsor,2020-2021,Graduate,Male,2472
+Windsor,2020-2021,Graduate,N/A or Another,73
+Windsor,2021-2022,Undergraduate,Female,5855
+Windsor,2021-2022,Undergraduate,Male,4382
+Windsor,2021-2022,Undergraduate,N/A or Another,354
+Windsor,2021-2022,Graduate,Female,2033
+Windsor,2021-2022,Graduate,Male,2861
+Windsor,2021-2022,Graduate,N/A or Another,31
+Windsor,2022-2023,Undergraduate,Female,5695
+Windsor,2022-2023,Undergraduate,Male,4203
+Windsor,2022-2023,Undergraduate,N/A or Another,298
+Windsor,2022-2023,Graduate,Female,2215
+Windsor,2022-2023,Graduate,Male,3521
+Windsor,2022-2023,Graduate,N/A or Another,19
+Windsor,2023-2024,Undergraduate,Female,5767
+Windsor,2023-2024,Undergraduate,Male,4409
+Windsor,2023-2024,Undergraduate,N/A or Another,322
+Windsor,2023-2024,Graduate,Female,2263
+Windsor,2023-2024,Graduate,Male,3574
+Windsor,2023-2024,Graduate,N/A or Another,31
+Windsor,2024-2025,Undergraduate,Female,5959
+Windsor,2024-2025,Undergraduate,Male,4473
+Windsor,2024-2025,Undergraduate,N/A or Another,316
+Windsor,2024-2025,Graduate,Female,2096
+Windsor,2024-2025,Graduate,Male,2532
+Windsor,2024-2025,Graduate,N/A or Another,46
+York,2012-2013,Undergraduate,Female,24361
+York,2012-2013,Undergraduate,Male,16886
+York,2012-2013,Graduate,Female,2194
+York,2012-2013,Graduate,Male,1723
+York,2013-2014,Undergraduate,Female,23942
+York,2013-2014,Undergraduate,Male,16957
+York,2013-2014,Undergraduate,N/A or Another,0
+York,2013-2014,Graduate,Female,2201
+York,2013-2014,Graduate,Male,1733
+York,2013-2014,Graduate,N/A or Another,0
+York,2014-2015,Undergraduate,Female,23244
+York,2014-2015,Undergraduate,Male,16451
+York,2014-2015,Undergraduate,N/A or Another,0
+York,2014-2015,Graduate,Female,2241
+York,2014-2015,Graduate,Male,1795
+York,2015-2016,Undergraduate,Female,22941
+York,2015-2016,Undergraduate,Male,16662
+York,2015-2016,Undergraduate,N/A or Another,0
+York,2015-2016,Graduate,Female,2297
+York,2015-2016,Graduate,Male,1778
+York,2015-2016,Graduate,N/A or Another,0
+York,2016-2017,Undergraduate,Female,22822
+York,2016-2017,Undergraduate,Male,16797
+York,2016-2017,Undergraduate,N/A or Another,19
+York,2016-2017,Graduate,Female,2332
+York,2016-2017,Graduate,Male,1768
+York,2016-2017,Graduate,N/A or Another,0
+York,2017-2018,Undergraduate,Female,23573
+York,2017-2018,Undergraduate,Male,17461
+York,2017-2018,Undergraduate,N/A or Another,186
+York,2017-2018,Graduate,Female,2381
+York,2017-2018,Graduate,Male,1850
+York,2017-2018,Graduate,N/A or Another,0
+York,2018-2019,Undergraduate,Female,24238
+York,2018-2019,Undergraduate,Male,18279
+York,2018-2019,Undergraduate,N/A or Another,459
+York,2018-2019,Graduate,Female,2508
+York,2018-2019,Graduate,Male,1892
+York,2018-2019,Graduate,N/A or Another,21
+York,2019-2020,Undergraduate,Female,23846
+York,2019-2020,Undergraduate,Male,18609
+York,2019-2020,Undergraduate,N/A or Another,586
+York,2019-2020,Graduate,Female,2511
+York,2019-2020,Graduate,Male,1957
+York,2019-2020,Graduate,N/A or Another,31
+York,2020-2021,Undergraduate,Female,23652
+York,2020-2021,Undergraduate,Male,18414
+York,2020-2021,Undergraduate,N/A or Another,784
+York,2020-2021,Graduate,Female,2572
+York,2020-2021,Graduate,Male,1991
+York,2020-2021,Graduate,N/A or Another,39
+York,2021-2022,Undergraduate,Female,22675
+York,2021-2022,Undergraduate,Male,18127
+York,2021-2022,Undergraduate,N/A or Another,865
+York,2021-2022,Graduate,Female,2612
+York,2021-2022,Graduate,Male,1994
+York,2021-2022,Graduate,N/A or Another,62
+York,2022-2023,Undergraduate,Female,21901
+York,2022-2023,Undergraduate,Male,17515
+York,2022-2023,Undergraduate,N/A or Another,840
+York,2022-2023,Graduate,Female,2603
+York,2022-2023,Graduate,Male,1908
+York,2022-2023,Graduate,N/A or Another,71
+York,2023-2024,Undergraduate,Female,22300
+York,2023-2024,Undergraduate,Male,17833
+York,2023-2024,Undergraduate,N/A or Another,915
+York,2023-2024,Graduate,Female,2641
+York,2023-2024,Graduate,Male,1958
+York,2023-2024,Graduate,N/A or Another,83
+York,2024-2025,Undergraduate,Female,22116
+York,2024-2025,Undergraduate,Male,17800
+York,2024-2025,Undergraduate,N/A or Another,989
+York,2024-2025,Graduate,Female,2652
+York,2024-2025,Graduate,Male,1916
+York,2024-2025,Graduate,N/A or Another,83
