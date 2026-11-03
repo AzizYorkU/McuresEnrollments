@@ -45,7 +45,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -117,57 +117,55 @@ CMP_FN = """dash.calc('cmp___D__', {
 
 
 def section(d, tab, col, note):
-    note_html = f'\n        <p class="ux-note">{note}</p>' if note else ""
+    note_html = f'\n          <p class="ux-note">{note}</p>' if note else ""
     low = col.lower()
     return f"""
-  <section class="ux-dim" data-dim="{d}" id="by-{d}" hidden>
-    <p class="ux-empty ux-msg" hidden>No {low} headcounts are reported for York in this selection.</p>
-    <div class="ux-dim-body">
-      <div class="ux-grid">
-        <div class="ux-card" id="{d}-mix">
-          <h3>York’s mix against <span data-draw="sel-group">—</span></h3>
+    <div class="ux-dim" data-dim="{d}" id="by-{d}" hidden>
+      <p class="ux-empty ux-msg" hidden>No {low} headcounts are reported for York in this selection.</p>
+      <div class="ux-dim-body">
+        <div class="ux-card" id="{d}-mix" data-view="mix">
+          <h3>{tab}: York against <span data-draw="sel-group">—</span></h3>
           <p class="ux-note">Share of each one’s students in the 12 largest groups, selected year.</p>
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
           <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_{d}"></div>
         </div>
-        <div class="ux-card" id="{d}-field">
-          <h3>Where York gained or lost ground</h3>
-          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points.</p>
+        <div class="ux-card" id="{d}-field" data-view="gains">
+          <h3>{tab}: change in York’s share since 2012-13</h3>
+          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points. The 12 largest groups.</p>
           <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
           <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_{d}"></div>
         </div>
-      </div>
-      <div class="ux-card" id="{d}-table">
-        <div class="ux-card-head">
-          <h3>All groups</h3>
-          <input class="ux-search" id="search-{d}" type="search" placeholder="Search" aria-label="Search {low}">
+        <div class="ux-card" id="{d}-table" data-view="table">
+          <div class="ux-card-head">
+            <h3>{tab}: all groups</h3>
+            <input class="ux-search" id="search-{d}" type="search" placeholder="Search" aria-label="Search {low}">
+          </div>
+          <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>{note_html}
+          <div class="ux-scroll ux-scroll-tall">
+            <table class="ux-table" id="table-{d}" data-rows="dim-rows" data-source="cmp_{d}" data-row-key="key" data-default-sort="york">
+              <thead><tr>
+                <th data-field="category"><button class="ux-sort" data-sort="category">{col}</button></th>
+                <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
+                <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
+                <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
+                <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
+                <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
+                <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
+                <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
+                <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
+              </tr></thead>
+              <tbody data-draw="dim-rows"></tbody>
+            </table>
+          </div>
         </div>
-        <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>{note_html}
-        <div class="ux-scroll">
-          <table class="ux-table" id="table-{d}" data-rows="dim-rows" data-source="cmp_{d}" data-row-key="key" data-default-sort="york">
-            <thead><tr>
-              <th data-field="category"><button class="ux-sort" data-sort="category">{col}</button></th>
-              <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
-              <th class="ux-num" data-field="york_share"><button class="ux-sort" data-sort="york_share">York share</button></th>
-              <th class="ux-num" data-field="peer_share"><button class="ux-sort" data-sort="peer_share">Peer share</button></th>
-              <th class="ux-num ux-hide-narrow" data-field="gap"><button class="ux-sort" data-sort="gap">Gap</button></th>
-              <th class="ux-num" data-field="field_share"><button class="ux-sort" data-sort="field_share">York’s share of group</button></th>
-              <th class="ux-num" data-field="field_change"><button class="ux-sort" data-sort="field_change">Change</button></th>
-              <th class="ux-num ux-hide-narrow" data-field="york_change"><button class="ux-sort" data-sort="york_change">York since 2012-13</button></th>
-              <th class="ux-num ux-hide-narrow" data-field="peer_change"><button class="ux-sort" data-sort="peer_change">Peers since 2012-13</button></th>
-            </tr></thead>
-            <tbody data-draw="dim-rows"></tbody>
-          </table>
-        </div>
       </div>
-    </div>
-  </section>"""
+    </div>"""
 
 
 css = open(os.path.join(HERE, "page.css"), encoding="utf-8").read()
 js = open(os.path.join(HERE, "page.js"), encoding="utf-8").read()
 calcs = "".join(CMP_FN.replace("__D__", d).replace("__LOW__", tab.lower()) for d, tab, *_ in DIMS)
-tabs = "\n".join(f'      <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in DIMS)
+tabs = "\n".join(f'          <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in DIMS)
 sections = "".join(section(*x) for x in DIMS)
 
 html = f"""<meta name="dash-one-writer">
@@ -175,60 +173,78 @@ html = f"""<meta name="dash-one-writer">
 {css}
 </style>
 <div class="ux">
-  <header class="ux-head" id="overview">
-    <h1>York University against its Ontario peers</h1>
-    <p class="ux-lede">In <span data-draw="sel-year">—</span>, York had <b data-draw="lede-york" data-source="totals">—</b> students (<span data-draw="sel-level">—</span>), <b data-draw="lede-york-chg" data-source="totals">—</b> since 2012-13. Its comparison group, <span data-draw="sel-group">—</span>, changed by <b data-draw="lede-peer-chg" data-source="group_totals">—</b> combined.</p>
-  </header>
+<div class="ux-app">
+  <nav class="ux-nav" aria-label="Pages">
+    <p class="ux-nav-h">York overall</p>
+    <button class="ux-navlink" type="button" data-page="overview">Overview</button>
+    <button class="ux-navlink" type="button" data-page="growth">Growth since 2012-13</button>
+    <button class="ux-navlink" type="button" data-page="share">Share of Ontario</button>
+    <p class="ux-nav-h">Against the group</p>
+    <button class="ux-navlink" type="button" data-page="ranking">Ranking</button>
+    <button class="ux-navlink" type="button" data-page="institutions">Institutions</button>
+    <p class="ux-nav-h">Breakdowns</p>
+    <button class="ux-navlink" type="button" data-page="mix">York’s mix</button>
+    <button class="ux-navlink" type="button" data-page="gains">Gains and losses</button>
+    <button class="ux-navlink" type="button" data-page="table">Breakdown table</button>
+  </nav>
 
-  <div class="ux-filters" id="filters">
-    <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
-    <label class="ux-field">Study level
-      <select id="f-level" class="ux-level">
-        <option>All levels</option>
-        <option>Undergraduate</option>
-        <option>Graduate</option>
-      </select>
-    </label>
-    <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-    <button class="ux-btn ux-reset" type="button">Reset</button>
-  </div>
-  <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
+  <div class="ux-main">
+    <header class="ux-head">
+      <h1>York University against its Ontario peers</h1>
+      <p class="ux-lede">In <span data-draw="sel-year">—</span>, York had <b data-draw="lede-york" data-source="totals">—</b> students (<span data-draw="sel-level">—</span>), <b data-draw="lede-york-chg" data-source="totals">—</b> since 2012-13. Its comparison group, <span data-draw="sel-group">—</span>, changed by <b data-draw="lede-peer-chg" data-source="group_totals">—</b> combined.</p>
+    </header>
 
-  <div class="ux-tiles" id="figures">
-    <div class="ux-tile"><span class="ux-tile-l">York headcount</span><span class="ux-tile-v dash-skeleton" data-draw="t-headcount" data-source="totals">—</span>
-      <span class="ux-sub"><span>Rank by size <b data-draw="r-headcount" data-source="york_standing">—</b></span></span></div>
-    <div class="ux-tile"><span class="ux-tile-l">Growth since 2012-13</span><span class="ux-tile-v dash-skeleton" data-draw="t-base" data-source="totals">—</span>
-      <span class="ux-sub"><span>Peers <b data-draw="g-base" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_base" data-source="york_standing">—</b></span></span></div>
-    <div class="ux-tile"><span class="ux-tile-l">From previous year</span><span class="ux-tile-v dash-skeleton" data-draw="t-prev" data-source="totals">—</span>
-      <span class="ux-sub"><span>Peers <b data-draw="g-prev" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_prev" data-source="york_standing">—</b></span></span></div>
-    <div class="ux-tile"><span class="ux-tile-l">International share</span><span class="ux-tile-v dash-skeleton" data-draw="t-intl" data-source="totals">—</span>
-      <span class="ux-sub"><span>Peers <b data-draw="g-intl" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-intl_share" data-source="york_standing">—</b></span></span></div>
-    <div class="ux-tile"><span class="ux-tile-l">York’s share of Ontario</span><span class="ux-tile-v dash-skeleton" data-draw="t-ont" data-source="york_ontario">—</span>
-      <span class="ux-sub"><span>Since 2012-13 <b data-draw="o-base" data-source="york_ontario">—</b></span></span></div>
-  </div>
-
-  <div class="ux-grid">
-    <div class="ux-card" id="growth">
-      <h3>Growth since 2012-13</h3>
-      <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer.</p>
-      <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
-      <div class="ux-chart dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
-      <p class="ux-note">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
+    <div class="ux-filters" id="filters">
+      <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
+      <label class="ux-field">Study level
+        <select id="f-level" class="ux-level">
+          <option>All levels</option>
+          <option>Undergraduate</option>
+          <option>Graduate</option>
+        </select>
+      </label>
+      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
+      <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
-    <div class="ux-card" id="share">
-      <h3>York’s share of Ontario students</h3>
-      <p class="ux-note">York’s headcount as a share of all Ontario universities combined, each year.</p>
-      <div class="ux-chart dash-skeleton" data-draw="share" data-source="york_ontario"></div>
-    </div>
-  </div>
+    <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
 
-  <div class="ux-section" id="ranking">
-    <h2>How York ranks</h2>
-    <div class="ux-grid">
-      <div class="ux-card" id="rank-chart">
-        <div class="ux-card-head">
-          <h3>York and <span data-draw="sel-group">—</span></h3>
-        </div>
+    <section class="ux-page" data-page="overview" id="overview" hidden>
+      <div class="ux-tiles" id="figures">
+        <div class="ux-tile"><span class="ux-tile-l">York headcount</span><span class="ux-tile-v dash-skeleton" data-draw="t-headcount" data-source="totals">—</span>
+          <span class="ux-sub"><span>Rank by size <b data-draw="r-headcount" data-source="york_standing">—</b></span></span></div>
+        <div class="ux-tile"><span class="ux-tile-l">Growth since 2012-13</span><span class="ux-tile-v dash-skeleton" data-draw="t-base" data-source="totals">—</span>
+          <span class="ux-sub"><span>Peers <b data-draw="g-base" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_base" data-source="york_standing">—</b></span></span></div>
+        <div class="ux-tile"><span class="ux-tile-l">From previous year</span><span class="ux-tile-v dash-skeleton" data-draw="t-prev" data-source="totals">—</span>
+          <span class="ux-sub"><span>Peers <b data-draw="g-prev" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_prev" data-source="york_standing">—</b></span></span></div>
+        <div class="ux-tile"><span class="ux-tile-l">International share</span><span class="ux-tile-v dash-skeleton" data-draw="t-intl" data-source="totals">—</span>
+          <span class="ux-sub"><span>Peers <b data-draw="g-intl" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-intl_share" data-source="york_standing">—</b></span></span></div>
+        <div class="ux-tile"><span class="ux-tile-l">York’s share of Ontario</span><span class="ux-tile-v dash-skeleton" data-draw="t-ont" data-source="york_ontario">—</span>
+          <span class="ux-sub"><span>Since 2012-13 <b data-draw="o-base" data-source="york_ontario">—</b></span></span></div>
+      </div>
+      <p class="ux-note">Peers: the comparison group’s members added together. Rank: York’s place among itself and the group’s members, 1 = highest. Each chart has its own page in the menu.</p>
+    </section>
+
+    <section class="ux-page" data-page="growth" id="growth" hidden>
+      <div class="ux-card" id="growth-card">
+        <h2>Growth since 2012-13</h2>
+        <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer.</p>
+        <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
+        <div class="ux-chart ux-chart-big dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
+        <p class="ux-note">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
+      </div>
+    </section>
+
+    <section class="ux-page" data-page="share" id="share" hidden>
+      <div class="ux-card" id="share-card">
+        <h2>York’s share of Ontario students</h2>
+        <p class="ux-note">York’s headcount as a share of all Ontario universities combined, each year.</p>
+        <div class="ux-chart ux-chart-big dash-skeleton" data-draw="share" data-source="york_ontario"></div>
+      </div>
+    </section>
+
+    <section class="ux-page" data-page="ranking" id="ranking" hidden>
+      <div class="ux-card" id="rank-card">
+        <h2>How York ranks against <span data-draw="sel-group">—</span></h2>
         <div class="ux-tabs" role="group" aria-label="Rank by">
           <button class="ux-tab ux-metric" data-metric="change_base" aria-pressed="false">Since 2012-13</button>
           <button class="ux-tab ux-metric" data-metric="change_prev" aria-pressed="false">Previous year</button>
@@ -238,10 +254,13 @@ html = f"""<meta name="dash-one-writer">
         <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
-      <div class="ux-card" id="institutions">
-        <h3>Institutions in the comparison</h3>
-        <p class="ux-note">Selected year and study level.</p>
-        <div class="ux-scroll ux-scroll-short">
+    </section>
+
+    <section class="ux-page" data-page="institutions" id="institutions" hidden>
+      <div class="ux-card" id="inst-card">
+        <h2>Institutions in the comparison</h2>
+        <p class="ux-note">Selected year and study level. York is highlighted.</p>
+        <div class="ux-scroll ux-scroll-tall">
           <table class="ux-table ux-inst-table" id="table-inst" data-rows="inst-rows" data-source="totals peer_groups" data-row-key="slice">
             <thead><tr>
               <th data-field="institution"><button class="ux-sort" data-sort="institution">Institution</button></th>
@@ -254,18 +273,20 @@ html = f"""<meta name="dash-one-writer">
           </table>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="ux-break" id="breakdown">
-    <h2>Where York differs from its peers</h2>
-    <div class="ux-tabs" role="group" aria-label="Break down by">
+    <section class="ux-page" data-page="mix gains table" id="breakdown" hidden>
+      <div class="ux-break">
+        <div class="ux-tabs" role="group" aria-label="Break down by">
 {tabs}
-    </div>
-  </div>
+        </div>
+      </div>
 {sections}
+    </section>
 
-  <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. Figures, growth, ranks and the institution table use the domestic/international file. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are an editable file in Sources. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
+    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. Figures, growth, ranks and the institution table use the domestic/international file. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are an editable file in Sources. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
+  </div>
+</div>
 </div>
 <script>
 {calcs}

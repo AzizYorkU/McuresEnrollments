@@ -304,6 +304,13 @@ document.addEventListener('click', (e) => {
     dash.draw(table.dataset.rows);
     return;
   }
+  const nav = e.target.closest('.ux .ux-navlink');
+  if (nav) {
+    dash.setParams({ page: nav.dataset.page });
+    dash.setLink(nav.dataset.page);
+    document.querySelector('.ux .ux-main')?.scrollIntoView({ block: 'start' });
+    return;
+  }
   const metric = e.target.closest('.ux .ux-metric');
   if (metric) {
     dash.setParams({ metric: metric.dataset.metric });
@@ -312,7 +319,7 @@ document.addEventListener('click', (e) => {
   const tab = e.target.closest('.ux .ux-dimtab');
   if (tab) {
     dash.setParams({ dim: tab.dataset.dim });
-    dash.setLink('by-' + tab.dataset.dim);
+    dash.setLink(pageOf(P()));
     return;
   }
   if (e.target.closest('.ux .ux-reset')) dash.resetParams();
@@ -324,8 +331,18 @@ document.addEventListener('input', (e) => {
   if (e.target.matches('.ux .ux-search')) dash.draw('dim-rows');
 });
 
+const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'mix', 'gains', 'table'];
+const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
+
 dash.onData(() => {
   const p = P();
+  const page = pageOf(p);
+  document.querySelectorAll('.ux .ux-navlink').forEach((b) => {
+    if (b.dataset.page === page) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
+  document.querySelectorAll('.ux .ux-page').forEach((s) => { s.hidden = !s.dataset.page.split(' ').includes(page); });
+  document.querySelectorAll('.ux [data-view]').forEach((v) => { v.hidden = v.dataset.view !== page; });
   document.querySelectorAll('.ux .ux-level').forEach((s) => { s.value = p.level; });
   document.querySelectorAll('.ux .ux-sw[data-i]').forEach((s) => { s.style.background = dash.colors[Number(s.dataset.i)]; });
   document.querySelectorAll('.ux .ux-sw[data-muted]').forEach((s) => { s.style.background = MUTED; });
@@ -432,7 +449,7 @@ dash.draw('growth', (el) => {
   const york = { name: FOCUS, color: dash.colors[0], pts: index(byInst.get(FOCUS) ?? []) ?? [] };
   const comb = { name: 'Peers combined', color: dash.colors[1],
     pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level)) ?? [] };
-  const W = Math.max(260, el.clientWidth), H = 260;
+  const W = Math.max(260, el.clientWidth), H = Math.round(Math.min(520, Math.max(280, W * 0.45)));
   const { svg, tip } = svgIn(el, W, H);
   if (!york.pts.length || !years.length) return;
   const all = [york, comb, ...peers].flatMap((s) => s.pts.map((d) => d.v));
@@ -497,7 +514,7 @@ dash.draw('share', (el) => {
   if (!gate(el, ['york_ontario'], true)) return;
   const p = P();
   const rows = dash.data('york_ontario').data.filter((r) => r.level === p.level).sort((a, b) => d3.ascending(a.year, b.year));
-  const W = Math.max(260, el.clientWidth), H = 260;
+  const W = Math.max(260, el.clientWidth), H = Math.round(Math.min(520, Math.max(280, W * 0.45)));
   const { svg, tip } = svgIn(el, W, H);
   if (!rows.length) return;
   const years = rows.map((r) => r.year);
@@ -556,7 +573,7 @@ dash.draw('rank-bars', (el) => {
   const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
   if (comb && comb[f] != null && f !== 'headcount') rows.push({ name: 'Peers combined', v: comb[f], kind: 'comb' });
   rows.sort((a, b) => b.v - a.v);
-  const W = Math.max(260, el.clientWidth), rowH = 24, H = Math.max(rowH, rows.length * rowH) + 4;
+  const W = Math.max(260, el.clientWidth), rowH = 30, H = Math.max(rowH, rows.length * rowH) + 4;
   const { svg, tip } = svgIn(el, W, H);
   if (!rows.length) return;
   const vals = rows.map((r) => r.v).sort(d3.ascending);
@@ -667,7 +684,7 @@ dash.draw('field-bars', (el) => {
   const id = el.dataset.source;
   if (!gate(el, [id], true)) return;
   const rows = topRows(id).filter((r) => r.field_change != null).sort((a, b) => b.field_change - a.field_change);
-  const W = Math.max(260, el.clientWidth), rowH = 24, H = Math.max(rowH, rows.length * rowH) + 4;
+  const W = Math.max(260, el.clientWidth), rowH = 30, H = Math.max(rowH, rows.length * rowH) + 4;
   const { svg, tip } = svgIn(el, W, H);
   if (!rows.length) return;
   const ext = d3.max(rows, (r) => Math.abs(r.field_change)) || 1;
@@ -724,7 +741,7 @@ dash.draw('dim-rows', (tb) => {
   }));
 });
 
+// A link names a page (#growth) or a breakdown (#by-age).
 const link = location.hash.slice(1);
-if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ dim: link.slice(3) });
-const named = document.getElementById(link);
-if (named) named.scrollIntoView();
+if (PAGES.includes(link)) dash.setParams({ page: link });
+else if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ page: 'mix', dim: link.slice(3) });
