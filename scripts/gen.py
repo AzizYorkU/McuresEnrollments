@@ -45,7 +45,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -191,7 +191,7 @@ html = f"""<meta name="dash-one-writer">
   <div class="ux-main">
     <header class="ux-head">
       <h1>York University against its Ontario peers</h1>
-      <p class="ux-lede">In <span data-draw="sel-year">—</span>, York had <b data-draw="lede-york" data-source="totals">—</b> students (<span data-draw="sel-level">—</span>), <b data-draw="lede-york-chg" data-source="totals">—</b> since 2012-13. Its comparison group, <span data-draw="sel-group">—</span>, changed by <b data-draw="lede-peer-chg" data-source="group_totals">—</b> combined.</p>
+      <p class="ux-lede">In <span data-draw="sel-year">—</span>, York had <b data-draw="lede-york" data-source="totals">—</b> students (<span data-draw="sel-level">—</span>, <span data-draw="sel-field">—</span>), <b data-draw="lede-york-chg" data-source="totals">—</b> since 2012-13. Its comparison group, <span data-draw="sel-group">—</span>, changed by <b data-draw="lede-peer-chg" data-source="group_totals">—</b> combined.</p>
     </header>
 
     <div class="ux-filters" id="filters">
@@ -204,6 +204,7 @@ html = f"""<meta name="dash-one-writer">
         </select>
       </label>
       <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
+      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="cip2"></select></label>
       <button class="ux-btn ux-reset" type="button">Reset</button>
     </div>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
@@ -231,12 +232,13 @@ html = f"""<meta name="dash-one-writer">
         <div class="ux-card ux-list-card" id="list-intl_share">
           <p class="ux-list-l">International share</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
+          <p class="ux-note ux-no-intl" hidden>Not reported by field of study. Pick All fields to see it.</p>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
         <div class="ux-card ux-list-card" id="list-ontario_share">
           <p class="ux-list-l">Share of Ontario students</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
+          <h3 class="ux-rank">York ranks <b data-draw="r-ontario_share" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="ontario_share" data-source="totals group_totals peer_groups"></ol>
           <p class="ux-note">York since 2012-13: <b data-draw="o-base" data-source="york_ontario">—</b></p>
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
@@ -273,6 +275,7 @@ html = f"""<meta name="dash-one-writer">
           <button class="ux-tab ux-metric" data-metric="intl_share" aria-pressed="false">International share</button>
         </div>
         <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
+        <p class="ux-note ux-no-intl" hidden>International share isn’t reported by field of study; pick All fields to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
     </section>
@@ -298,6 +301,7 @@ html = f"""<meta name="dash-one-writer">
 
     <section class="ux-page" data-page="mix gains table" id="breakdown" hidden>
       <div class="ux-break">
+        <p class="ux-msg ux-field-off" hidden>The field of study filter doesn’t apply here: these breakdowns aren’t reported by field. Use the Field of study tab to compare fields.</p>
         <div class="ux-tabs" role="group" aria-label="Break down by">
 {tabs}
         </div>
@@ -305,7 +309,7 @@ html = f"""<meta name="dash-one-writer">
 {sections}
     </section>
 
-    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. Figures, growth, ranks and the institution table use the domestic/international file. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are an editable file in Sources. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
+    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. With All fields, figures, growth, ranks and the institution table use the domestic/international file; with one field picked they use the field-of-study file, whose totals run slightly lower. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are an editable file in Sources. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
   </div>
 </div>
 </div>

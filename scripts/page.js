@@ -1,28 +1,30 @@
 dash.calc('totals', {
-  inputs: ['status'],
-  title: 'Totals by institution and year',
-  description: 'Domestic plus international headcount per slice, its international share and share of all Ontario students, and change from the previous year and from 2012-13.',
-  fn: (status) => {
+  inputs: ['status', 'cip2'],
+  title: 'Totals by institution, field and year',
+  description: 'Headcount per institution, level and year, for all fields (domestic plus international) and for each field of study, with international share (all fields only), share of all Ontario students, and change from the previous year and from 2012-13.',
+  fn: (status, cip2) => {
     const by = new Map();
-    for (const r of status) {
-      const n = Number(r.headcount);
-      const t = by.get(r.slice) ?? { slice: r.slice, headcount: 0, international: 0 };
+    const add = (field, slice, n, intl) => {
+      const key = field + '|' + slice;
+      const t = by.get(key) ?? { key, field, slice, headcount: 0, international: field === 'All fields' ? 0 : null };
       t.headcount += n;
-      if (r.category === 'International') t.international += n;
-      by.set(r.slice, t);
-    }
+      if (intl) t.international += n;
+      by.set(key, t);
+    };
+    for (const r of status) add('All fields', r.slice, Number(r.headcount), r.category === 'International');
+    for (const r of cip2) add(r.category, r.slice, Number(r.headcount), false);
     const rows = [...by.values()];
     for (const t of rows) {
       const [institution, level, year] = t.slice.split('|');
       const y = Number(year.slice(0, 4));
-      const prev = by.get(`${institution}|${level}|${y - 1}-${y}`);
-      const base = by.get(`${institution}|${level}|2012-2013`);
-      const all = by.get(`All institutions|${level}|${year}`);
+      const prev = by.get(`${t.field}|${institution}|${level}|${y - 1}-${y}`);
+      const base = by.get(`${t.field}|${institution}|${level}|2012-2013`);
+      const all = by.get(`${t.field}|All institutions|${level}|${year}`);
       Object.assign(t, {
         institution,
         level,
         year,
-        intl_share: t.international / t.headcount,
+        intl_share: t.international == null ? null : t.international / t.headcount,
         ontario_share: all ? t.headcount / all.headcount : null,
         change_prev: prev ? t.headcount / prev.headcount - 1 : null,
         change_base: base && year !== '2012-2013' ? t.headcount / base.headcount - 1 : null,
@@ -35,16 +37,17 @@ dash.calc('totals', {
 dash.calc('group_totals', {
   inputs: ['totals', 'peer_groups'],
   title: 'Comparison groups combined',
-  description: 'Each comparison group’s members added together: headcount, international share, and change from the previous year and from 2012-13.',
+  description: 'Each comparison group’s members added together, for all fields and each field of study: headcount, international share, and change from the previous year and from 2012-13.',
   fn: (totals, peer_groups) => {
+    const groupsOf = new Map();
+    for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
     const by = new Map();
     for (const t of totals) {
-      for (const g of peer_groups) {
-        if (g.institution !== t.institution) continue;
-        const key = `${g.group}|${t.level}|${t.year}`;
-        const s = by.get(key) ?? { key, group: g.group, level: t.level, year: t.year, headcount: 0, international: 0, members: 0 };
+      for (const group of groupsOf.get(t.institution) ?? []) {
+        const key = `${group}|${t.field}|${t.level}|${t.year}`;
+        const s = by.get(key) ?? { key, group, field: t.field, level: t.level, year: t.year, headcount: 0, international: t.international == null ? null : 0, members: 0 };
         s.headcount += t.headcount;
-        s.international += t.international;
+        if (s.international != null) s.international += t.international;
         s.members += 1;
         by.set(key, s);
       }
@@ -52,9 +55,9 @@ dash.calc('group_totals', {
     const rows = [...by.values()];
     for (const s of rows) {
       const y = Number(s.year.slice(0, 4));
-      const prev = by.get(`${s.group}|${s.level}|${y - 1}-${y}`);
-      const base = by.get(`${s.group}|${s.level}|2012-2013`);
-      s.intl_share = s.international / s.headcount;
+      const prev = by.get(`${s.group}|${s.field}|${s.level}|${y - 1}-${y}`);
+      const base = by.get(`${s.group}|${s.field}|${s.level}|2012-2013`);
+      s.intl_share = s.international == null ? null : s.international / s.headcount;
       s.change_prev = prev ? s.headcount / prev.headcount - 1 : null;
       s.change_base = base && s.year !== '2012-2013' ? s.headcount / base.headcount - 1 : null;
     }
@@ -65,11 +68,11 @@ dash.calc('group_totals', {
 dash.calc('york_standing', {
   inputs: ['totals', 'peer_groups'],
   title: 'York’s rank in each comparison group',
-  description: 'York’s place among itself and the group’s members on headcount, growth and international share (1 = highest).',
+  description: 'York’s place among itself and the group’s members on headcount, growth, international share and share of Ontario (1 = highest), for all fields and each field of study.',
   fn: (totals, peer_groups) => {
     const slices = new Map();
     for (const t of totals) {
-      const k = t.level + '|' + t.year;
+      const k = `${t.field}|${t.level}|${t.year}`;
       if (!slices.has(k)) slices.set(k, []);
       slices.get(k).push(t);
     }
@@ -80,9 +83,9 @@ dash.calc('york_standing', {
         const york = list.find((t) => t.institution === 'York');
         if (!york) continue;
         const pool = list.filter((t) => t.institution === 'York' || members.has(t.institution));
-        const [level, year] = k.split('|');
-        const r = { key: `${group}|${k}`, group, level, year };
-        for (const f of ['headcount', 'change_prev', 'change_base', 'intl_share']) {
+        const [field, level, year] = k.split('|');
+        const r = { key: `${group}|${k}`, group, field, level, year };
+        for (const f of ['headcount', 'change_prev', 'change_base', 'intl_share', 'ontario_share']) {
           const vals = pool.filter((t) => t[f] != null);
           r['rank_' + f] = york[f] == null ? null : 1 + vals.filter((t) => t[f] > york[f]).length;
           r['n_' + f] = york[f] == null ? null : vals.length;
@@ -97,14 +100,14 @@ dash.calc('york_standing', {
 dash.calc('york_ontario', {
   inputs: ['totals'],
   title: 'York’s share of Ontario',
-  description: 'York’s headcount as a share of all Ontario institutions combined, and its change since 2012-13 in percentage points.',
+  description: 'York’s headcount as a share of all Ontario institutions combined, for all fields and each field of study, and its change since 2012-13 in percentage points.',
   fn: (totals) => {
-    const all = new Map(totals.filter((t) => t.institution === 'All institutions').map((t) => [t.level + '|' + t.year, t.headcount]));
-    const share = new Map(totals.filter((t) => t.institution === 'York').map((t) => [t.level + '|' + t.year, t.headcount / all.get(t.level + '|' + t.year)]));
-    return [...share].map(([key, s]) => {
-      const [level, year] = key.split('|');
-      const base = share.get(level + '|2012-2013');
-      return { key, level, year, share: s, change_base: year === '2012-2013' || base == null ? null : (s - base) * 100 };
+    const york = totals.filter((t) => t.institution === 'York' && t.ontario_share != null);
+    const share = new Map(york.map((t) => [`${t.field}|${t.level}|${t.year}`, t.ontario_share]));
+    return york.map((t) => {
+      const base = share.get(`${t.field}|${t.level}|2012-2013`);
+      return { key: `${t.field}|${t.level}|${t.year}`, field: t.field, level: t.level, year: t.year, share: t.ontario_share,
+        change_base: t.year === '2012-2013' || base == null ? null : (t.ontario_share - base) * 100 };
     });
   },
 });
@@ -120,8 +123,11 @@ const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFracti
 const shortYear = (y) => y.slice(0, 5) + y.slice(7);
 const enc = (s) => String(s).replace(/[%&=]/g, encodeURIComponent);
 const P = () => dash.params();
-const instKey = (inst, p) => `${inst}|${p.level}|${p.year}`;
-const groupKey = (p) => `${p.group}|${p.level}|${p.year}`;
+const ALL_F = 'All fields';
+const fieldOf = (p) => p.field || ALL_F;
+const instKey = (inst, p) => `${fieldOf(p)}|${inst}|${p.level}|${p.year}`;
+const groupKey = (p) => `${p.group}|${fieldOf(p)}|${p.level}|${p.year}`;
+const cmpKey = (p) => `${p.group}|${p.level}|${p.year}`;
 const MUTED = 'var(--cds-chart-muted)';
 const LOSS = 'var(--cds-chart-status-critical)';
 const memo = (f) => {
@@ -132,7 +138,6 @@ const memo = (f) => {
   };
 };
 const byField = (field) => memo((rows) => new Map(rows.map((r) => [r[field], r])));
-const bySliceRow = byField('slice');
 const byKeyRow = byField('key');
 const bySel = memo((rows) => d3.group(rows, (r) => `${r.group}|${r.level}|${r.year}`));
 const membersOf = (group) => {
@@ -351,8 +356,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
   document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
+  const oneField = fieldOf(p) !== ALL_F;
+  document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !oneField; });
+  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !oneField; });
   const d = dash.data('cmp_' + p.dim);
-  const empty = d.status === 'ok' && !(bySel(d.data).get(groupKey(p)) ?? []).some((r) => r.york > 0);
+  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0);
   document.querySelectorAll('.ux .ux-dim').forEach((s) => {
     const on = s.dataset.dim === p.dim;
     s.hidden = !on;
@@ -365,6 +373,18 @@ dash.onData(() => {
 dash.draw('sel-level', (el) => { el.textContent = P().level.toLowerCase(); });
 dash.draw('sel-year', (el) => { el.textContent = shortYear(P().year); });
 dash.draw('sel-group', (el) => { el.textContent = P().group; });
+dash.draw('sel-field', (el) => {
+  const f = fieldOf(P());
+  el.textContent = f === ALL_F ? 'all fields' : f.replace(/^\d+ /, '');
+});
+dash.draw('field-select', (sel) => {
+  const g = dash.data('cip2');
+  const p = P();
+  const names = g.status === 'ok' ? [...new Set(g.data.map((r) => r.category))].sort(d3.ascending) : [fieldOf(p)].filter((f) => f !== ALL_F);
+  sel.replaceChildren(new Option(ALL_F), ...names.map((n) => new Option(n, n)));
+  sel.value = fieldOf(p);
+  sel.onchange = () => dash.setParams({ field: sel.value });
+});
 dash.draw('members', (el) => {
   if (!gate(el, ['peer_groups'])) return;
   el.textContent = membersOf(P().group).join(', ') || '—';
@@ -391,10 +411,10 @@ dash.draw('year-select', (sel) => {
 
 // Headline figures. Each reads one row of one source.
 const SOURCES = {
-  totals: { index: bySliceRow, key: (p) => instKey(FOCUS, p), col: 'slice' },
+  totals: { index: byKeyRow, key: (p) => instKey(FOCUS, p), col: 'key' },
   group_totals: { index: byKeyRow, key: groupKey, col: 'key' },
   york_standing: { index: byKeyRow, key: groupKey, col: 'key' },
-  york_ontario: { index: byKeyRow, key: (p) => `${p.level}|${p.year}`, col: 'key' },
+  york_ontario: { index: byKeyRow, key: (p) => `${fieldOf(p)}|${p.level}|${p.year}`, col: 'key' },
 };
 const rowOf = (id) => SOURCES[id].index(dash.data(id).data).get(SOURCES[id].key(P()));
 const figure = (id, field, fmt, colored) => (el) => {
@@ -424,7 +444,7 @@ const rank = (f) => (el) => {
   el.replaceChildren(cite('span', String(r['rank_' + f]), 'york_standing', 'rank_' + f, where), ' of ',
     cite('span', String(r['n_' + f]), 'york_standing', 'n_' + f, where));
 };
-['headcount', 'change_base', 'change_prev', 'intl_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
+['headcount', 'change_base', 'change_prev', 'intl_share', 'ontario_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
 
 // Overview: one ranked list per measure, York highlighted, peers combined at the foot.
 const LISTS = {
@@ -441,7 +461,7 @@ dash.draw('ov-list', (el) => {
   const spec = LISTS[f];
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
   const rows = dash.data('totals').data
-    .filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
+    .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
     .sort((a, b) => b[f] - a[f]);
   const item = (rank, name, value, cls) => {
     const li = document.createElement('li');
@@ -459,7 +479,7 @@ dash.draw('ov-list', (el) => {
     return li;
   };
   const items = rows.map((r, i) => {
-    const v = cite('span', spec.fmt(r[f]), 'totals', f, 'slice=' + enc(r.slice));
+    const v = cite('span', spec.fmt(r[f]), 'totals', f, 'key=' + enc(r.key));
     v.dataset.raw = r[f];
     return item(String(i + 1), r.institution, v, r.institution === FOCUS ? 'is-york' : '');
   });
@@ -479,15 +499,15 @@ dash.draw('ov-spark', (el) => {
   const f = el.dataset.field;
   const spec = LISTS[f];
   const york = { name: 'York', color: dash.colors[0],
-    pts: dash.data('totals').data.filter((r) => r.institution === FOCUS && r.level === p.level && r[f] != null) };
+    pts: dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.institution === FOCUS && r.level === p.level && r[f] != null) };
   const series = [york];
   if (spec.comb) {
     series.push({ name: 'Peers combined', color: dash.colors[1],
-      pts: dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && r[f] != null) });
+      pts: dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level && r[f] != null) });
   }
   series.forEach((s) => s.pts.sort((a, b) => d3.ascending(a.year, b.year)));
   const years = [...new Set(series.flatMap((s) => s.pts.map((r) => r.year)))].sort(d3.ascending);
-  const W = Math.max(120, el.clientWidth), H = 86;
+  const W = Math.max(120, el.clientWidth), H = 120;
   const { svg, tip } = svgIn(el, W, H);
   if (years.length < 2) return;
   const vals = series.flatMap((s) => s.pts.map((r) => r[f]));
@@ -523,7 +543,7 @@ dash.draw('ov-spark', (el) => {
 dash.draw('growth', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
-  const tot = dash.data('totals').data.filter((r) => r.level === p.level);
+  const tot = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
   const years = [...new Set(tot.map((r) => r.year))].sort(d3.ascending);
   const index = (rows) => {
     const base = rows.find((r) => r.year === FIRST);
@@ -535,7 +555,7 @@ dash.draw('growth', (el) => {
   const peers = membersOf(p.group).map((m) => ({ name: m, pts: index(byInst.get(m) ?? []) })).filter((s) => s.pts && s.pts.length > 1);
   const york = { name: FOCUS, color: dash.colors[0], pts: index(byInst.get(FOCUS) ?? []) ?? [] };
   const comb = { name: 'Peers combined', color: dash.colors[1],
-    pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level)) ?? [] };
+    pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level)) ?? [] };
   const W = Math.max(260, el.clientWidth), H = Math.round(Math.min(520, Math.max(280, W * 0.45)));
   const { svg, tip } = svgIn(el, W, H);
   if (!york.pts.length || !years.length) return;
@@ -600,7 +620,7 @@ dash.draw('growth', (el) => {
 dash.draw('share', (el) => {
   if (!gate(el, ['york_ontario'], true)) return;
   const p = P();
-  const rows = dash.data('york_ontario').data.filter((r) => r.level === p.level).sort((a, b) => d3.ascending(a.year, b.year));
+  const rows = dash.data('york_ontario').data.filter((r) => r.field === fieldOf(p) && r.level === p.level).sort((a, b) => d3.ascending(a.year, b.year));
   const W = Math.max(260, el.clientWidth), H = Math.round(Math.min(520, Math.max(280, W * 0.45)));
   const { svg, tip } = svgIn(el, W, H);
   if (!rows.length) return;
@@ -655,7 +675,7 @@ dash.draw('rank-bars', (el) => {
   const f = METRICS[p.metric] ? p.metric : 'change_base';
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
   const rows = dash.data('totals').data
-    .filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
+    .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
     .map((r) => ({ name: r.institution, v: r[f], kind: r.institution === FOCUS ? 'york' : 'peer' }));
   const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
   if (comb && comb[f] != null && f !== 'headcount') rows.push({ name: 'Peers combined', v: comb[f], kind: 'comb' });
@@ -699,12 +719,12 @@ dash.draw('inst-rows', (tb) => {
   if (!gateRows(tb, ['totals', 'peer_groups'], 5)) return;
   const p = P();
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
-  const list = dash.data('totals').data.filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution));
+  const list = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution));
   sortRows(list, table);
   const max = d3.max(list, (r) => r.headcount) || 1;
   tb.replaceChildren(...list.map((r) => {
     const tr = document.createElement('tr');
-    tr.dataset.key = r.slice;
+    tr.dataset.key = r.key;
     if (r.institution === FOCUS) tr.className = 'is-picked';
     const hc = document.createElement('td');
     hc.className = 'ux-num';
@@ -723,7 +743,7 @@ dash.draw('inst-rows', (tb) => {
       hc,
       td(r.change_prev == null ? '—' : fmtD(r.change_prev), signed(r.change_prev) + ' ux-hide-narrow'),
       td(r.change_base == null ? '—' : fmtD(r.change_base), signed(r.change_base)),
-      td(fmtP(r.intl_share), 'ux-num'),
+      td(r.intl_share == null ? '—' : fmtP(r.intl_share), 'ux-num'),
     );
     return tr;
   }));
@@ -731,7 +751,7 @@ dash.draw('inst-rows', (tb) => {
 
 // Breakdown rows for the selected group, level and year, largest first.
 const TOP = 12;
-const selRows = (id) => (bySel(dash.data(id).data).get(groupKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+const selRows = (id) => (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
 // York's mix against the group's: paired bars of share.
