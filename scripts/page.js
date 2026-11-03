@@ -1,7 +1,7 @@
 dash.calc('totals', {
   inputs: ['status'],
   title: 'Totals by institution and year',
-  description: 'Domestic plus international headcount per slice, its international share, and change from the previous year and from 2012-13.',
+  description: 'Domestic plus international headcount per slice, its international share and share of all Ontario students, and change from the previous year and from 2012-13.',
   fn: (status) => {
     const by = new Map();
     for (const r of status) {
@@ -17,11 +17,13 @@ dash.calc('totals', {
       const y = Number(year.slice(0, 4));
       const prev = by.get(`${institution}|${level}|${y - 1}-${y}`);
       const base = by.get(`${institution}|${level}|2012-2013`);
+      const all = by.get(`All institutions|${level}|${year}`);
       Object.assign(t, {
         institution,
         level,
         year,
         intl_share: t.international / t.headcount,
+        ontario_share: all ? t.headcount / all.headcount : null,
         change_prev: prev ? t.headcount / prev.headcount - 1 : null,
         change_base: base && year !== '2012-2013' ? t.headcount / base.headcount - 1 : null,
       });
@@ -409,14 +411,6 @@ const figure = (id, field, fmt, colored) => (el) => {
 dash.draw('lede-york', figure('totals', 'headcount', fmtN));
 dash.draw('lede-york-chg', figure('totals', 'change_base', fmtD));
 dash.draw('lede-peer-chg', figure('group_totals', 'change_base', fmtD));
-dash.draw('t-headcount', figure('totals', 'headcount', fmtN));
-dash.draw('t-base', figure('totals', 'change_base', fmtD, true));
-dash.draw('t-prev', figure('totals', 'change_prev', fmtD, true));
-dash.draw('t-intl', figure('totals', 'intl_share', fmtP));
-dash.draw('t-ont', figure('york_ontario', 'share', fmtP));
-dash.draw('g-base', figure('group_totals', 'change_base', fmtD, true));
-dash.draw('g-prev', figure('group_totals', 'change_prev', fmtD, true));
-dash.draw('g-intl', figure('group_totals', 'intl_share', fmtP));
 dash.draw('o-base', figure('york_ontario', 'change_base', fmtPt, true));
 // "2 of 10": York's rank and how many were ranked.
 const rank = (f) => (el) => {
@@ -431,6 +425,52 @@ const rank = (f) => (el) => {
     cite('span', String(r['n_' + f]), 'york_standing', 'n_' + f, where));
 };
 ['headcount', 'change_base', 'change_prev', 'intl_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
+
+// Overview: one ranked list per measure, York highlighted, peers combined at the foot.
+const LISTS = {
+  headcount: { fmt: fmtN },
+  change_base: { fmt: fmtD, signed: true, comb: true },
+  change_prev: { fmt: fmtD, signed: true, comb: true },
+  intl_share: { fmt: fmtP, comb: true },
+  ontario_share: { fmt: fmtP },
+};
+dash.draw('ov-list', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const f = el.dataset.field;
+  const spec = LISTS[f];
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const rows = dash.data('totals').data
+    .filter((r) => r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
+    .sort((a, b) => b[f] - a[f]);
+  const item = (rank, name, value, cls) => {
+    const li = document.createElement('li');
+    li.className = 'ux-li' + (cls ? ' ' + cls : '');
+    if (cls === 'is-york') li.style.setProperty('--york', dash.colors[0]);
+    const n = document.createElement('span');
+    n.className = 'ux-li-rank';
+    n.textContent = rank;
+    const nm = document.createElement('span');
+    nm.className = 'ux-li-name';
+    nm.textContent = name;
+    if (spec.signed) value.classList.add(...tone(value.dataset.raw ? Number(value.dataset.raw) : 0).split(' ').filter(Boolean));
+    value.classList.add('ux-li-v');
+    li.append(n, nm, value);
+    return li;
+  };
+  const items = rows.map((r, i) => {
+    const v = cite('span', spec.fmt(r[f]), 'totals', f, 'slice=' + enc(r.slice));
+    v.dataset.raw = r[f];
+    return item(String(i + 1), r.institution, v, r.institution === FOCUS ? 'is-york' : '');
+  });
+  const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
+  if (spec.comb && comb && comb[f] != null) {
+    const v = cite('span', spec.fmt(comb[f]), 'group_totals', f, 'key=' + enc(comb.key));
+    v.dataset.raw = comb[f];
+    items.push(item('', 'Peers', v, 'is-comb'));
+  }
+  el.replaceChildren(...items);
+});
 
 // Growth since 2012-13, indexed to 100: York, peers combined, and each peer.
 dash.draw('growth', (el) => {

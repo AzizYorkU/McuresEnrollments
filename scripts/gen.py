@@ -209,19 +209,35 @@ html = f"""<meta name="dash-one-writer">
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
-      <div class="ux-tiles" id="figures">
-        <div class="ux-tile"><span class="ux-tile-l">York headcount</span><span class="ux-tile-v dash-skeleton" data-draw="t-headcount" data-source="totals">—</span>
-          <span class="ux-sub"><span>Rank by size <b data-draw="r-headcount" data-source="york_standing">—</b></span></span></div>
-        <div class="ux-tile"><span class="ux-tile-l">Growth since 2012-13</span><span class="ux-tile-v dash-skeleton" data-draw="t-base" data-source="totals">—</span>
-          <span class="ux-sub"><span>Peers <b data-draw="g-base" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_base" data-source="york_standing">—</b></span></span></div>
-        <div class="ux-tile"><span class="ux-tile-l">From previous year</span><span class="ux-tile-v dash-skeleton" data-draw="t-prev" data-source="totals">—</span>
-          <span class="ux-sub"><span>Peers <b data-draw="g-prev" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-change_prev" data-source="york_standing">—</b></span></span></div>
-        <div class="ux-tile"><span class="ux-tile-l">International share</span><span class="ux-tile-v dash-skeleton" data-draw="t-intl" data-source="totals">—</span>
-          <span class="ux-sub"><span>Peers <b data-draw="g-intl" data-source="group_totals">—</b></span><span>Rank <b data-draw="r-intl_share" data-source="york_standing">—</b></span></span></div>
-        <div class="ux-tile"><span class="ux-tile-l">York’s share of Ontario</span><span class="ux-tile-v dash-skeleton" data-draw="t-ont" data-source="york_ontario">—</span>
-          <span class="ux-sub"><span>Since 2012-13 <b data-draw="o-base" data-source="york_ontario">—</b></span></span></div>
+      <div class="ux-lists" id="figures">
+        <div class="ux-card ux-list-card" id="list-headcount">
+          <p class="ux-list-l">Headcount</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
+          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="headcount" data-source="totals group_totals peer_groups"></ol>
+        </div>
+        <div class="ux-card ux-list-card" id="list-change_base">
+          <p class="ux-list-l">Growth since 2012-13</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-change_base" data-source="york_standing">—</b></h3>
+          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_base" data-source="totals group_totals peer_groups"></ol>
+        </div>
+        <div class="ux-card ux-list-card" id="list-change_prev">
+          <p class="ux-list-l">From previous year</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-change_prev" data-source="york_standing">—</b></h3>
+          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_prev" data-source="totals group_totals peer_groups"></ol>
+        </div>
+        <div class="ux-card ux-list-card" id="list-intl_share">
+          <p class="ux-list-l">International share</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
+          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
+        </div>
+        <div class="ux-card ux-list-card" id="list-ontario_share">
+          <p class="ux-list-l">Share of Ontario students</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
+          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="ontario_share" data-source="totals group_totals peer_groups"></ol>
+          <p class="ux-note">York since 2012-13: <b data-draw="o-base" data-source="york_ontario">—</b></p>
+        </div>
       </div>
-      <p class="ux-note">Peers: the comparison group’s members added together. Rank: York’s place among itself and the group’s members, 1 = highest. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
