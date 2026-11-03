@@ -205,7 +205,6 @@ html = f"""<meta name="dash-one-writer">
   <div class="ux-main">
     <header class="ux-head">
       <h1>York University against its Ontario peers</h1>
-      <p class="ux-lede">In <span data-draw="sel-year">—</span>, York had <b data-draw="lede-york" data-source="totals">—</b> students (<span data-draw="sel-level">—</span>, <span data-draw="sel-field">—</span>), <b data-draw="lede-york-chg" data-source="totals">—</b> since 2012-13. Its comparison group, <span data-draw="sel-group">—</span>, changed by <b data-draw="lede-peer-chg" data-source="group_totals">—</b> combined.</p>
     </header>
 
     <div class="ux-filters" id="filters">
@@ -235,7 +234,6 @@ html = f"""<meta name="dash-one-writer">
       </div>
     </div>
     <p class="ux-note ux-filter-note">Year, comparison group and study level always apply. Credential, field of study, year of study, citizenship and gender come from separate files that aren’t cross-tabulated, so only one of those five applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
-    <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
       <div class="ux-lists" id="figures">
