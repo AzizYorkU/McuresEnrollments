@@ -27,7 +27,10 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 .ux-msg { margin: 0; padding: var(--cds-pad-md) var(--cds-pad-lg); border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); color: var(--color-fg-muted); }
 
-.ux-filters { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: end; }
+.ux-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: end; max-width: 60rem; }
+.ux .ux-filters select { width: 100%; max-width: none; }
+.ux-reset-cell { justify-items: start; }
+@media (max-width: 40rem) { .ux-filters { grid-template-columns: minmax(0, 1fr); } }
 .ux-field { display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); min-width: 0; }
 .ux select, .ux .ux-search { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); max-width: 100%; }
 .ux-btn, .ux-tab { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: transparent; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); cursor: pointer; }
@@ -155,7 +158,6 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-field-select option.is-above, .ux-field-select.is-above { color: var(--color-ok); }
 .ux-field-select option.is-below, .ux-field-select.is-below { color: var(--color-bad); }
 .ux-field-select option, .ux-field-select optgroup { color: var(--color-fg); background: var(--color-panel); }
-.ux select.ux-subset { max-width: 16rem; }
 .ux-filter-note { margin-top: calc(-1 * var(--cds-gap-xs)); }
 
 </style>
@@ -182,7 +184,9 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     </header>
 
     <div class="ux-filters" id="filters">
+      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
       <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
+      <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
       <label class="ux-field">Study level
         <select id="f-level" class="ux-level">
           <option>All levels</option>
@@ -190,13 +194,11 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <option>Graduate</option>
         </select>
       </label>
-      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
-      <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
-      <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
-      <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
       <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
-      <button class="ux-btn ux-reset" type="button">Reset</button>
+      <label class="ux-field">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
+      <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
+      <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
+      <div class="ux-field ux-reset-cell"><button class="ux-btn ux-reset" type="button">Reset</button></div>
     </div>
     <p class="ux-note ux-filter-note">Field of study, gender, citizenship, credential and year of study come from separate files that aren’t cross-tabulated, so one of them applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
     <p class="ux-members">In the group: <span data-draw="members" data-source="peer_groups">—</span></p>
