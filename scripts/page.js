@@ -1008,3 +1008,151 @@ dash.draw('dim-rows', (tb) => {
 const link = location.hash.slice(1);
 if (PAGES.includes(link)) dash.setParams({ page: link });
 else if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ page: 'mix', dim: link.slice(3) });
+
+// Filter dropdowns: the page's own list replaces the browser's, so moving through it with the arrow keys applies
+// each choice straight away (the browser's list only reports a choice when it closes). The <select> stays the
+// source of truth: the list is drawn from its options, and choosing sets its value and fires its change event.
+(() => {
+  const FILTER = '.ux .ux-filters select';
+  let dd = null; // the open list: { sel, box, start, obs }
+  let typed = '', typedAt = 0;
+
+  function row(o, inGroup) {
+    const d = document.createElement('div');
+    d.className = 'ux-dd-o' + (inGroup ? ' ux-dd-in' : '') + (o.className ? ' ' + o.className : '');
+    d.setAttribute('role', 'option');
+    d.dataset.value = o.value;
+    d.textContent = o.text;
+    return d;
+  }
+  function render() {
+    const { sel, box } = dd;
+    const out = [];
+    for (const c of sel.children) {
+      if (c.tagName === 'OPTGROUP') {
+        const h = document.createElement('div');
+        h.className = 'ux-dd-g';
+        h.textContent = c.label;
+        out.push(h, ...[...c.children].map((o) => row(o, true)));
+      } else out.push(row(c, false));
+    }
+    box.replaceChildren(...out);
+    mark();
+  }
+  function mark() {
+    for (const d of dd.box.querySelectorAll('.ux-dd-o')) {
+      const on = d.dataset.value === dd.sel.value;
+      d.classList.toggle('is-hi', on);
+      d.setAttribute('aria-selected', String(on));
+      if (on) d.scrollIntoView({ block: 'nearest' });
+    }
+  }
+  function place() {
+    const { sel, box } = dd;
+    const r = sel.getBoundingClientRect();
+    const below = innerHeight - r.bottom - 8, above = r.top - 8;
+    const up = below < 180 && above > below;
+    box.style.minWidth = r.width + 'px';
+    box.style.maxHeight = Math.min(352, up ? above : below) + 'px';
+    box.style.top = up ? '' : r.bottom + 2 + 'px';
+    box.style.bottom = up ? innerHeight - r.top + 2 + 'px' : '';
+    box.style.left = Math.max(8, Math.min(r.left, innerWidth - 8 - box.offsetWidth)) + 'px';
+  }
+  function open(sel) {
+    if (sel.disabled) return;
+    close();
+    const box = document.createElement('div');
+    box.className = 'ux-dd';
+    box.setAttribute('role', 'listbox');
+    (sel.closest('.ux') ?? document.body).append(box);
+    // The page redraws the options after each choice; redraw the list with them.
+    const obs = new MutationObserver(() => dd && render());
+    obs.observe(sel, { childList: true, subtree: true, characterData: true });
+    dd = { sel, box, start: sel.value, obs };
+    sel.setAttribute('aria-expanded', 'true');
+    render();
+    place();
+    mark();
+  }
+  function close() {
+    if (!dd) return;
+    dd.obs.disconnect();
+    dd.box.remove();
+    dd.sel.setAttribute('aria-expanded', 'false');
+    dd = null;
+  }
+  function choose(value) {
+    const sel = dd.sel;
+    if (sel.value === value) return;
+    sel.value = value;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    mark();
+  }
+  function step(n) {
+    const opts = [...dd.sel.options].filter((o) => !o.disabled);
+    const i = opts.findIndex((o) => o.value === dd.sel.value);
+    const next = opts[Math.max(0, Math.min(opts.length - 1, (i < 0 ? 0 : i) + n))];
+    if (next) choose(next.value);
+  }
+  function seek(ch) {
+    const now = Date.now();
+    typed = now - typedAt < 700 ? typed + ch : ch;
+    typedAt = now;
+    const opts = [...dd.sel.options].filter((o) => !o.disabled);
+    const i = opts.findIndex((o) => o.value === dd.sel.value);
+    const order = typed.length > 1 ? [...opts.slice(i), ...opts.slice(0, i)] : [...opts.slice(i + 1), ...opts.slice(0, i + 1)];
+    const hit = order.find((o) => o.text.toLowerCase().startsWith(typed));
+    if (hit) choose(hit.value);
+  }
+
+  document.addEventListener('mousedown', (e) => {
+    const sel = e.target.closest?.(FILTER);
+    if (sel) {
+      e.preventDefault(); // keeps the browser's own list shut
+      if (sel.disabled) return;
+      sel.focus();
+      if (dd?.sel === sel) close();
+      else open(sel);
+      return;
+    }
+    if (dd && e.target.closest?.('.ux-dd')) {
+      e.preventDefault(); // keep focus on the select
+      const o = e.target.closest('.ux-dd-o');
+      if (o) {
+        choose(o.dataset.value);
+        close();
+      }
+      return;
+    }
+    close();
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    const sel = e.target.closest?.(FILTER);
+    if (!sel) return;
+    if (!dd || dd.sel !== sel) {
+      // Closed: the arrow keys already change the select one step at a time; these keys open the list.
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'F4' || (e.altKey && (e.key === 'ArrowDown' || e.key === 'ArrowUp'))) {
+        e.preventDefault();
+        open(sel);
+      }
+      return;
+    }
+    const keys = { ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10, Home: -1e6, End: 1e6 };
+    if (e.key in keys && !e.altKey) step(keys[e.key]);
+    else if (e.key === 'Enter' || e.key === ' ' || e.key === 'F4' || (e.altKey && e.key === 'ArrowUp')) close();
+    else if (e.key === 'Escape') {
+      choose(dd.start);
+      close();
+    } else if (e.key === 'Tab') {
+      close();
+      return;
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) seek(e.key.toLowerCase());
+    else return;
+    e.preventDefault();
+  }, true);
+
+  document.addEventListener('focusout', (e) => { if (dd && e.target === dd.sel) close(); });
+  addEventListener('resize', () => dd && place());
+  addEventListener('scroll', (e) => { if (dd && !dd.box.contains(e.target)) place(); }, true);
+})();

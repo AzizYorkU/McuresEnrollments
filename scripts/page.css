@@ -153,3 +153,12 @@
 .ux-field-select option.is-below, .ux-field-select.is-below { color: var(--color-bad); }
 .ux-field-select option, .ux-field-select optgroup { color: var(--color-fg); background: var(--color-panel); }
 .ux-filter-note { margin-top: calc(-1 * var(--cds-gap-xs)); }
+/* The filters' own dropdown list (see the end of page.js). */
+.ux-dd { position: fixed; z-index: 60; overflow-y: auto; max-width: min(46rem, calc(100vw - 16px)); padding: 4px 0; background: var(--color-panel); color: var(--color-fg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: var(--cds-font-size-body); }
+.ux-dd-g { padding: 8px 12px 3px; font-size: var(--cds-font-size-caption); font-weight: 600; color: var(--color-fg-muted); }
+.ux-dd-o { padding: 5px 12px; white-space: nowrap; cursor: pointer; }
+.ux-dd-o.ux-dd-in { padding-left: 22px; }
+.ux-dd-o:hover { background: color-mix(in srgb, var(--color-fg) 6%, transparent); }
+.ux-dd-o.is-hi { background: color-mix(in srgb, var(--color-fg) 12%, transparent); font-weight: 600; }
+.ux-dd-o.is-above { color: var(--color-ok); }
+.ux-dd-o.is-below { color: var(--color-bad); }
