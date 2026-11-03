@@ -136,8 +136,8 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 }
 
 /* Overview: ranked lists, one per measure */
-.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap: var(--cds-gap-sm); align-items: start; }
-.ux-list-card { gap: var(--cds-gap-xs); padding: var(--cds-pad-md) var(--cds-pad-sm); }
+.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap: var(--cds-gap-sm); align-items: stretch; }
+.ux-list-card { display: flex; flex-direction: column; gap: var(--cds-gap-xs); padding: var(--cds-pad-md) var(--cds-pad-sm); }
 .ux-list-l { margin: 0; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
 .ux-rank { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); }
 .ux .ux-rank b { font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -150,6 +150,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-li.is-york { background: color-mix(in srgb, var(--york) 16%, transparent); border-radius: 4px; font-weight: 600; box-shadow: inset 3px 0 0 var(--york); }
 .ux-li.is-comb { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); margin-top: 2px; }
 .ux-li.is-comb .ux-li-v { color: var(--color-fg-muted); }
+.ux-spark { position: relative; min-height: 86px; margin-top: auto; padding-top: var(--cds-gap-xs); border-top: 1px solid var(--color-border-line); }
 
 </style>
 <div class="ux">
@@ -194,30 +195,35 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <p class="ux-list-l">Headcount</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="headcount" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="headcount" data-source="totals group_totals"></div>
         </div>
         <div class="ux-card ux-list-card" id="list-change_base">
           <p class="ux-list-l">Growth since 2012-13</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-change_base" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_base" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="change_base" data-source="totals group_totals"></div>
         </div>
         <div class="ux-card ux-list-card" id="list-change_prev">
           <p class="ux-list-l">From previous year</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-change_prev" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_prev" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="change_prev" data-source="totals group_totals"></div>
         </div>
         <div class="ux-card ux-list-card" id="list-intl_share">
           <p class="ux-list-l">International share</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
         <div class="ux-card ux-list-card" id="list-ontario_share">
           <p class="ux-list-l">Share of Ontario students</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="ontario_share" data-source="totals group_totals peer_groups"></ol>
           <p class="ux-note">York since 2012-13: <b data-draw="o-base" data-source="york_ontario">—</b></p>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
         </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
@@ -1417,6 +1423,53 @@ dash.draw('ov-list', (el) => {
     items.push(item('', 'Peers', v, 'is-comb'));
   }
   el.replaceChildren(...items);
+});
+
+// Overview: a small chart under each list, York (and peers combined) every year.
+dash.draw('ov-spark', (el) => {
+  if (!gate(el, ['totals', 'group_totals'], true)) return;
+  const p = P();
+  const f = el.dataset.field;
+  const spec = LISTS[f];
+  const york = { name: 'York', color: dash.colors[0],
+    pts: dash.data('totals').data.filter((r) => r.institution === FOCUS && r.level === p.level && r[f] != null) };
+  const series = [york];
+  if (spec.comb) {
+    series.push({ name: 'Peers combined', color: dash.colors[1],
+      pts: dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && r[f] != null) });
+  }
+  series.forEach((s) => s.pts.sort((a, b) => d3.ascending(a.year, b.year)));
+  const years = [...new Set(series.flatMap((s) => s.pts.map((r) => r.year)))].sort(d3.ascending);
+  const W = Math.max(120, el.clientWidth), H = 86;
+  const { svg, tip } = svgIn(el, W, H);
+  if (years.length < 2) return;
+  const vals = series.flatMap((s) => s.pts.map((r) => r[f]));
+  const lo = d3.min(vals), hi = d3.max(vals);
+  const pad = (hi - lo) * 0.12 || Math.abs(hi) * 0.05 || 1;
+  const y = d3.scaleLinear([spec.signed ? Math.min(0, lo - pad) : lo - pad, spec.signed ? Math.max(0, hi + pad) : hi + pad], [H - 18, 6]);
+  const x = d3.scalePoint(years, [4, W - 4]);
+  if (spec.signed) svg.append('line').attr('class', 'ux-rule').attr('x1', 0).attr('x2', W).attr('y1', y(0)).attr('y2', y(0)).attr('stroke-dasharray', '3 3');
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', 0).attr('x2', W).attr('y1', H - 18).attr('y2', H - 18);
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data([years[0], years[years.length - 1]]).join('text')
+    .attr('x', (yr, i) => (i ? W : 0)).attr('y', H - 4).attr('text-anchor', (yr, i) => (i ? 'end' : 'start')).text(shortYear);
+  const line = d3.line().x((r) => x(r.year)).y((r) => y(r[f]));
+  svg.append('g').selectAll('path').data(series.slice().reverse()).join('path').attr('d', (s) => line(s.pts))
+    .style('fill', 'none').style('stroke', (s) => s.color).attr('stroke-width', (s) => (s === york ? 2 : 1.5))
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const sel = york.pts.find((r) => r.year === p.year);
+  if (sel) svg.append('circle').attr('r', 3).attr('cx', x(sel.year)).attr('cy', y(sel[f])).style('fill', york.color);
+  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 4).attr('y2', H - 18).attr('opacity', 0);
+  svg.append('rect').attr('width', W).attr('height', H).style('fill', 'transparent')
+    .on('mousemove', (e) => {
+      const mx = d3.pointer(e, svg.node())[0];
+      const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
+      rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+      showTip(el, tip, e, shortYear(yr), series.map((s) => {
+        const r = s.pts.find((d) => d.year === yr);
+        return { color: series.length > 1 ? s.color : null, name: s.name, value: r ? spec.fmt(r[f]) : '—' };
+      }));
+    })
+    .on('mouseleave', () => { tip.hidden = true; rule.attr('opacity', 0); });
 });
 
 // Growth since 2012-13, indexed to 100: York, peers combined, and each peer.

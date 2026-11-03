@@ -472,6 +472,53 @@ dash.draw('ov-list', (el) => {
   el.replaceChildren(...items);
 });
 
+// Overview: a small chart under each list, York (and peers combined) every year.
+dash.draw('ov-spark', (el) => {
+  if (!gate(el, ['totals', 'group_totals'], true)) return;
+  const p = P();
+  const f = el.dataset.field;
+  const spec = LISTS[f];
+  const york = { name: 'York', color: dash.colors[0],
+    pts: dash.data('totals').data.filter((r) => r.institution === FOCUS && r.level === p.level && r[f] != null) };
+  const series = [york];
+  if (spec.comb) {
+    series.push({ name: 'Peers combined', color: dash.colors[1],
+      pts: dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && r[f] != null) });
+  }
+  series.forEach((s) => s.pts.sort((a, b) => d3.ascending(a.year, b.year)));
+  const years = [...new Set(series.flatMap((s) => s.pts.map((r) => r.year)))].sort(d3.ascending);
+  const W = Math.max(120, el.clientWidth), H = 86;
+  const { svg, tip } = svgIn(el, W, H);
+  if (years.length < 2) return;
+  const vals = series.flatMap((s) => s.pts.map((r) => r[f]));
+  const lo = d3.min(vals), hi = d3.max(vals);
+  const pad = (hi - lo) * 0.12 || Math.abs(hi) * 0.05 || 1;
+  const y = d3.scaleLinear([spec.signed ? Math.min(0, lo - pad) : lo - pad, spec.signed ? Math.max(0, hi + pad) : hi + pad], [H - 18, 6]);
+  const x = d3.scalePoint(years, [4, W - 4]);
+  if (spec.signed) svg.append('line').attr('class', 'ux-rule').attr('x1', 0).attr('x2', W).attr('y1', y(0)).attr('y2', y(0)).attr('stroke-dasharray', '3 3');
+  svg.append('line').attr('class', 'ux-axis-line').attr('x1', 0).attr('x2', W).attr('y1', H - 18).attr('y2', H - 18);
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data([years[0], years[years.length - 1]]).join('text')
+    .attr('x', (yr, i) => (i ? W : 0)).attr('y', H - 4).attr('text-anchor', (yr, i) => (i ? 'end' : 'start')).text(shortYear);
+  const line = d3.line().x((r) => x(r.year)).y((r) => y(r[f]));
+  svg.append('g').selectAll('path').data(series.slice().reverse()).join('path').attr('d', (s) => line(s.pts))
+    .style('fill', 'none').style('stroke', (s) => s.color).attr('stroke-width', (s) => (s === york ? 2 : 1.5))
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const sel = york.pts.find((r) => r.year === p.year);
+  if (sel) svg.append('circle').attr('r', 3).attr('cx', x(sel.year)).attr('cy', y(sel[f])).style('fill', york.color);
+  const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 4).attr('y2', H - 18).attr('opacity', 0);
+  svg.append('rect').attr('width', W).attr('height', H).style('fill', 'transparent')
+    .on('mousemove', (e) => {
+      const mx = d3.pointer(e, svg.node())[0];
+      const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
+      rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+      showTip(el, tip, e, shortYear(yr), series.map((s) => {
+        const r = s.pts.find((d) => d.year === yr);
+        return { color: series.length > 1 ? s.color : null, name: s.name, value: r ? spec.fmt(r[f]) : '—' };
+      }));
+    })
+    .on('mouseleave', () => { tip.hidden = true; rule.attr('opacity', 0); });
+});
+
 // Growth since 2012-13, indexed to 100: York, peers combined, and each peer.
 dash.draw('growth', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
