@@ -180,6 +180,14 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-dd-o.is-hi { background: color-mix(in srgb, var(--color-fg) 12%, transparent); font-weight: 600; }
 .ux-dd-o.is-above { color: var(--color-ok); }
 .ux-dd-o.is-below { color: var(--color-bad); }
+/* Ranking page: rotatable 3D bars. */
+#rank3d-card { margin-top: var(--cds-gap-md); }
+.ux-3d-box { min-height: 340px; }
+.ux-3d-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; margin-bottom: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ux-3d-wrap { position: relative; }
+.ux-3d { display: block; width: 100%; cursor: grab; touch-action: pan-y; border-radius: var(--cds-radius); }
+.ux-3d:active { cursor: grabbing; }
+.ux-3d:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
 
 </style>
 <div class="ux">
@@ -293,6 +301,11 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
         <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
         <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
+      </div>
+      <div class="ux-card" id="rank3d-card">
+        <h2>Headcount by year, in 3D</h2>
+        <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures. York is in colour.</p>
+        <div class="ux-3d-box dash-skeleton" data-draw="bars3d" data-source="totals peer_groups"></div>
       </div>
     </section>
 
@@ -2104,6 +2117,252 @@ dash.draw('dim-rows', (tb) => {
 const link = location.hash.slice(1);
 if (PAGES.includes(link)) dash.setParams({ page: link });
 else if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ page: 'mix', dim: link.slice(3) });
+
+// Ranking page: headcount for York and the group's members, each year, as 3D bars you can rotate.
+// Drawn on a canvas with an orthographic projection (no perspective, so equal heights look equal).
+// Drag or use the arrow keys to rotate; hover a bar for its figures.
+const VIEW3D = { yaw: -0.62, pitch: 0.5 };
+const DEFAULT3D = { ...VIEW3D };
+let from3d = FIRST;
+// A CSS colour (including var(...)) as [r, g, b], read back from a 1px canvas so any colour syntax works.
+function rgbOf(el, css) {
+  const s = document.createElement('span');
+  s.style.color = css;
+  el.append(s);
+  const c = getComputedStyle(s).color;
+  s.remove();
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 1;
+  const x = cv.getContext('2d');
+  x.fillStyle = c;
+  x.fillRect(0, 0, 1, 1);
+  return [...x.getImageData(0, 0, 1, 1).data.slice(0, 3)];
+}
+const shade = ([r, g, b], k, a = 1) => `rgba(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)},${a})`;
+
+function build3d(el) {
+  const head = document.createElement('div');
+  head.className = 'ux-3d-head';
+  const lab = document.createElement('label');
+  lab.className = 'ux-3d-from';
+  lab.textContent = 'From ';
+  const from = document.createElement('select');
+  from.onchange = () => { from3d = from.value; draw3d(el); };
+  lab.append(from);
+  const reset = document.createElement('button');
+  reset.type = 'button';
+  reset.className = 'ux-btn';
+  reset.textContent = 'Reset view';
+  reset.onclick = () => { Object.assign(VIEW3D, DEFAULT3D); el._3d.paint(); };
+  head.append(lab, reset);
+  const wrap = document.createElement('div');
+  wrap.className = 'ux-3d-wrap';
+  const canvas = document.createElement('canvas');
+  canvas.className = 'ux-3d';
+  canvas.tabIndex = 0;
+  canvas.setAttribute('role', 'img');
+  const tip = document.createElement('div');
+  tip.className = 'ux-tip';
+  tip.hidden = true;
+  wrap.append(canvas, tip);
+  el.replaceChildren(head, wrap);
+  const st = { canvas, tip, from, faces: [], hover: null, paint: () => {} };
+  el._3d = st;
+
+  let drag = null;
+  canvas.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, y: e.clientY };
+    canvas.setPointerCapture(e.pointerId);
+    tip.hidden = true;
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (drag) {
+      VIEW3D.yaw += (e.clientX - drag.x) * 0.008;
+      VIEW3D.pitch = Math.max(0.05, Math.min(1.5, VIEW3D.pitch + (e.clientY - drag.y) * 0.008));
+      drag = { x: e.clientX, y: e.clientY };
+      st.paint();
+      return;
+    }
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    const hit = [...st.faces].reverse().find((f) => inside(px, py, f.pts));
+    const bar = hit?.bar ?? null;
+    if (bar !== st.hover) {
+      st.hover = bar;
+      st.paint();
+    }
+    if (!bar) {
+      tip.hidden = true;
+      return;
+    }
+    showTip(wrap, tip, e, `${bar.name} · ${shortYear(bar.year)}`, [
+      { name: 'Headcount', value: fmtN(bar.v) },
+      { name: 'Rank that year', value: `${bar.rank} of ${bar.of}` },
+    ]);
+  });
+  const end = () => { drag = null; };
+  canvas.addEventListener('pointerup', end);
+  canvas.addEventListener('pointercancel', end);
+  canvas.addEventListener('pointerleave', () => {
+    tip.hidden = true;
+    if (st.hover) {
+      st.hover = null;
+      st.paint();
+    }
+  });
+  canvas.addEventListener('keydown', (e) => {
+    const k = { ArrowLeft: [-0.12, 0], ArrowRight: [0.12, 0], ArrowUp: [0, -0.1], ArrowDown: [0, 0.1] }[e.key];
+    if (!k) return;
+    e.preventDefault();
+    VIEW3D.yaw += k[0];
+    VIEW3D.pitch = Math.max(0.05, Math.min(1.5, VIEW3D.pitch + k[1]));
+    st.paint();
+  });
+  return st;
+}
+function inside(x, y, pts) {
+  let r = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i], [xj, yj] = pts[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) r = !r;
+  }
+  return r;
+}
+
+function draw3d(el) {
+  if (!gate(el, ['totals', 'peer_groups'], true)) return;
+  const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el);
+  const p = P();
+  const all = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
+  const allYears = [...new Set(all.map((r) => r.year))].sort(d3.ascending).filter((y) => y <= p.year);
+  st.from.replaceChildren(...allYears.map((y) => new Option(shortYear(y), y)));
+  if (!allYears.includes(from3d)) from3d = allYears[0] ?? FIRST;
+  st.from.value = from3d;
+  const years = allYears.filter((y) => y >= from3d);
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const rows = all.filter((r) => pool.has(r.institution) && years.includes(r.year));
+  const last = new Map(rows.filter((r) => r.year === p.year).map((r) => [r.institution, r.headcount]));
+  // Smallest at the front, largest at the back, so tall bars don't hide the others in the starting view.
+  const insts = [...new Set(rows.map((r) => r.institution))].sort((a, b) => d3.ascending(last.get(a) ?? 0, last.get(b) ?? 0) || d3.ascending(a, b));
+  const bars = [];
+  for (const y of years) {
+    const yr = rows.filter((r) => r.year === y).sort((a, b) => b.headcount - a.headcount);
+    yr.forEach((r, k) => bars.push({ name: r.institution, year: y, v: r.headcount, i: insts.indexOf(r.institution), j: years.indexOf(y), rank: k + 1, of: yr.length }));
+  }
+  st.canvas.setAttribute('aria-label', `3D bar chart of headcount for ${insts.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(p.year)}. Drag or use the arrow keys to rotate.`);
+  const max = d3.max(bars, (b) => b.v) || 1;
+  const nI = Math.max(1, insts.length), nY = Math.max(1, years.length);
+  const Hh = Math.max(nI, nY) * 0.55;
+
+  st.paint = () => {
+    const W = Math.max(280, st.canvas.parentElement.clientWidth), H = Math.round(Math.min(560, Math.max(340, W * 0.55)));
+    const dpr = window.devicePixelRatio || 1;
+    st.canvas.width = W * dpr;
+    st.canvas.height = H * dpr;
+    st.canvas.style.height = H + 'px';
+    const ctx = st.canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    if (!bars.length) return;
+    const cy = Math.cos(VIEW3D.yaw), sy = Math.sin(VIEW3D.yaw), cp = Math.cos(VIEW3D.pitch), sp = Math.sin(VIEW3D.pitch);
+    const rot = (x, y, z) => {
+      const x1 = x * cy - z * sy, z1 = x * sy + z * cy;
+      return [x1, y * cp - z1 * sp, y * sp + z1 * cp];
+    };
+    const world = (x, y, z) => rot(x - nI / 2, y - Hh / 2, z - nY / 2);
+    // Fit the whole box into the canvas, leaving room for labels.
+    const corners = [];
+    for (const x of [0, nI]) for (const y of [0, Hh]) for (const z of [0, nY]) corners.push(world(x, y, z));
+    const [x0, x1] = d3.extent(corners, (c) => c[0]), [y0, y1] = d3.extent(corners, (c) => c[1]);
+    const pad = 56;
+    const k = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad + 20) / (y1 - y0));
+    const ox = W / 2 - ((x0 + x1) / 2) * k, oy = H / 2 + ((y0 + y1) / 2) * k;
+    const proj = (x, y, z) => {
+      const [a, b, d] = world(x, y, z);
+      return [ox + a * k, oy - b * k, d];
+    };
+    const fg = rgbOf(el, 'var(--color-fg)'), muted = rgbOf(el, 'var(--color-fg-muted)');
+    const york = rgbOf(el, dash.colors[0]), peer = rgbOf(el, MUTED);
+    const font = getComputedStyle(el).fontFamily;
+    const poly = (pts, fill, stroke) => {
+      ctx.beginPath();
+      pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+    };
+    // Which sides face the viewer: labels go on the near edges, the height scale on the far walls.
+    const nearZ = proj(nI / 2, 0, 0)[2] > proj(nI / 2, 0, nY)[2] ? 0 : nY;
+    const nearX = proj(0, 0, nY / 2)[2] > proj(nI, 0, nY / 2)[2] ? 0 : nI;
+    const farZ = nY - nearZ, farX = nI - nearX;
+    const ticks = d3.ticks(0, max, 4).filter((t) => t > 0);
+    const hOf = (v) => (v / max) * Hh;
+    // Floor and back walls with grid lines.
+    ctx.lineWidth = 1;
+    poly([proj(0, 0, 0), proj(nI, 0, 0), proj(nI, 0, nY), proj(0, 0, nY)], shade(fg, 1, 0.035), shade(fg, 1, 0.18));
+    const topY = hOf(ticks[ticks.length - 1] ?? max);
+    poly([proj(0, 0, farZ), proj(nI, 0, farZ), proj(nI, topY, farZ), proj(0, topY, farZ)], shade(fg, 1, 0.02), shade(fg, 1, 0.12));
+    poly([proj(farX, 0, 0), proj(farX, 0, nY), proj(farX, topY, nY), proj(farX, topY, 0)], shade(fg, 1, 0.02), shade(fg, 1, 0.12));
+    ctx.strokeStyle = shade(fg, 1, 0.1);
+    for (const t of ticks) {
+      const h = hOf(t);
+      ctx.beginPath();
+      [[0, h, farZ], [nI, h, farZ]].map((q) => proj(...q)).forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      [[farX, h, 0], [farX, h, nY]].map((q) => proj(...q)).forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.stroke();
+    }
+    ctx.font = `11px ${font}`;
+    ctx.fillStyle = shade(muted, 1);
+    ctx.textBaseline = 'middle';
+    // Height labels up the far corner on the near-x side of the back wall.
+    for (const t of ticks) {
+      const [x, y] = proj(nearX, hOf(t), farZ);
+      ctx.textAlign = nearX === 0 ? 'right' : 'left';
+      ctx.fillText(compact.format(t), x + (nearX === 0 ? -6 : 6), y);
+    }
+    // Institution labels along the near z edge, year labels along the near x edge.
+    const out = (fromPt, toPt) => (toPt[0] >= fromPt[0] ? 'left' : 'right');
+    insts.forEach((name, i) => {
+      const a = proj(i + 0.5, 0, nearZ), b = proj(i + 0.5, 0, nearZ + (nearZ === 0 ? -0.9 : 0.9));
+      ctx.textAlign = Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
+      ctx.fillStyle = name === FOCUS ? shade(york, 1) : shade(muted, 1);
+      ctx.font = `${name === FOCUS ? '600 ' : ''}12px ${font}`;
+      ctx.fillText(name, b[0], b[1]);
+    });
+    ctx.font = `11px ${font}`;
+    ctx.fillStyle = shade(muted, 1);
+    years.forEach((y, j) => {
+      const a = proj(nearX, 0, j + 0.5), b = proj(nearX + (nearX === 0 ? -0.7 : 0.7), 0, j + 0.5);
+      ctx.textAlign = Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
+      if (nY <= 8 || j % 2 === (nY - 1) % 2) ctx.fillText(shortYear(y), b[0], b[1]);
+    });
+    // Bars, far to near; each visible face is kept for hover hit-testing.
+    const g = 0.19, faces = [];
+    const order = bars.map((b) => ({ b, d: proj(b.i + 0.5, hOf(b.v) / 2, b.j + 0.5)[2] })).sort((a, c) => a.d - c.d);
+    const normals = { px: rot(1, 0, 0)[2], nx: rot(-1, 0, 0)[2], pz: rot(0, 0, 1)[2], nz: rot(0, 0, -1)[2], top: rot(0, 1, 0)[2] };
+    for (const { b } of order) {
+      const h = Math.max(hOf(b.v), 0.001), xa = b.i + g, xb = b.i + 1 - g, za = b.j + g, zb = b.j + 1 - g;
+      const c = b.name === FOCUS ? york : peer;
+      const hi = st.hover === b;
+      const P3 = (x, y, z) => proj(x, y, z);
+      const sides = [
+        ['px', [P3(xb, 0, za), P3(xb, 0, zb), P3(xb, h, zb), P3(xb, h, za)], 0.78],
+        ['nx', [P3(xa, 0, za), P3(xa, 0, zb), P3(xa, h, zb), P3(xa, h, za)], 0.78],
+        ['pz', [P3(xa, 0, zb), P3(xb, 0, zb), P3(xb, h, zb), P3(xa, h, zb)], 0.64],
+        ['nz', [P3(xa, 0, za), P3(xb, 0, za), P3(xb, h, za), P3(xa, h, za)], 0.64],
+        ['top', [P3(xa, h, za), P3(xb, h, za), P3(xb, h, zb), P3(xa, h, zb)], 1],
+      ];
+      for (const [n, pts, kk] of sides) {
+        if (normals[n] <= 0) continue;
+        poly(pts, shade(c, hi ? Math.min(1.15, kk + 0.15) : kk), hi ? shade(fg, 1, 0.9) : shade(c, kk * 0.8, 0.9));
+        faces.push({ bar: b, pts });
+      }
+    }
+    st.faces = faces;
+  };
+  st.paint();
+}
+dash.draw('bars3d', draw3d);
 
 // Filter dropdowns: the page's own list replaces the browser's, so moving through it with the arrow keys applies
 // each choice straight away (the browser's list only reports a choice when it closes). The <select> stays the

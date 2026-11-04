@@ -162,3 +162,11 @@
 .ux-dd-o.is-hi { background: color-mix(in srgb, var(--color-fg) 12%, transparent); font-weight: 600; }
 .ux-dd-o.is-above { color: var(--color-ok); }
 .ux-dd-o.is-below { color: var(--color-bad); }
+/* Ranking page: rotatable 3D bars. */
+#rank3d-card { margin-top: var(--cds-gap-md); }
+.ux-3d-box { min-height: 340px; }
+.ux-3d-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; margin-bottom: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ux-3d-wrap { position: relative; }
+.ux-3d { display: block; width: 100%; cursor: grab; touch-action: pan-y; border-radius: var(--cds-radius); }
+.ux-3d:active { cursor: grabbing; }
+.ux-3d:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }

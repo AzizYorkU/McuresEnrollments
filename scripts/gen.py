@@ -298,6 +298,11 @@ html = f"""<meta name="dash-one-writer">
         <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
+      <div class="ux-card" id="rank3d-card">
+        <h2>Headcount by year, in 3D</h2>
+        <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures. York is in colour.</p>
+        <div class="ux-3d-box dash-skeleton" data-draw="bars3d" data-source="totals peer_groups"></div>
+      </div>
     </section>
 
     <section class="ux-page" data-page="institutions" id="institutions" hidden>
