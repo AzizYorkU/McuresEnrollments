@@ -169,3 +169,16 @@
 .ux-3d { display: block; width: 100%; cursor: grab; touch-action: pan-y; border-radius: var(--cds-radius); }
 .ux-3d:active { cursor: grabbing; }
 .ux-3d:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+/* Field of study: count and sort controls; fields open into programs */
+.ux-ctl { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: end; margin: var(--cds-gap-xs) 0 var(--cds-gap-sm); }
+.ux-ctl-f { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ux-ctl select, .ux .ux-top { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: 2px 6px; }
+.ux .ux-top { width: 4.5em; }
+.ux-exp { font: inherit; line-height: 1; width: 1.4em; padding: 0; margin-right: 4px; border: 0; background: transparent; color: var(--color-fg-muted); cursor: pointer; flex: none; }
+.ux-exp:hover { color: var(--color-fg); }
+.ux-bar-row.ux-child { padding-left: 1.8em; }
+.ux-bar-row.ux-child .ux-bar-label { color: var(--color-fg-muted); }
+.ux-table tr.ux-child td:first-child { padding-left: 2.2em; color: var(--color-fg-muted); }
+.ux-lbl-child { fill: var(--color-fg-muted); }
+.ux-bar-head .ux-exp + .ux-bar-label { flex: 1 1 auto; }
+.ux-exp { font-size: 1.15em; }

@@ -23,7 +23,7 @@ REMOVED = ["program", "campus"]  # datasets the York-vs-peers page no longer use
 
 # id, tab label, column header, note under the table
 DIMS = [
-    ("cip2", "Field of study", "Field of study (CIP series)", "Detailed CIP codes rolled up to their 2-digit series."),
+    ("cip2", "Field of study", "Field of study and program", "Open a field (▸) to see its programs (6-digit CIP). Program shares are of all students, like the fields’, so a field’s programs add up to it."),
     ("cip", "Detailed programs", "Program (6-digit CIP)", "York share and Peer share are shares of the program’s field of study, not of all students."),
     ("country", "Citizenship", "Country of citizenship", ""),
     ("age", "Age", "Age group", ""),
@@ -127,34 +127,53 @@ CMP_FN = """dash.calc('cmp___D__', {
 def section(d, tab, col, note):
     note_html = f'\n          <p class="ux-note">{note}</p>' if note else ""
     low = col.lower()
-    mixnote = ('Share of each one’s students in the field, for its 12 largest programs, selected year.' if d == 'cip'
-               else 'Share of each one’s students in the 12 largest groups, selected year.')
-    pick = ('\n      <p class="ux-msg ux-pick-field" hidden>Pick a field of study in the filters to see the programs within it. Showing the largest programs across all fields.</p>'
-            if d == "cip" else "")
+    tree = d == "cip2"  # fields open into their programs, with a count and sort controls
+    src = "cmp_cip2 cmp_cip" if tree else f"cmp_{d}"
+    if tree:
+        mixnote = ('Share of each one’s students in each field, selected year: the largest fields, as many as you choose. '
+                   'Open a field (▸) to see its largest programs; their shares are of all students too.')
+        gainnote = ('York’s share of the students in each field (York ÷ York + peers), change since 2012-13 in percentage points. '
+                    'The largest fields, as many as you choose; open a field (▸) to see its programs.')
+    else:
+        mixnote = 'Share of each one’s students in the 12 largest groups, selected year.'
+        gainnote = 'York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points. The 12 largest groups.'
+
+    def ctl(chart, opts):
+        if not tree:
+            return ""
+        o = "".join(f'<option value="{v}">{t}</option>' for v, t in opts)
+        return f"""
+          <div class="ux-ctl">
+            <label class="ux-ctl-f">Show <input class="ux-top" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" value="12" aria-label="How many fields and programs to show: a number, or all" title="Type a number, or all"></label>
+            <label class="ux-ctl-f">Sort by <select class="ux-sortby" data-chart="{chart}">{o}</select></label>
+            <button class="ux-btn ux-sortdir" type="button" data-chart="{chart}" aria-label="Sort order">↓ High to low</button>
+          </div>"""
+    mixctl = ctl("mix", [("size", "Size (York + peers)"), ("york_share", "York share"), ("peer_share", "Peer share"), ("gap", "Gap"), ("category", "Name")])
+    gainctl = ctl("gains", [("field_change", "Change"), ("field_share", "York’s share of group"), ("size", "Size (York + peers)"), ("category", "Name")])
     return f"""
     <div class="ux-dim" data-dim="{d}" id="by-{d}" hidden>
-      <p class="ux-empty ux-msg" hidden>No {low} headcounts are reported for York in this selection.</p>{pick}
+      <p class="ux-empty ux-msg" hidden>No {low} headcounts are reported for York in this selection.</p>
       <div class="ux-dim-body">
         <div class="ux-card" id="{d}-mix" data-view="mix">
           <h3>{tab}: York against <span data-draw="sel-group">—</span></h3>
-          <p class="ux-note">{mixnote}</p>
+          <p class="ux-note">{mixnote}</p>{mixctl}
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span></div>
-          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="cmp_{d}"></div>
+          <div class="ux-bars dash-skeleton" data-draw="mix-bars" data-source="{src}"></div>
         </div>
         <div class="ux-card" id="{d}-field" data-view="gains">
           <h3>{tab}: change in York’s share since 2012-13</h3>
-          <p class="ux-note">York’s share of the students in each group (York ÷ York + peers), change since 2012-13 in percentage points. The 12 largest groups.</p>
+          <p class="ux-note">{gainnote}</p>{gainctl}
           <p class="ux-note ux-first-year" hidden>Pick a year after 2012-13 to see the change.</p>
-          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="cmp_{d}"></div>
+          <div class="ux-hbars dash-skeleton" data-draw="field-bars" data-source="{src}"></div>
         </div>
         <div class="ux-card" id="{d}-table" data-view="table">
           <div class="ux-card-head">
-            <h3>{tab}: all groups</h3>
+            <h3>{tab}: {'all fields and programs' if tree else 'all groups'}</h3>
             <input class="ux-search" id="search-{d}" type="search" placeholder="Search" aria-label="Search {low}">
           </div>
           <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>{note_html}
           <div class="ux-scroll ux-scroll-tall">
-            <table class="ux-table" id="table-{d}" data-rows="dim-rows" data-source="cmp_{d}" data-row-key="key" data-default-sort="york">
+            <table class="ux-table" id="table-{d}" data-rows="dim-rows" data-source="{src}" data-row-key="key" data-default-sort="york">
               <thead><tr>
                 <th data-field="category"><button class="ux-sort" data-sort="category">{col}</button></th>
                 <th class="ux-num" data-field="york"><button class="ux-sort" data-sort="york">York</button></th>
@@ -179,8 +198,9 @@ js = open(os.path.join(HERE, "page.js"), encoding="utf-8").read()
 calcs = "".join(CMP_FN.replace("__D__", d).replace("__LOW__", tab.lower()).replace("__WITHIN__", "true" if d == "cip" else "false")
                 .replace("York’s and the group’s headcount and share by category", "York’s and the group’s headcount and share of the field of study by program" if d == "cip" else "York’s and the group’s headcount and share by category")
                 for d, tab, *_ in DIMS)
-tabs = "\n".join(f'          <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in DIMS)
-sections = "".join(section(*x) for x in DIMS)
+SHOWN = [x for x in DIMS if x[0] != "cip"]  # programs open inside the Field of study tab, so cip has no tab of its own
+tabs = "\n".join(f'          <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in SHOWN)
+sections = "".join(section(*x) for x in SHOWN)
 
 html = f"""<meta name="dash-one-writer">
 <style>
@@ -331,7 +351,7 @@ html = f"""<meta name="dash-one-writer">
 
     <section class="ux-page" data-page="mix gains table" id="breakdown" hidden>
       <div class="ux-break">
-        <p class="ux-msg ux-field-off" hidden>The filters above (other than study level and comparison group) don’t apply to the breakdowns, which aren’t cross-tabulated. The one exception: a field of study narrows the Detailed programs tab to that field.</p>
+        <p class="ux-msg ux-field-off" hidden>The filters above (other than year, study level and comparison group) don’t apply to the breakdowns, which aren’t cross-tabulated. To see a field’s programs, open it in the Field of study tab.</p>
         <div class="ux-tabs" role="group" aria-label="Break down by">
 {tabs}
         </div>

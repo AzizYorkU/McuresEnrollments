@@ -216,14 +216,16 @@ function td(text, cls) {
 
 // Table sorting, shared by every table on the page.
 const sortBy = new Map();
+// Compares rows on one field; a missing value always sorts last.
+const cmpOn = (key, dir) => (a, b) => {
+  const x = a[key], y = b[key];
+  if (x == null) return y == null ? 0 : 1;
+  if (y == null) return -1;
+  return dir === 'asc' ? d3.ascending(x, y) : d3.descending(x, y);
+};
 function sortRows(list, table) {
   const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
-  list.sort((a, b) => {
-    const x = a[s.key], y = b[s.key];
-    if (x == null) return y == null ? 0 : 1;
-    if (y == null) return -1;
-    return s.dir === 'asc' ? d3.ascending(x, y) : d3.descending(x, y);
-  });
+  list.sort(cmpOn(s.key, s.dir));
   table.querySelectorAll('th').forEach((th) => {
     const b = th.querySelector('.ux-sort');
     th.setAttribute('aria-sort', b && b.dataset.sort === s.key ? (s.dir === 'asc' ? 'ascending' : 'descending') : 'none');
@@ -374,7 +376,7 @@ function idleFilters(p) {
   if (page === 'share') off['f-group'] = 'The share of Ontario chart compares York with all of Ontario, not with a comparison group.';
   if (BREAKDOWN_PAGES.includes(page)) {
     for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = 'The breakdowns aren’t cross-tabulated with this filter, so it doesn’t change them.';
-    if (p.dim !== 'cip') off['f-field'] = 'Field of study only narrows the Detailed programs tab.';
+    off['f-field'] = 'The breakdowns aren’t cross-tabulated with this filter. To see a field’s programs, open it in the Field of study tab.';
   }
   if (p.level === 'Graduate' && !off['f-studyyear']) off['f-studyyear'] = 'Year of study is reported for undergraduates only.';
   return off;
@@ -405,13 +407,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux [data-rview-panel]').forEach((c) => { c.hidden = c.dataset.rviewPanel !== rv; });
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
-  const cip2On = fieldCode(p) != null;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
-  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !filtered || (p.dim === 'cip' && cip2On); });
-  document.querySelectorAll('.ux .ux-pick-field').forEach((n) => { n.hidden = cip2On; });
+  document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !filtered; });
+  if (p.dim === 'cip') { dash.setParams({ dim: 'cip2' }); return; } // Detailed programs now open inside Field of study
   const d = dash.data('cmp_' + p.dim);
-  const code = p.dim === 'cip' ? fieldCode(p) : null;
-  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0 && (!code || r.category.startsWith(code + '.')));
+  const empty = d.status === 'ok' && !(bySel(d.data).get(cmpKey(p)) ?? []).some((r) => r.york > 0);
   document.querySelectorAll('.ux .ux-dim').forEach((s) => {
     const on = s.dataset.dim === p.dim;
     s.hidden = !on;
@@ -902,12 +902,8 @@ dash.draw('inst-rows', (tb) => {
 // Breakdown rows for the selected group, level and year, largest first.
 const TOP = 12;
 const selRows = (id) => {
-  const p = P();
-  const code = id === 'cmp_cip' ? fieldCode(p) : null;
-  const rows = (bySel(dash.data(id).data).get(cmpKey(p)) ?? [])
-    .filter((r) => r.york + r.peers > 0 && (!code || r.category.startsWith(code + '.')));
-  if (id === 'cmp_cip2') return rows.map((r) => ({ ...r, category: fieldName(r.category) })); // names without the CIP code
-  if (id === 'cmp_cip') return programLabels(rows);
+  const rows = (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+  if (id === 'cmp_cip2') return rows.map((r) => ({ ...r, code: r.category.slice(0, 2), category: fieldName(r.category), size: r.york + r.peers })); // names without the CIP code
   return rows;
 };
 // Program titles without the CIP code; a title shared by more than one code in the list keeps its code in brackets.
@@ -921,15 +917,117 @@ function programLabels(rows) {
 }
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
+// Field of study opens into its programs. One count (a number or all), the open fields and each chart's sort
+// are shared by the Mix, Gains and Table views; the table sorts by its headers.
+const TREE = 'cmp_cip2';
+const tree = { top: '12', open: new Set(), sort: { mix: { key: 'size', dir: 'desc' }, gains: { key: 'field_change', dir: 'desc' } } };
+const srcIds = (el) => el.dataset.source.split(' ');
+const bySize = (a, b) => b.size - a.size;
+const largest = (list, limit) => (limit && tree.top !== 'all' ? [...list].sort(bySize).slice(0, Number(tree.top)) : list);
+// A field's programs, with shares of all students like the field's own (cmp_cip's shares are within the field).
+function programsOf(f) {
+  const rows = (bySel(dash.data('cmp_cip').data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0 && r.category.startsWith(f.code + '.'));
+  return programLabels(rows).map((r) => {
+    const ys = r.york_share == null || f.york_share == null ? null : r.york_share * f.york_share;
+    const ps = r.peer_share == null || f.peer_share == null ? null : r.peer_share * f.peer_share;
+    return { ...r, child: true, parent: f.code, size: r.york + r.peers, york_share: ys, peer_share: ps, gap: ys == null || ps == null ? null : (ys - ps) * 100 };
+  });
+}
+// Fields in the given order, each open one followed by its programs in the same order.
+// limit: the largest fields (and programs) up to the count. only: rows to keep at both levels.
+// keep (a search): a field stays when it or one of its programs matches; matching programs open it.
+function treeRows(cmp, { limit = false, keep = null, only = null } = {}) {
+  let fields = selRows(TREE);
+  if (only) fields = fields.filter(only);
+  const kidsOf = (f) => (only ? programsOf(f).filter(only) : programsOf(f));
+  const sel = [];
+  for (const f of fields) {
+    if (!keep || keep(f)) { sel.push({ f, kids: null }); continue; }
+    const kids = kidsOf(f).filter(keep);
+    if (kids.length) sel.push({ f, kids });
+  }
+  const shown = new Set(largest(sel.map((x) => x.f), limit));
+  const out = [];
+  for (const x of sel.filter((x) => shown.has(x.f)).sort((a, b) => cmp(a.f, b.f))) {
+    const open = tree.open.has(x.f.code) || Boolean(x.kids);
+    out.push({ ...x.f, open });
+    if (open) out.push(...largest(x.kids ?? kidsOf(x.f), limit).sort(cmp));
+  }
+  return out;
+}
+const chartCmp = (chart) => cmpOn(tree.sort[chart].key, tree.sort[chart].dir);
+// The button that opens or closes a field.
+function expBtn(r) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'ux-exp';
+  b.dataset.code = r.code;
+  b.setAttribute('aria-expanded', String(r.open));
+  b.setAttribute('aria-label', (r.open ? 'Close ' : 'Open ') + r.category);
+  b.textContent = r.open ? '▾' : '▸';
+  return b;
+}
+const redrawTree = () => ['mix-bars', 'field-bars', 'dim-rows'].forEach((n) => dash.draw(n));
+const toggleField = (code) => {
+  if (tree.open.has(code)) tree.open.delete(code); else tree.open.add(code);
+  redrawTree();
+};
+// Brings the count boxes and sort controls in line with the tree state.
+function syncTreeCtl() {
+  document.querySelectorAll('.ux .ux-top').forEach((i) => { if (document.activeElement !== i) i.value = tree.top; i.dataset.last = i.value; });
+  document.querySelectorAll('.ux .ux-sortby').forEach((s) => { s.value = tree.sort[s.dataset.chart].key; });
+  document.querySelectorAll('.ux .ux-sortdir').forEach((b) => {
+    const s = tree.sort[b.dataset.chart];
+    const text = s.key === 'category';
+    b.textContent = s.dir === 'desc' ? (text ? '↓ Z to A' : '↓ High to low') : (text ? '↑ A to Z' : '↑ Low to high');
+  });
+}
+document.addEventListener('click', (e) => {
+  const exp = e.target.closest('.ux .ux-exp');
+  if (exp) { toggleField(exp.dataset.code); return; }
+  const dir = e.target.closest('.ux .ux-sortdir');
+  if (dir) {
+    const s = tree.sort[dir.dataset.chart];
+    s.dir = s.dir === 'desc' ? 'asc' : 'desc';
+    syncTreeCtl();
+    redrawTree();
+  }
+});
+document.addEventListener('change', (e) => {
+  if (!e.target.matches('.ux .ux-sortby')) return;
+  const s = tree.sort[e.target.dataset.chart];
+  s.key = e.target.value;
+  s.dir = s.key === 'category' ? 'asc' : 'desc';
+  syncTreeCtl();
+  redrawTree();
+});
+// The count box takes digits or the word "all", nothing else, and applies as you type.
+document.addEventListener('input', (e) => {
+  const i = e.target;
+  if (!i.matches('.ux .ux-top')) return;
+  const v = i.value.trim().toLowerCase();
+  if (!(/^\d*$/.test(v) || 'all'.startsWith(v))) { i.value = i.dataset.last ?? tree.top; return; }
+  i.dataset.last = i.value;
+  if (v === 'all' || /^0*[1-9]\d*$/.test(v)) {
+    tree.top = v === 'all' ? 'all' : String(Number(v));
+    document.querySelectorAll('.ux .ux-top').forEach((o) => { if (o !== i) o.value = tree.top; });
+    redrawTree();
+  }
+});
+document.addEventListener('focusout', (e) => { if (e.target.matches('.ux .ux-top')) syncTreeCtl(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('.ux .ux-top')) { syncTreeCtl(); e.target.select(); } });
+
 // York's mix against the group's: paired bars of share.
 dash.draw('mix-bars', (el) => {
-  const id = el.dataset.source;
-  if (!gate(el, [id], true)) return;
-  const rows = topRows(id);
+  const ids = srcIds(el), id = ids[0];
+  if (!gate(el, ids, true)) return;
+  const isTree = id === TREE;
+  if (isTree) syncTreeCtl();
+  const rows = isTree ? treeRows(chartCmp('mix'), { limit: true }) : topRows(id);
   const max = d3.max(rows, (r) => Math.max(r.york_share ?? 0, r.peer_share ?? 0)) || 1;
   el.replaceChildren(...rows.map((r) => {
     const row = document.createElement('div');
-    row.className = 'ux-bar-row';
+    row.className = 'ux-bar-row' + (r.child ? ' ux-child' : '');
     const head = document.createElement('div');
     head.className = 'ux-bar-head';
     const label = document.createElement('span');
@@ -939,6 +1037,7 @@ dash.draw('mix-bars', (el) => {
     const val = document.createElement('span');
     val.className = 'ux-bar-val';
     val.textContent = `${fmtP(r.york_share ?? 0)} vs ${fmtP(r.peer_share ?? 0)}`;
+    if (isTree && !r.child) head.append(expBtn(r));
     head.append(label, val);
     const yb = document.createElement('div');
     yb.className = 'ux-bar';
@@ -955,19 +1054,30 @@ dash.draw('mix-bars', (el) => {
 
 // York's share of each category (York ÷ York + peers), change since 2012-13 in points.
 dash.draw('field-bars', (el) => {
-  const id = el.dataset.source;
-  if (!gate(el, [id], true)) return;
-  const rows = topRows(id).filter((r) => r.field_change != null).sort((a, b) => b.field_change - a.field_change);
+  const ids = srcIds(el), id = ids[0];
+  if (!gate(el, ids, true)) return;
+  const isTree = id === TREE;
+  if (isTree) syncTreeCtl();
+  const rows = isTree ? treeRows(chartCmp('gains'), { limit: true, only: (r) => r.field_change != null })
+    : topRows(id).filter((r) => r.field_change != null).sort((a, b) => b.field_change - a.field_change);
   const W = Math.max(260, el.clientWidth), rowH = 30, H = Math.max(rowH, rows.length * rowH) + 4;
   const { svg, tip } = svgIn(el, W, H);
   if (!rows.length) return;
   const ext = d3.max(rows, (r) => Math.abs(r.field_change)) || 1;
-  const labelW = Math.min(measure(svg, rows.map((r) => r.category), 'ux-lbl') + 16, W * 0.45);
+  const IND = isTree ? 34 : 0; // room for the open/close mark and the programs' indent
+  const labelW = Math.min(measure(svg, rows.map((r) => r.category), 'ux-lbl') + 16 + IND, W * 0.45);
   const valW = measure(svg, rows.map((r) => fmtPt(r.field_change)), 'ux-lbl') + 8;
   const x = d3.scaleLinear([-ext, ext], [labelW + valW, W - valW]);
   const g = svg.append('g').selectAll('g').data(rows).join('g').attr('transform', (r, i) => `translate(0,${i * rowH + 2})`);
-  g.append('text').attr('class', 'ux-lbl').attr('x', labelW - 10).attr('y', rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
-    .text((r) => fit(svg, r.category, labelW - 12, 'ux-lbl'));
+  if (isTree) {
+    const lx = (r) => (r.child ? IND : 18);
+    g.append('text').attr('class', (r) => (r.child ? 'ux-lbl ux-lbl-child' : 'ux-lbl')).attr('x', lx).attr('y', rowH / 2).attr('dy', '0.32em')
+      .text((r) => fit(svg, r.category, labelW - lx(r) - 10, 'ux-lbl'));
+    g.filter((r) => !r.child).append('text').attr('class', 'ux-lbl').attr('x', 2).attr('y', rowH / 2).attr('dy', '0.32em').text((r) => (r.open ? '▾' : '▸'));
+  } else {
+    g.append('text').attr('class', 'ux-lbl').attr('x', labelW - 10).attr('y', rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .text((r) => fit(svg, r.category, labelW - 12, 'ux-lbl'));
+  }
   g.append('rect').attr('y', 5).attr('height', rowH - 10).attr('rx', 2)
     .style('fill', (r) => (r.field_change >= 0 ? dash.colors[0] : LOSS))
     .attr('x', (r) => x(Math.min(0, r.field_change))).attr('width', (r) => Math.max(1, Math.abs(x(r.field_change) - x(0))));
@@ -975,8 +1085,11 @@ dash.draw('field-bars', (el) => {
     .attr('x', (r) => (r.field_change < 0 ? x(r.field_change) - 4 : x(r.field_change) + 4))
     .attr('text-anchor', (r) => (r.field_change < 0 ? 'end' : 'start')).text((r) => fmtPt(r.field_change));
   svg.append('line').attr('class', 'ux-axis-line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H);
-  g.append('rect').attr('x', 0).attr('width', W).attr('height', rowH).style('fill', 'transparent')
+  const hit = g.append('rect').attr('x', 0).attr('width', W).attr('height', rowH).style('fill', 'transparent');
+  if (isTree) hit.filter((r) => !r.child).style('cursor', 'pointer').on('click', (e, r) => toggleField(r.code));
+  hit
     .on('mousemove', (e, r) => showTip(el, tip, e, r.category, [
+      ...(isTree && !r.child ? [{ name: r.open ? 'Click to close the field' : 'Click to see its programs', value: '' }] : []),
       { name: 'York’s share now', value: fmtP(r.field_share) },
       { name: 'Change since 2012-13', value: fmtPt(r.field_change) },
       { color: dash.colors[0], name: 'York', value: fmtN(r.york) },
@@ -988,20 +1101,34 @@ dash.draw('field-bars', (el) => {
 // Every category, searchable and sortable.
 dash.draw('dim-rows', (tb) => {
   const table = tb.closest('table');
-  const id = table.dataset.source;
-  if (!gateRows(tb, [id], 9)) return;
+  const ids = srcIds(table), id = ids[0];
+  if (!gateRows(tb, ids, 9)) return;
   const search = table.closest('.ux-dim')?.querySelector('.ux-search');
   const q = (search?.value ?? '').trim().toLowerCase();
-  let list = selRows(id);
-  if (q) list = list.filter((r) => r.category.toLowerCase().includes(q));
-  sortRows(list, table);
+  const match = (r) => r.category.toLowerCase().includes(q);
+  let list;
+  if (id === TREE) {
+    // Both levels sort by the chosen header; a search opens the fields whose programs match.
+    sortRows([], table);
+    const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
+    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null });
+  } else {
+    list = selRows(id);
+    if (q) list = list.filter(match);
+    sortRows(list, table);
+  }
   const pct = (v) => (v == null ? '—' : fmtP(v));
   const chg = (v) => (v == null ? '—' : fmtD(v));
   tb.replaceChildren(...list.map((r) => {
     const tr = document.createElement('tr');
     tr.dataset.key = r.key;
+    const name = td(r.category);
+    if (id === TREE) {
+      if (r.child) tr.className = 'ux-child';
+      else name.prepend(expBtn(r));
+    }
     tr.append(
-      td(r.category),
+      name,
       td(fmtN(r.york), 'ux-num'),
       td(pct(r.york_share), 'ux-num'),
       td(pct(r.peer_share), 'ux-num'),
@@ -1018,6 +1145,7 @@ dash.draw('dim-rows', (tb) => {
 // A link names a page (#growth) or a breakdown (#by-age).
 const link = location.hash.slice(1);
 if (PAGES.includes(link)) dash.setParams({ page: link });
+else if (link === 'by-cip') dash.setParams({ page: 'mix', dim: 'cip2' });
 else if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ page: 'mix', dim: link.slice(3) });
 
 // Ranking page: headcount for York and the group's members, each year, as 3D bars you can rotate.
