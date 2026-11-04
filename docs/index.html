@@ -110,7 +110,6 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 
 .ux-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
 .ux-fail::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-bad); }
-.ux-foot { max-width: 65ch; }
 
 [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
 [data-dash-source-state=empty] { color: transparent; }
@@ -674,7 +673,6 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     </div>
     </section>
 
-    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. With no filter, figures, growth, ranks and the institution table use the domestic/international file; with a field of study, gender, citizenship, credential or year of study picked they use that file, whose totals can run slightly lower. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are listed in data/peer_groups.csv. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
   </div>
 </div>
 </div>
@@ -2576,7 +2574,6 @@ dash.draw('bars3d', draw3d);
 
 </script>
 
-<footer class="site-foot">Data: Ontario university headcounts by institution, 2012-13 to 2024-25. Source code and data: <a href="https://github.com/AzizYorkU/McuresEnrollments">github.com/AzizYorkU/McuresEnrollments</a>.</footer>
 </main>
 </body>
 </html>

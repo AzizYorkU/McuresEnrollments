@@ -339,7 +339,6 @@ html = f"""<meta name="dash-one-writer">
 {sections}
     </section>
 
-    <p class="ux-note ux-foot">Source: Ontario university headcounts, 2012-13 to 2024-25, one file per breakdown. With no filter, figures, growth, ranks and the institution table use the domestic/international file; with a field of study, gender, citizenship, credential or year of study picked they use that file, whose totals can run slightly lower. Peers combined adds up every member of the chosen group; ranks count York and the group’s members (1 = highest). Large universities are those with more than 20,000 students in 2024-25; the groups are an editable file in Sources. Breakdown shares use each file’s own total, which can run up to about 2% lower where a group isn’t reported.</p>
   </div>
 </div>
 </div>
@@ -366,7 +365,7 @@ for f in ["dash.js", "theme.css", "d3.min.js"]:
     shutil.copyfile(os.path.join(HERE, "site", f), os.path.join(SITE, f))
 open(os.path.join(SITE, ".nojekyll"), "w").close()
 params = next(e["data"] for e in writes if e["collection"] == "dash" and e["doc_id"] == "params")
-body = html.replace('<meta name="dash-one-writer">\n', "").replace("the groups are an editable file in Sources", "the groups are listed in data/peer_groups.csv")
+body = html.replace('<meta name="dash-one-writer">\n', "")
 page = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -385,7 +384,6 @@ window.DASH_PARAMS = {json.dumps(params)};
 <body>
 <main class="site">
 {body}
-<footer class="site-foot">Data: Ontario university headcounts by institution, 2012-13 to 2024-25. Source code and data: <a href="https://github.com/AzizYorkU/McuresEnrollments">github.com/AzizYorkU/McuresEnrollments</a>.</footer>
 </main>
 </body>
 </html>
