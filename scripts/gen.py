@@ -171,7 +171,7 @@ def section(d, tab, col, note):
             <h3>{tab}: {'all fields and programs' if tree else 'all groups'}</h3>
             <input class="ux-search" id="search-{d}" type="search" placeholder="Search" aria-label="Search {low}">
           </div>
-          <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>{note_html}
+          <p class="ux-note">Only groups with York students are listed. Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>{note_html}
           <div class="ux-scroll ux-scroll-tall">
             <table class="ux-table" id="table-{d}" data-rows="dim-rows" data-source="{src}" data-row-key="key" data-default-sort="york">
               <thead><tr>

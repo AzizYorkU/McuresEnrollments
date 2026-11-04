@@ -479,7 +479,9 @@ dash.draw('field-select', (sel) => {
     return og;
   };
   const head = p.year === FIRST ? `Fields with York students (${at.length})` : `Fields with York students (${at.length}): growth since 2012-13, York vs ${p.group}`;
-  sel.replaceChildren(new Option(ALL_F), group(head, at, true), group(`No York students (${not.length})`, not, false));
+  // Fields without York students aren't listed, unless one is already picked.
+  const picked = not.filter((f) => f === fieldOf(p));
+  sel.replaceChildren(new Option(ALL_F), group(head, at, true), ...picked.map((f) => option(f, false)));
   sel.value = fieldCode(p) ? fieldOf(p) : ALL_F;
   sel.classList.remove('is-above', 'is-below');
   const cur = fieldCode(p) && count(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
@@ -531,7 +533,6 @@ dash.draw('subset-select', (sel) => {
   if (s.id === 'studyyear') list.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
   else list.sort((a, b) => d3.descending(cats.get(a), cats.get(b)) || d3.ascending(a, b));
   const at = list.filter((f) => cats.get(f) > 0);
-  const not = list.filter((f) => !(cats.get(f) > 0));
   const item = (f, withCount) => new Option(withCount ? `${label(f)}  ·  York ${fmtN(cats.get(f))}` : label(f), f);
   const group = (lbl, fs, withCount) => {
     const og = document.createElement('optgroup');
@@ -541,9 +542,8 @@ dash.draw('subset-select', (sel) => {
   };
   const opts = [new Option(s.all, '')];
   if (!list.length) opts.push(group('Not reported for this study level', [], false));
-  else if (not.length) opts.push(group(`With York students (${at.length})`, at, true), group(`No York students (${not.length})`, not, false));
-  else opts.push(...at.map((f) => item(f, true)));
-  if (cur && !cats.has(cur)) opts.push(new Option(label(cur), cur));
+  else opts.push(...at.map((f) => item(f, true))); // categories without York students aren't listed
+  if (cur && !(cats.get(cur) > 0)) opts.push(new Option(label(cur), cur));
   sel.replaceChildren(...opts);
   sel.value = cur;
 });
@@ -902,7 +902,7 @@ dash.draw('inst-rows', (tb) => {
 // Breakdown rows for the selected group, level and year, largest first.
 const TOP = 12;
 const selRows = (id) => {
-  const rows = (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0);
+  const rows = (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york > 0); // only what York has students in
   if (id === 'cmp_cip2') return rows.map((r) => ({ ...r, code: r.category.slice(0, 2), category: fieldName(r.category), size: r.york + r.peers })); // names without the CIP code
   return rows;
 };
@@ -926,7 +926,7 @@ const bySize = (a, b) => b.size - a.size;
 const largest = (list, limit) => (limit && tree.top !== 'all' ? [...list].sort(bySize).slice(0, Number(tree.top)) : list);
 // A field's programs, with shares of all students like the field's own (cmp_cip's shares are within the field).
 function programsOf(f) {
-  const rows = (bySel(dash.data('cmp_cip').data).get(cmpKey(P())) ?? []).filter((r) => r.york + r.peers > 0 && r.category.startsWith(f.code + '.'));
+  const rows = (bySel(dash.data('cmp_cip').data).get(cmpKey(P())) ?? []).filter((r) => r.york > 0 && r.category.startsWith(f.code + '.'));
   return programLabels(rows).map((r) => {
     const ys = r.york_share == null || f.york_share == null ? null : r.york_share * f.york_share;
     const ps = r.peer_share == null || f.peer_share == null ? null : r.peer_share * f.peer_share;
@@ -1112,7 +1112,7 @@ dash.draw('dim-rows', (tb) => {
     // Both levels sort by the chosen header; a search opens the fields whose programs match.
     sortRows([], table);
     const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
-    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null, kids: (r) => r.york > 0 });
+    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null });
   } else {
     list = selRows(id);
     if (q) list = list.filter(match);
