@@ -1086,8 +1086,9 @@ function build3d(el) {
       tip.hidden = true;
       return;
     }
+    const c = st.colorOf?.get(bar.name);
     showTip(wrap, tip, e, `${bar.name} · ${shortYear(bar.year)}`, [
-      { name: 'Headcount', value: fmtN(bar.v) },
+      { name: 'Headcount', value: fmtN(bar.v), color: c ? `rgb(${c.join(',')})` : undefined },
       { name: 'Rank that year', value: `${bar.rank} of ${bar.of}` },
     ]);
   });
@@ -1173,7 +1174,16 @@ function draw3d(el) {
       return [ox + a * k, oy - b * k, d];
     };
     const fg = rgbOf(el, 'var(--color-fg)'), muted = rgbOf(el, 'var(--color-fg-muted)');
-    const york = rgbOf(el, dash.colors[0]), peer = rgbOf(el, MUTED);
+    const york = rgbOf(el, dash.colors[0]);
+    // One colour per university: York keeps its orange; the others get evenly spaced hues that skip the oranges,
+    // a little lighter in dark mode.
+    const dark = fg[0] + fg[1] + fg[2] > 380;
+    const others = insts.filter((n) => n !== FOCUS);
+    const colorOf = new Map([[FOCUS, york], ...others.map((n, i) => {
+      const c = d3.hcl(95 + (i * 255) / Math.max(1, others.length - (others.length > 1 ? 1 : 0)), 52, dark ? 70 : 58).rgb();
+      return [n, [c.r, c.g, c.b]];
+    })]);
+    st.colorOf = colorOf;
     const font = getComputedStyle(el).fontFamily;
     const poly = (pts, fill, stroke) => {
       ctx.beginPath();
@@ -1216,7 +1226,7 @@ function draw3d(el) {
     insts.forEach((name, i) => {
       const a = proj(i + 0.5, 0, nearZ), b = proj(i + 0.5, 0, nearZ + (nearZ === 0 ? -0.9 : 0.9));
       ctx.textAlign = Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
-      ctx.fillStyle = name === FOCUS ? shade(york, 1) : shade(muted, 1);
+      ctx.fillStyle = shade(colorOf.get(name), dark ? 1 : 0.85);
       ctx.font = `${name === FOCUS ? '600 ' : ''}12px ${font}`;
       ctx.fillText(name, b[0], b[1]);
     });
@@ -1233,7 +1243,7 @@ function draw3d(el) {
     const normals = { px: rot(1, 0, 0)[2], nx: rot(-1, 0, 0)[2], pz: rot(0, 0, 1)[2], nz: rot(0, 0, -1)[2], top: rot(0, 1, 0)[2] };
     for (const { b } of order) {
       const h = Math.max(hOf(b.v), 0.001), xa = b.i + g, xb = b.i + 1 - g, za = b.j + g, zb = b.j + 1 - g;
-      const c = b.name === FOCUS ? york : peer;
+      const c = colorOf.get(b.name);
       const hi = st.hover === b;
       const P3 = (x, y, z) => proj(x, y, z);
       const sides = [
