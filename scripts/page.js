@@ -936,10 +936,11 @@ function programsOf(f) {
 // Fields in the given order, each open one followed by its programs in the same order.
 // limit: the largest fields (and programs) up to the count. only: rows to keep at both levels.
 // keep (a search): a field stays when it or one of its programs matches; matching programs open it.
-function treeRows(cmp, { limit = false, keep = null, only = null } = {}) {
+// kids: programs to keep (the table leaves out programs with no York students).
+function treeRows(cmp, { limit = false, keep = null, only = null, kids: kidOnly = null } = {}) {
   let fields = selRows(TREE);
   if (only) fields = fields.filter(only);
-  const kidsOf = (f) => (only ? programsOf(f).filter(only) : programsOf(f));
+  const kidsOf = (f) => programsOf(f).filter((r) => (!only || only(r)) && (!kidOnly || kidOnly(r)));
   const sel = [];
   for (const f of fields) {
     if (!keep || keep(f)) { sel.push({ f, kids: null }); continue; }
@@ -1111,7 +1112,7 @@ dash.draw('dim-rows', (tb) => {
     // Both levels sort by the chosen header; a search opens the fields whose programs match.
     sortRows([], table);
     const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
-    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null });
+    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null, kids: (r) => r.york > 0 });
   } else {
     list = selRows(id);
     if (q) list = list.filter(match);

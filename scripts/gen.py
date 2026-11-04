@@ -23,7 +23,7 @@ REMOVED = ["program", "campus"]  # datasets the York-vs-peers page no longer use
 
 # id, tab label, column header, note under the table
 DIMS = [
-    ("cip2", "Field of study", "Field of study and program", "Open a field (▸) to see its programs (6-digit CIP). Program shares are of all students, like the fields’, so a field’s programs add up to it."),
+    ("cip2", "Field of study", "Field of study and program", "Open a field (▸) to see its programs with York students (6-digit CIP). Program shares are of all students, like the fields’, so a field’s programs add up to it."),
     ("cip", "Detailed programs", "Program (6-digit CIP)", "York share and Peer share are shares of the program’s field of study, not of all students."),
     ("country", "Citizenship", "Country of citizenship", ""),
     ("age", "Age", "Age group", ""),

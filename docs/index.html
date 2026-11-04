@@ -390,7 +390,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
             <input class="ux-search" id="search-cip2" type="search" placeholder="Search" aria-label="Search field of study and program">
           </div>
           <p class="ux-note">Gap: York’s share minus the peers’ share, in points. York’s share of group: York ÷ York + peers.</p>
-          <p class="ux-note">Open a field (▸) to see its programs (6-digit CIP). Program shares are of all students, like the fields’, so a field’s programs add up to it.</p>
+          <p class="ux-note">Open a field (▸) to see its programs with York students (6-digit CIP). Program shares are of all students, like the fields’, so a field’s programs add up to it.</p>
           <div class="ux-scroll ux-scroll-tall">
             <table class="ux-table" id="table-cip2" data-rows="dim-rows" data-source="cmp_cip2 cmp_cip" data-row-key="key" data-default-sort="york">
               <thead><tr>
@@ -2028,10 +2028,11 @@ function programsOf(f) {
 // Fields in the given order, each open one followed by its programs in the same order.
 // limit: the largest fields (and programs) up to the count. only: rows to keep at both levels.
 // keep (a search): a field stays when it or one of its programs matches; matching programs open it.
-function treeRows(cmp, { limit = false, keep = null, only = null } = {}) {
+// kids: programs to keep (the table leaves out programs with no York students).
+function treeRows(cmp, { limit = false, keep = null, only = null, kids: kidOnly = null } = {}) {
   let fields = selRows(TREE);
   if (only) fields = fields.filter(only);
-  const kidsOf = (f) => (only ? programsOf(f).filter(only) : programsOf(f));
+  const kidsOf = (f) => programsOf(f).filter((r) => (!only || only(r)) && (!kidOnly || kidOnly(r)));
   const sel = [];
   for (const f of fields) {
     if (!keep || keep(f)) { sel.push({ f, kids: null }); continue; }
@@ -2203,7 +2204,7 @@ dash.draw('dim-rows', (tb) => {
     // Both levels sort by the chosen header; a search opens the fields whose programs match.
     sortRows([], table);
     const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
-    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null });
+    list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null, kids: (r) => r.york > 0 });
   } else {
     list = selRows(id);
     if (q) list = list.filter(match);
