@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -286,7 +286,11 @@ html = f"""<meta name="dash-one-writer">
     </section>
 
     <section class="ux-page" data-page="ranking" id="ranking" hidden>
-      <div class="ux-card" id="rank-card">
+      <div class="ux-tabs ux-rview-tabs" role="group" aria-label="Chart">
+        <button class="ux-tab ux-rviewtab" data-rview="bars" aria-pressed="true">Ranking</button>
+        <button class="ux-tab ux-rviewtab" data-rview="3d" aria-pressed="false">Headcount by year (3D)</button>
+      </div>
+      <div class="ux-card" id="rank-card" data-rview-panel="bars">
         <h2>How York ranks against <span data-draw="sel-group">—</span></h2>
         <div class="ux-tabs" role="group" aria-label="Rank by">
           <button class="ux-tab ux-metric" data-metric="change_base" aria-pressed="false">Since 2012-13</button>
@@ -298,7 +302,7 @@ html = f"""<meta name="dash-one-writer">
         <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
-      <div class="ux-card" id="rank3d-card">
+      <div class="ux-card" id="rank3d-card" data-rview-panel="3d" hidden>
         <h2>Headcount by year, in 3D</h2>
         <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures and a dashed line at its height on the back walls. Bars further back start higher on the screen, so their tops can look taller than they are; compare them against the dashed line. Each university has its own colour, matching its name; York is orange and in bold.</p>
         <div class="ux-3d-box dash-skeleton" data-draw="bars3d" data-source="totals peer_groups"></div>

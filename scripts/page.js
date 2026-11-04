@@ -334,6 +334,11 @@ document.addEventListener('click', (e) => {
     document.querySelector('.ux .ux-main')?.scrollIntoView({ block: 'start' });
     return;
   }
+  const rview = e.target.closest('.ux .ux-rviewtab');
+  if (rview) {
+    dash.setParams({ rview: rview.dataset.rview });
+    return;
+  }
   const metric = e.target.closest('.ux .ux-metric');
   if (metric) {
     dash.setParams({ metric: metric.dataset.metric });
@@ -394,6 +399,10 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-sw[data-muted]').forEach((s) => { s.style.background = MUTED; });
   document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
   document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
+  // Ranking page tabs: the ranking bars or the 3D bars by year.
+  const rv = p.rview === '3d' ? '3d' : 'bars';
+  document.querySelectorAll('.ux .ux-rviewtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.rview === rv)));
+  document.querySelectorAll('.ux [data-rview-panel]').forEach((c) => { c.hidden = c.dataset.rviewPanel !== rv; });
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
   const cip2On = fieldCode(p) != null;

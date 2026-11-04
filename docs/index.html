@@ -9,7 +9,7 @@
 <script src="d3.min.js"></script>
 <script>
 window.DASH_SOURCES = {"status": "data/status.csv", "peer_groups": "data/peer_groups.csv", "cip2": "data/cip2.csv", "cip": "data/cip.csv", "country": "data/country.csv", "age": "data/age.csv", "gender": "data/gender.csv", "tongue": "data/tongue.csv", "credential": "data/credential.csv", "studyyear": "data/studyyear.csv"};
-window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields"};
+window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars"};
 </script>
 <script src="dash.js"></script>
 </head>
@@ -181,7 +181,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-dd-o.is-above { color: var(--color-ok); }
 .ux-dd-o.is-below { color: var(--color-bad); }
 /* Ranking page: rotatable 3D bars. */
-#rank3d-card { margin-top: var(--cds-gap-md); }
+.ux-rview-tabs { margin-bottom: var(--cds-gap-sm); }
 .ux-3d-box { min-height: 340px; }
 .ux-3d-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; margin-bottom: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 .ux-3d-wrap { position: relative; }
@@ -290,7 +290,11 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     </section>
 
     <section class="ux-page" data-page="ranking" id="ranking" hidden>
-      <div class="ux-card" id="rank-card">
+      <div class="ux-tabs ux-rview-tabs" role="group" aria-label="Chart">
+        <button class="ux-tab ux-rviewtab" data-rview="bars" aria-pressed="true">Ranking</button>
+        <button class="ux-tab ux-rviewtab" data-rview="3d" aria-pressed="false">Headcount by year (3D)</button>
+      </div>
+      <div class="ux-card" id="rank-card" data-rview-panel="bars">
         <h2>How York ranks against <span data-draw="sel-group">—</span></h2>
         <div class="ux-tabs" role="group" aria-label="Rank by">
           <button class="ux-tab ux-metric" data-metric="change_base" aria-pressed="false">Since 2012-13</button>
@@ -302,7 +306,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
         <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
-      <div class="ux-card" id="rank3d-card">
+      <div class="ux-card" id="rank3d-card" data-rview-panel="3d" hidden>
         <h2>Headcount by year, in 3D</h2>
         <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures and a dashed line at its height on the back walls. Bars further back start higher on the screen, so their tops can look taller than they are; compare them against the dashed line. Each university has its own colour, matching its name; York is orange and in bold.</p>
         <div class="ux-3d-box dash-skeleton" data-draw="bars3d" data-source="totals peer_groups"></div>
@@ -1443,6 +1447,11 @@ document.addEventListener('click', (e) => {
     document.querySelector('.ux .ux-main')?.scrollIntoView({ block: 'start' });
     return;
   }
+  const rview = e.target.closest('.ux .ux-rviewtab');
+  if (rview) {
+    dash.setParams({ rview: rview.dataset.rview });
+    return;
+  }
   const metric = e.target.closest('.ux .ux-metric');
   if (metric) {
     dash.setParams({ metric: metric.dataset.metric });
@@ -1503,6 +1512,10 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-sw[data-muted]').forEach((s) => { s.style.background = MUTED; });
   document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
   document.querySelectorAll('.ux .ux-metric').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.metric === p.metric)));
+  // Ranking page tabs: the ranking bars or the 3D bars by year.
+  const rv = p.rview === '3d' ? '3d' : 'bars';
+  document.querySelectorAll('.ux .ux-rviewtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.rview === rv)));
+  document.querySelectorAll('.ux [data-rview-panel]').forEach((c) => { c.hidden = c.dataset.rviewPanel !== rv; });
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
   const cip2On = fieldCode(p) != null;
