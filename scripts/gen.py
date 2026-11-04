@@ -233,7 +233,6 @@ html = f"""<meta name="dash-one-writer">
         <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
       </div>
     </div>
-    <p class="ux-note ux-filter-note">Year, comparison group and study level always apply. Credential, field of study, year of study, citizenship and gender come from separate files that aren’t cross-tabulated, so only one of those five applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
       <div class="ux-lists" id="figures">

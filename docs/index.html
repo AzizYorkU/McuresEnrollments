@@ -170,7 +170,6 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-field-select option.is-above, .ux-field-select.is-above { color: var(--color-ok); }
 .ux-field-select option.is-below, .ux-field-select.is-below { color: var(--color-bad); }
 .ux-field-select option, .ux-field-select optgroup { color: var(--color-fg); background: var(--color-panel); }
-.ux-filter-note { margin-top: calc(-1 * var(--cds-gap-xs)); }
 /* The filters' own dropdown list (see the end of page.js). */
 .ux-dd { position: fixed; z-index: 60; overflow-y: auto; max-width: min(46rem, calc(100vw - 16px)); padding: 4px 0; background: var(--color-panel); color: var(--color-fg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); box-shadow: 0 8px 24px rgb(0 0 0 / .16); font-size: var(--cds-font-size-body); }
 .ux-dd-g { padding: 8px 12px 3px; font-size: var(--cds-font-size-caption); font-weight: 600; color: var(--color-fg-muted); }
@@ -238,7 +237,6 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
         <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
       </div>
     </div>
-    <p class="ux-note ux-filter-note">Year, comparison group and study level always apply. Credential, field of study, year of study, citizenship and gender come from separate files that aren’t cross-tabulated, so only one of those five applies at a time: picking one clears the others. Year of study is reported for undergraduates only.</p>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
       <div class="ux-lists" id="figures">
