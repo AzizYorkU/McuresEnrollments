@@ -256,7 +256,7 @@ html = f"""<meta name="dash-one-writer">
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
         <div class="ux-card ux-list-card" id="list-ontario_share">
-          <p class="ux-list-l">Share of Ontario students</p>
+          <p class="ux-list-l">Share of students</p>
           <h3 class="ux-rank">York ranks <b data-draw="r-ontario_share" data-source="york_standing">—</b></h3>
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="ontario_share" data-source="totals group_totals peer_groups"></ol>
           <p class="ux-note">York since 2012-13: <b data-draw="o-base" data-source="york_ontario">—</b></p>
@@ -278,7 +278,7 @@ html = f"""<meta name="dash-one-writer">
 
     <section class="ux-page" data-page="share" id="share" hidden>
       <div class="ux-card" id="share-card">
-        <h2>York’s share of Ontario students</h2>
+        <h2>York’s share of students</h2>
         <p class="ux-note">York’s headcount as a share of all Ontario universities combined, each year.</p>
         <div class="ux-chart ux-chart-big dash-skeleton" data-draw="share" data-source="york_ontario"></div>
       </div>
