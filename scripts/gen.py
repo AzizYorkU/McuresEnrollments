@@ -286,25 +286,27 @@ html = f"""<meta name="dash-one-writer">
     </section>
 
     <section class="ux-page" data-page="ranking" id="ranking" hidden>
-      <div class="ux-tabs ux-rview-tabs" role="group" aria-label="Chart">
-        <button class="ux-tab ux-rviewtab" data-rview="bars" aria-pressed="true">Ranking</button>
-        <button class="ux-tab ux-rviewtab" data-rview="3d" aria-pressed="false">Headcount by year (3D)</button>
-      </div>
-      <div class="ux-card" id="rank-card" data-rview-panel="bars">
-        <h2>How York ranks against <span data-draw="sel-group">—</span></h2>
+      <div class="ux-rank-controls">
+        <div class="ux-tabs ux-rview-tabs" role="group" aria-label="Chart">
+          <button class="ux-tab ux-rviewtab" data-rview="bars" aria-pressed="true">2D</button>
+          <button class="ux-tab ux-rviewtab" data-rview="3d" aria-pressed="false">3D</button>
+        </div>
         <div class="ux-tabs" role="group" aria-label="Rank by">
           <button class="ux-tab ux-metric" data-metric="change_base" aria-pressed="false">Since 2012-13</button>
           <button class="ux-tab ux-metric" data-metric="change_prev" aria-pressed="false">Previous year</button>
           <button class="ux-tab ux-metric" data-metric="headcount" aria-pressed="false">Headcount</button>
           <button class="ux-tab ux-metric" data-metric="intl_share" aria-pressed="false">International share</button>
         </div>
+      </div>
+      <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
+      <div class="ux-card" id="rank-card" data-rview-panel="bars">
+        <h2>How York ranks against <span data-draw="sel-group">—</span>: <span data-draw="sel-metric">—</span></h2>
         <p class="ux-note">Selected year and study level. A › marks a bar cut short to keep the others readable.</p>
-        <p class="ux-note ux-no-intl" hidden>International share is only available for all students; clear the filters to rank on it.</p>
         <div class="ux-hbars dash-skeleton" data-draw="rank-bars" data-source="totals group_totals peer_groups"></div>
       </div>
       <div class="ux-card" id="rank3d-card" data-rview-panel="3d" hidden>
-        <h2>Headcount by year, in 3D</h2>
-        <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures and a dashed line at its height on the back walls. Bars further back start higher on the screen, so their tops can look taller than they are; compare them against the dashed line. Each university has its own colour, matching its name; York is orange and in bold.</p>
+        <h2><span data-draw="sel-metric">—</span> by year, in 3D</h2>
+        <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures and a dashed line at its height on the back walls. Bars rise from the 0 level, or drop below it for a fall. Bars further back start higher on the screen, so their tops can look taller than they are; compare them against the dashed line. Growth since 2012-13 starts in 2013-14. Each university has its own colour, matching its name; York is orange and in bold.</p>
         <div class="ux-3d-box dash-skeleton" data-draw="bars3d" data-source="totals peer_groups"></div>
       </div>
     </section>

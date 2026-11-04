@@ -816,6 +816,8 @@ const METRICS = {
   headcount: { fmt: fmtN, signed: false },
   intl_share: { fmt: fmtP, signed: false },
 };
+const METRIC_NAMES = { change_base: 'Growth since 2012-13', change_prev: 'Change from previous year', headcount: 'Headcount', intl_share: 'International share' };
+dash.draw('sel-metric', (el) => { el.textContent = METRIC_NAMES[METRICS[P().metric] ? P().metric : 'change_base']; });
 dash.draw('rank-bars', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
@@ -1096,10 +1098,12 @@ function build3d(el) {
       return;
     }
     const c = st.colorOf?.get(bar.name);
+    const mf = st.metric;
     showTip(wrap, tip, e, `${bar.name} · ${shortYear(bar.year)}`, [
-      { name: 'Headcount', value: fmtN(bar.v), color: c ? `rgb(${c.join(',')})` : undefined },
+      { name: METRIC_NAMES[mf], value: METRICS[mf].fmt(bar.v), color: c ? `rgb(${c.join(',')})` : undefined },
       { name: 'Rank that year', value: `${bar.rank} of ${bar.of}` },
-      ...(bar.first && bar.first.year !== bar.year
+      ...(mf !== 'headcount' ? [{ name: 'Headcount', value: fmtN(bar.n) }] : []),
+      ...(mf === 'headcount' && bar.first && bar.first.year !== bar.year
         ? [{ name: `Change since ${shortYear(bar.first.year)}`, value: fmtD(bar.v / bar.first.v - 1) }] : []),
     ]);
   });
@@ -1136,6 +1140,7 @@ function draw3d(el) {
   if (!gate(el, ['totals', 'peer_groups'], true)) return;
   const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el);
   const p = P();
+  const f = METRICS[p.metric] ? p.metric : 'change_base';
   const all = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
   const allYears = [...new Set(all.map((r) => r.year))].sort(d3.ascending).filter((y) => y <= p.year);
   st.from.replaceChildren(...allYears.map((y) => new Option(shortYear(y), y)));
@@ -1143,20 +1148,24 @@ function draw3d(el) {
   st.from.value = from3d;
   const years = allYears.filter((y) => y >= from3d);
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
-  const rows = all.filter((r) => pool.has(r.institution) && years.includes(r.year));
-  const last = new Map(rows.filter((r) => r.year === p.year).map((r) => [r.institution, r.headcount]));
+  const rows = all.filter((r) => pool.has(r.institution) && years.includes(r.year) && r[f] != null);
+  const last = new Map(rows.filter((r) => r.year === p.year).map((r) => [r.institution, r[f]]));
   // Smallest at the front, largest at the back, so tall bars don't hide the others in the starting view.
   const insts = [...new Set(rows.map((r) => r.institution))].sort((a, b) => d3.ascending(last.get(a) ?? 0, last.get(b) ?? 0) || d3.ascending(a, b));
   const bars = [];
   for (const y of years) {
-    const yr = rows.filter((r) => r.year === y).sort((a, b) => b.headcount - a.headcount);
-    yr.forEach((r, k) => bars.push({ name: r.institution, year: y, v: r.headcount, i: insts.indexOf(r.institution), j: years.indexOf(y), rank: k + 1, of: yr.length }));
+    const yr = rows.filter((r) => r.year === y).sort((a, b) => b[f] - a[f]);
+    yr.forEach((r, k) => bars.push({ name: r.institution, year: y, v: r[f], n: r.headcount, i: insts.indexOf(r.institution), j: years.indexOf(y), rank: k + 1, of: yr.length }));
   }
   const firstOf = new Map();
   for (const b of bars) if (!firstOf.has(b.name) || b.year < firstOf.get(b.name).year) firstOf.set(b.name, b);
   for (const b of bars) b.first = firstOf.get(b.name);
-  st.canvas.setAttribute('aria-label', `3D bar chart of headcount for ${insts.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(p.year)}. Drag or use the arrow keys to rotate.`);
-  const max = d3.max(bars, (b) => b.v) || 1;
+  st.canvas.setAttribute('aria-label', `3D bar chart of ${METRIC_NAMES[f].toLowerCase()} for ${insts.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(p.year)}. Drag or use the arrow keys to rotate.`);
+  st.metric = f;
+  // The height scale runs from the lowest value (or 0) to the highest (or 0); bars rise or fall from the 0 level.
+  let lo = Math.min(0, d3.min(bars, (b) => b.v) ?? 0), hi = Math.max(0, d3.max(bars, (b) => b.v) ?? 0);
+  if (hi === lo) hi = lo + 1;
+  const tickFmt = f === 'headcount' ? (t) => compact.format(t) : d3.format(hi - lo < 0.1 ? '.1%' : '.0%');
   const nI = Math.max(1, insts.length), nY = Math.max(1, years.length);
   const Hh = Math.max(nI, nY) * 0.55;
 
@@ -1169,7 +1178,14 @@ function draw3d(el) {
     const ctx = st.canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
-    if (!bars.length) return;
+    if (!bars.length) {
+      ctx.font = `13px ${getComputedStyle(el).fontFamily}`;
+      ctx.fillStyle = shade(rgbOf(el, 'var(--color-fg-muted)'), 1);
+      ctx.textAlign = 'center';
+      ctx.fillText(f === 'intl_share' ? 'International share is only available for all students.' : 'No figures for this measure and selection.', W / 2, H / 2);
+      st.faces = [];
+      return;
+    }
     const cy = Math.cos(VIEW3D.yaw), sy = Math.sin(VIEW3D.yaw), cp = Math.cos(VIEW3D.pitch), sp = Math.sin(VIEW3D.pitch);
     const rot = (x, y, z) => {
       const x1 = x * cy - z * sy, z1 = x * sy + z * cy;
@@ -1192,7 +1208,8 @@ function draw3d(el) {
     // One colour per university: York keeps its orange; the others get evenly spaced hues that skip the oranges,
     // a little lighter in dark mode.
     const dark = fg[0] + fg[1] + fg[2] > 380;
-    const others = insts.filter((n) => n !== FOCUS);
+    // Colours follow the names (alphabetical), so a university keeps its colour when the measure or order changes.
+    const others = insts.filter((n) => n !== FOCUS).sort(d3.ascending);
     const colorOf = new Map([[FOCUS, york], ...others.map((n, i) => {
       const c = d3.hcl(95 + (i * 255) / Math.max(1, others.length - (others.length > 1 ? 1 : 0)), 52, dark ? 70 : 58).rgb();
       return [n, [c.r, c.g, c.b]];
@@ -1210,14 +1227,15 @@ function draw3d(el) {
     const nearZ = proj(nI / 2, 0, 0)[2] > proj(nI / 2, 0, nY)[2] ? 0 : nY;
     const nearX = proj(0, 0, nY / 2)[2] > proj(nI, 0, nY / 2)[2] ? 0 : nI;
     const farZ = nY - nearZ, farX = nI - nearX;
-    const ticks = d3.ticks(0, max, 4).filter((t) => t > 0);
-    const hOf = (v) => (v / max) * Hh;
-    // Floor and back walls with grid lines.
+    const ticks = d3.ticks(lo, hi, 5);
+    const hOf = (v) => ((v - lo) / (hi - lo)) * Hh;
+    const base = hOf(0);
+    // Back walls with grid lines, then the 0 level (the floor when nothing is negative).
     ctx.lineWidth = 1;
-    poly([proj(0, 0, 0), proj(nI, 0, 0), proj(nI, 0, nY), proj(0, 0, nY)], shade(fg, 1, 0.035), shade(fg, 1, 0.18));
-    const topY = hOf(ticks[ticks.length - 1] ?? max);
-    poly([proj(0, 0, farZ), proj(nI, 0, farZ), proj(nI, topY, farZ), proj(0, topY, farZ)], shade(fg, 1, 0.02), shade(fg, 1, 0.12));
-    poly([proj(farX, 0, 0), proj(farX, 0, nY), proj(farX, topY, nY), proj(farX, topY, 0)], shade(fg, 1, 0.02), shade(fg, 1, 0.12));
+    poly([proj(0, 0, farZ), proj(nI, 0, farZ), proj(nI, Hh, farZ), proj(0, Hh, farZ)], shade(fg, 1, 0.02), shade(fg, 1, 0.12));
+    poly([proj(farX, 0, 0), proj(farX, 0, nY), proj(farX, Hh, nY), proj(farX, Hh, 0)], shade(fg, 1, 0.02), shade(fg, 1, 0.12));
+    if (lo < 0) poly([proj(0, 0, 0), proj(nI, 0, 0), proj(nI, 0, nY), proj(0, 0, nY)], null, shade(fg, 1, 0.1));
+    poly([proj(0, base, 0), proj(nI, base, 0), proj(nI, base, nY), proj(0, base, nY)], shade(fg, 1, lo < 0 ? 0.06 : 0.035), shade(fg, 1, lo < 0 ? 0.35 : 0.18));
     ctx.strokeStyle = shade(fg, 1, 0.1);
     for (const t of ticks) {
       const h = hOf(t);
@@ -1233,7 +1251,7 @@ function draw3d(el) {
     for (const t of ticks) {
       const [x, y] = proj(nearX, hOf(t), farZ);
       ctx.textAlign = nearX === 0 ? 'right' : 'left';
-      ctx.fillText(compact.format(t), x + (nearX === 0 ? -6 : 6), y);
+      ctx.fillText(tickFmt(t), x + (nearX === 0 ? -6 : 6), y);
     }
     // Institution labels along the near z edge, year labels along the near x edge.
     const out = (fromPt, toPt) => (toPt[0] >= fromPt[0] ? 'left' : 'right');
@@ -1266,18 +1284,20 @@ function draw3d(el) {
     }
     // Bars, far to near; each visible face is kept for hover hit-testing.
     const g = 0.19, faces = [];
-    const order = bars.map((b) => ({ b, d: proj(b.i + 0.5, hOf(b.v) / 2, b.j + 0.5)[2] })).sort((a, c) => a.d - c.d);
+    const order = bars.map((b) => ({ b, d: proj(b.i + 0.5, (hOf(b.v) + base) / 2, b.j + 0.5)[2] })).sort((a, c) => a.d - c.d);
     const normals = { px: rot(1, 0, 0)[2], nx: rot(-1, 0, 0)[2], pz: rot(0, 0, 1)[2], nz: rot(0, 0, -1)[2], top: rot(0, 1, 0)[2] };
     for (const { b } of order) {
-      const h = Math.max(hOf(b.v), 0.001), xa = b.i + g, xb = b.i + 1 - g, za = b.j + g, zb = b.j + 1 - g;
+      // A bar spans from the 0 level to its value, up for positive values and down for negative ones.
+      const y0 = Math.min(base, hOf(b.v)), h = Math.max(base, hOf(b.v), y0 + 0.001);
+      const xa = b.i + g, xb = b.i + 1 - g, za = b.j + g, zb = b.j + 1 - g;
       const c = colorOf.get(b.name);
       const hi = st.hover === b;
       const P3 = (x, y, z) => proj(x, y, z);
       const sides = [
-        ['px', [P3(xb, 0, za), P3(xb, 0, zb), P3(xb, h, zb), P3(xb, h, za)], 0.78],
-        ['nx', [P3(xa, 0, za), P3(xa, 0, zb), P3(xa, h, zb), P3(xa, h, za)], 0.78],
-        ['pz', [P3(xa, 0, zb), P3(xb, 0, zb), P3(xb, h, zb), P3(xa, h, zb)], 0.64],
-        ['nz', [P3(xa, 0, za), P3(xb, 0, za), P3(xb, h, za), P3(xa, h, za)], 0.64],
+        ['px', [P3(xb, y0, za), P3(xb, y0, zb), P3(xb, h, zb), P3(xb, h, za)], 0.78],
+        ['nx', [P3(xa, y0, za), P3(xa, y0, zb), P3(xa, h, zb), P3(xa, h, za)], 0.78],
+        ['pz', [P3(xa, y0, zb), P3(xb, y0, zb), P3(xb, h, zb), P3(xa, h, zb)], 0.64],
+        ['nz', [P3(xa, y0, za), P3(xb, y0, za), P3(xb, h, za), P3(xa, h, za)], 0.64],
         ['top', [P3(xa, h, za), P3(xb, h, za), P3(xb, h, zb), P3(xa, h, zb)], 1],
       ];
       for (const [n, pts, kk] of sides) {

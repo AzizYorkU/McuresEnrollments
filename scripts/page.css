@@ -163,7 +163,8 @@
 .ux-dd-o.is-above { color: var(--color-ok); }
 .ux-dd-o.is-below { color: var(--color-bad); }
 /* Ranking page: rotatable 3D bars. */
-.ux-rview-tabs { margin-bottom: var(--cds-gap-sm); }
+.ux-rank-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-lg); align-items: center; margin-bottom: var(--cds-gap-sm); }
+.ux-rview-tabs { padding-right: var(--cds-gap-lg); border-right: 1px solid var(--color-border-line); }
 .ux-3d-box { min-height: 340px; }
 .ux-3d-head { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: center; margin-bottom: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 .ux-3d-wrap { position: relative; }
