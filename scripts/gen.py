@@ -300,7 +300,7 @@ html = f"""<meta name="dash-one-writer">
       </div>
       <div class="ux-card" id="rank3d-card">
         <h2>Headcount by year, in 3D</h2>
-        <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures. Each university has its own colour, matching its name; York is orange and in bold.</p>
+        <p class="ux-note">York and each member of <span data-draw="sel-group">—</span>, from the year you pick here to the Year filter, for the selected study level and filter. Drag the chart or use the arrow keys to rotate it; hover a bar for its figures and a dashed line at its height on the back walls. Bars further back start higher on the screen, so their tops can look taller than they are; compare them against the dashed line. Each university has its own colour, matching its name; York is orange and in bold.</p>
         <div class="ux-3d-box dash-skeleton" data-draw="bars3d" data-source="totals peer_groups"></div>
       </div>
     </section>

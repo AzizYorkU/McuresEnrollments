@@ -1090,6 +1090,8 @@ function build3d(el) {
     showTip(wrap, tip, e, `${bar.name} · ${shortYear(bar.year)}`, [
       { name: 'Headcount', value: fmtN(bar.v), color: c ? `rgb(${c.join(',')})` : undefined },
       { name: 'Rank that year', value: `${bar.rank} of ${bar.of}` },
+      ...(bar.first && bar.first.year !== bar.year
+        ? [{ name: `Change since ${shortYear(bar.first.year)}`, value: fmtD(bar.v / bar.first.v - 1) }] : []),
     ]);
   });
   const end = () => { drag = null; };
@@ -1141,6 +1143,9 @@ function draw3d(el) {
     const yr = rows.filter((r) => r.year === y).sort((a, b) => b.headcount - a.headcount);
     yr.forEach((r, k) => bars.push({ name: r.institution, year: y, v: r.headcount, i: insts.indexOf(r.institution), j: years.indexOf(y), rank: k + 1, of: yr.length }));
   }
+  const firstOf = new Map();
+  for (const b of bars) if (!firstOf.has(b.name) || b.year < firstOf.get(b.name).year) firstOf.set(b.name, b);
+  for (const b of bars) b.first = firstOf.get(b.name);
   st.canvas.setAttribute('aria-label', `3D bar chart of headcount for ${insts.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(p.year)}. Drag or use the arrow keys to rotate.`);
   const max = d3.max(bars, (b) => b.v) || 1;
   const nI = Math.max(1, insts.length), nY = Math.max(1, years.length);
@@ -1237,6 +1242,19 @@ function draw3d(el) {
       ctx.textAlign = Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
       if (nY <= 8 || j % 2 === (nY - 1) % 2) ctx.fillText(shortYear(y), b[0], b[1]);
     });
+    // The hovered bar's height as a line across both back walls, so other bars can be read against it.
+    if (st.hover) {
+      const h = hOf(st.hover.v), c = colorOf.get(st.hover.name);
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = shade(c, 1, 0.9);
+      ctx.beginPath();
+      [[0, h, farZ], [nI, h, farZ]].map((q) => proj(...q)).forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      [[farX, h, 0], [farX, h, nY]].map((q) => proj(...q)).forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.stroke();
+      ctx.restore();
+    }
     // Bars, far to near; each visible face is kept for hover hit-testing.
     const g = 0.19, faces = [];
     const order = bars.map((b) => ({ b, d: proj(b.i + 0.5, hOf(b.v) / 2, b.j + 0.5)[2] })).sort((a, c) => a.d - c.d);
