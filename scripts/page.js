@@ -116,6 +116,8 @@ dash.calc('york_ontario', {
 
 const FOCUS = 'York';
 const FIRST = '2012-2013';
+// Growth page panel: the institution whose line was clicked (see openFields).
+const gpick = { kind: null, inst: null, field: null };
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -375,6 +377,8 @@ function idleFilters(p) {
   const page = pageOf(p);
   const off = {};
   if (page === 'share') off['f-group'] = 'The share of Ontario chart compares York with all of Ontario, not with a comparison group.';
+  // These charts show every year; the year only matters once the Growth panel is open (it ends the change).
+  if (page === 'share' || (page === 'growth' && !gpick.inst)) off['f-year'] = 'This chart shows every year from 2012-13 on, so the year doesn’t change it.' + (page === 'growth' ? ' Click a line: the year then sets the end of each field’s change.' : '');
   if (BREAKDOWN_PAGES.includes(page)) {
     for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = 'The breakdowns aren’t cross-tabulated with this filter, so it doesn’t change them.';
     off['f-field'] = 'The breakdowns aren’t cross-tabulated with this filter. To see a field’s programs, open it in the Field of study tab.';
@@ -383,14 +387,17 @@ function idleFilters(p) {
   return off;
 }
 
-dash.onData(() => {
-  const p = P();
-  const page = pageOf(p);
+function greyFilters(p) {
   const off = idleFilters(p);
   document.querySelectorAll('.ux .ux-filters select').forEach((s) => {
     s.disabled = s.id in off;
     s.closest('.ux-field').title = off[s.id] ?? '';
   });
+}
+dash.onData(() => {
+  const p = P();
+  const page = pageOf(p);
+  greyFilters(p);
   document.querySelectorAll('.ux .ux-navlink').forEach((b) => {
     if (b.dataset.page === page) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
@@ -791,13 +798,13 @@ dash.draw('growth', (el) => {
 // Fields of study for the institution clicked on the Growth chart: lines indexed to 2012-13 = 100,
 // fields that grew (green) above, fields that dropped (red) below, and a list of every field with its change.
 // gpick.kind is 'inst' (one institution) or 'comb' (the comparison group combined); gpick.field is the highlighted field.
-const gpick = { kind: null, inst: null, field: null };
 const gHeight = (W) => Math.round(Math.min(600, Math.max(440, W * 0.75)));
 const GDRAWS = ['growth', 'gf-title', 'gf-chart', 'gf-list'];
 function syncGpick() {
   const open = !!gpick.inst;
   document.querySelectorAll('.ux .ux-gwrap').forEach((w) => w.classList.toggle('is-open', open));
   document.querySelectorAll('.ux .ux-gside, .ux .ux-gpick').forEach((n) => { n.hidden = !open; });
+  greyFilters(P());
 }
 function openFields(pick) {
   const same = gpick.kind === pick.kind && gpick.inst === pick.inst;
@@ -818,13 +825,38 @@ function pickField(f) {
   const it = document.querySelector('.ux .ux-gli[aria-selected="true"]');
   if (it) it.scrollIntoView({ block: 'nearest' });
 }
-// The highlighted field: the one picked here ('' = none), else the Field of study filter's.
-const gField = () => gpick.field ?? (isCip2(fieldOf(P())) ? fieldOf(P()) : null);
+// With a field picked in the Field of study filter, the panel lists that field's detailed programs instead of fields.
+const gPrograms = () => fieldCode(P()) != null;
+const gWord = (n) => (gPrograms() ? (n === 1 ? 'program' : 'programs') : (n === 1 ? 'field' : 'fields'));
+const gSources = () => ['totals', 'group_totals', ...(gPrograms() ? ['cip', 'peer_groups'] : [])];
+// The highlighted row: the one picked here ('' = none), else (fields only) the Field of study filter's.
+const gField = () => gpick.field ?? (!gPrograms() && isCip2(fieldOf(P())) ? fieldOf(P()) : null);
 const gEnd = (years, p) => (p.year !== FIRST && years.includes(p.year) ? p.year : years[years.length - 1]);
+// cip rows by institution|level, parsed once.
+const cipIndex = memo((rows) => d3.group(rows.map((r) => {
+  const [institution, level, year] = r.slice.split('|');
+  return { institution, level, year, category: r.category, headcount: Number(r.headcount) };
+}), (r) => r.institution + '|' + r.level));
+function programRows(p) {
+  const idx = cipIndex(dash.data('cip').data);
+  const insts = gpick.kind === 'comb' ? membersOf(p.group) : [gpick.inst];
+  const code = fieldCode(p) + '.';
+  const by = new Map(); // category|year -> summed headcount
+  for (const inst of insts)
+    for (const r of idx.get(inst + '|' + p.level) ?? []) {
+      if (!r.category.startsWith(code)) continue;
+      const k = r.category + '|' + r.year;
+      by.set(k, (by.get(k) ?? 0) + r.headcount);
+    }
+  return [...by].map(([k, headcount]) => {
+    const i = k.lastIndexOf('|');
+    return { field: k.slice(0, i), year: k.slice(i + 1), headcount };
+  });
+}
 function fieldSeries() {
   const p = P();
-  if (!gpick.inst || dash.data('totals').status !== 'ok' || dash.data('group_totals').status !== 'ok') return null;
-  const rows = gpick.kind === 'comb'
+  if (!gpick.inst || gSources().some((id) => dash.data(id).status !== 'ok')) return null;
+  const rows = gPrograms() ? programRows(p) : gpick.kind === 'comb'
     ? dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && isCip2(r.field))
     : dash.data('totals').data.filter((r) => r.institution === gpick.inst && r.level === p.level && isCip2(r.field));
   const years = [...new Set(rows.map((r) => r.year))].sort(d3.ascending);
@@ -837,12 +869,15 @@ function fieldSeries() {
     const base = at(FIRST), last = at(end);
     if (!base && !last) continue;
     list.push({
-      field, name: fieldName(field), base, last,
+      field, name: gPrograms() ? programTitle(field) : fieldName(field), base, last,
       rate: base ? last / base - 1 : null, // null: no students in 2012-13 (a new field)
       up: !base || last >= base,
       pts: base ? years.map((yr) => ({ year: yr, v: (at(yr) / base) * 100, n: at(yr) })) : [],
     });
   }
+  // A program title shared by more than one code keeps its code in brackets.
+  const dup = d3.rollup(list, (v) => v.length, (d) => d.name);
+  for (const d of list) if (dup.get(d.name) > 1) d.name += ` (${d.field.split(' ')[0]})`;
   return { years, end, list };
 }
 const rateText = (d) => (d.rate == null ? 'new' : fmtD(d.rate));
@@ -853,10 +888,14 @@ dash.draw('gf-title', (el) => {
   const b = document.createElement('b');
   b.textContent = gpick.kind === 'comb' ? `${p.group} combined` : gpick.inst;
   const span = fs && fs.end ? `, ${shortYear(FIRST)} to ${shortYear(fs.end)}` : '';
-  el.replaceChildren('Fields of study at ', b, ` · ${p.level.toLowerCase()}${span}`);
+  if (gPrograms()) {
+    const f = document.createElement('b');
+    f.textContent = fieldName(fieldOf(p));
+    el.replaceChildren('Detailed programs in ', f, ' at ', b, ` · ${p.level.toLowerCase()}${span}`);
+  } else el.replaceChildren('Fields of study at ', b, ` · ${p.level.toLowerCase()}${span}`);
 });
 dash.draw('gf-chart', (el) => {
-  if (!gpick.inst || !gate(el, ['totals', 'group_totals'], true)) return;
+  if (!gpick.inst || !gate(el, gSources(), true)) return;
   const up = el.dataset.dir === 'up';
   const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
   const total = gHeight(Math.max(260, main.clientWidth));
@@ -867,9 +906,10 @@ dash.draw('gf-chart', (el) => {
   const series = fs ? fs.list.filter((d) => d.up === up && d.pts.length > 1) : [];
   const count = fs ? fs.list.filter((d) => d.up === up).length : 0;
   svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', color)
-    .text(`${up ? 'Grew' : 'Dropped'} · ${count} field${count === 1 ? '' : 's'}`);
+    .text(`${up ? 'Grew' : 'Dropped'} · ${count} ${gWord(count)}`);
   if (!series.length) {
-    svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34).text(up ? 'No field grew.' : 'No field dropped.');
+    const none = count ? `Only new ${gWord(2)}: no 2012-13 headcount to index.` : `No ${gWord(1)} ${up ? 'grew' : 'dropped'}.`;
+    svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34).text(none);
     return;
   }
   const years = fs.years;
@@ -936,7 +976,7 @@ dash.draw('gf-chart', (el) => {
     .on('mouseleave', () => { tip.hidden = true; style(null); });
 });
 dash.draw('gf-list', (el) => {
-  if (!gpick.inst || !gate(el, ['totals', 'group_totals'], true)) return;
+  if (!gpick.inst || !gate(el, gSources(), true)) return;
   const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
   el.style.height = gHeight(Math.max(260, main.clientWidth)) + 'px';
   const fs = fieldSeries();
