@@ -799,7 +799,22 @@ dash.draw('growth', (el) => {
 // fields that grew (green) above, fields that dropped (red) below, and a list of every field with its change.
 // gpick.kind is 'inst' (one institution) or 'comb' (the comparison group combined); gpick.field is the highlighted field.
 const gHeight = (W) => Math.round(Math.min(600, Math.max(440, W * 0.75)));
-const GDRAWS = ['growth', 'gf-title', 'gf-chart', 'gf-list'];
+const GDRAWS = ['growth', 'gf-title', 'gf-chart', 'gf-list', 'gf-warn'];
+// The source files aren't cross-tabulated: fields and programs aren't split by gender, citizenship, credential
+// or year of study, so with one of those filters on, the panel can only show all students.
+// The draw target stays visible (hidden targets aren't drawn); the message inside it comes and goes.
+dash.draw('gf-warn', (box) => {
+  const p = P();
+  const s = subsetOf(fieldOf(p));
+  if (!gpick.inst || !s) { box.replaceChildren(); return; }
+  const el = document.createElement('p');
+  el.className = 'ux-msg ux-gwarn';
+  box.replaceChildren(el);
+  const what = s.prefix.replace(': ', '').toLowerCase();
+  const b = document.createElement('b');
+  b.textContent = `${s.prefix}${catLabel(s, fieldOf(p).slice(s.prefix.length))}`;
+  el.replaceChildren('The chart on the left shows ', b, `. The fields of study on the right show all students: the source data doesn’t split fields by ${what}, so the ${what} filter can’t apply to them.`);
+});
 function syncGpick() {
   const open = !!gpick.inst;
   document.querySelectorAll('.ux .ux-gwrap').forEach((w) => w.classList.toggle('is-open', open));
@@ -887,7 +902,7 @@ dash.draw('gf-title', (el) => {
   const fs = fieldSeries();
   const b = document.createElement('b');
   b.textContent = gpick.kind === 'comb' ? `${p.group} combined` : gpick.inst;
-  const span = fs && fs.end ? `, ${shortYear(FIRST)} to ${shortYear(fs.end)}` : '';
+  const span = (fs && fs.end ? `, ${shortYear(FIRST)} to ${shortYear(fs.end)}` : '') + (subsetOf(fieldOf(p)) ? ' · all students' : '');
   if (gPrograms()) {
     const f = document.createElement('b');
     f.textContent = fieldName(fieldOf(p));

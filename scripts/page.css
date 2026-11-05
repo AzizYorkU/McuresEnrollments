@@ -208,3 +208,6 @@
 .ux-gli.is-up { --hl: var(--color-ok); }
 .ux-gli.is-down { --hl: var(--color-bad); }
 .ux-glbl { font-size: var(--cds-font-size-caption); font-family: var(--font-anthropic-sans); font-weight: 600; paint-order: stroke; stroke: var(--color-panel); stroke-width: 3px; stroke-linejoin: round; }
+
+.ux-gwarn { padding: var(--cds-pad-sm) var(--cds-pad-md); border-style: solid; border-color: var(--color-bad); color: var(--color-fg); font-size: var(--cds-font-size-caption); }
+[data-draw="gf-warn"]:empty { display: none; }

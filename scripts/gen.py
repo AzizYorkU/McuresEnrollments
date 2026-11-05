@@ -294,6 +294,7 @@ html = f"""<meta name="dash-one-writer">
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
           <div class="ux-gpick" hidden><span data-draw="gf-title" data-source="totals group_totals cip peer_groups"></span><button class="ux-btn ux-gclose" type="button" aria-label="Close the fields of study">Close ✕</button></div>
         </div>
+        <div data-draw="gf-warn" data-source="totals"></div>
         <div class="ux-gwrap">
           <div class="ux-chart ux-chart-big dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
           <div class="ux-gside" hidden>
