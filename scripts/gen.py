@@ -289,9 +289,21 @@ html = f"""<meta name="dash-one-writer">
     <section class="ux-page" data-page="growth" id="growth" hidden>
       <div class="ux-card" id="growth-card">
         <h2>Growth since 2012-13</h2>
-        <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer.</p>
-        <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
-        <div class="ux-chart ux-chart-big dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
+        <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer; click any line to see that institution’s fields of study.</p>
+        <div class="ux-card-head">
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
+          <div class="ux-gpick" hidden><span data-draw="gf-title" data-source="totals group_totals"></span><button class="ux-btn ux-gclose" type="button" aria-label="Close the fields of study">Close ✕</button></div>
+        </div>
+        <div class="ux-gwrap">
+          <div class="ux-chart ux-chart-big dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
+          <div class="ux-gside" hidden>
+            <div class="ux-gminis">
+              <div class="ux-gmini" data-draw="gf-chart" data-dir="up" data-source="totals group_totals"></div>
+              <div class="ux-gmini" data-draw="gf-chart" data-dir="down" data-source="totals group_totals"></div>
+            </div>
+            <div class="ux-glist" data-draw="gf-list" data-source="totals group_totals" role="listbox" aria-label="Fields of study by change"></div>
+          </div>
+        </div>
         <p class="ux-note">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
       </div>
     </section>

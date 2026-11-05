@@ -352,7 +352,8 @@ document.addEventListener('click', (e) => {
     dash.setLink(pageOf(P()));
     return;
   }
-  if (e.target.closest('.ux .ux-reset')) dash.resetParams();
+  if (e.target.closest('.ux .ux-gclose')) { closeFields(); return; }
+  if (e.target.closest('.ux .ux-reset')) { if (gpick.inst) closeFields(); dash.resetParams(); }
 });
 document.addEventListener('change', (e) => {
   if (e.target.matches('.ux .ux-level')) {
@@ -688,6 +689,7 @@ dash.draw('ov-spark', (el) => {
 });
 
 // Growth since 2012-13, indexed to 100: York, peers combined, and each peer.
+// Clicking a line opens that institution's fields of study beside the chart (gpick, below).
 dash.draw('growth', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
@@ -704,9 +706,11 @@ dash.draw('growth', (el) => {
   const york = { name: FOCUS, color: dash.colors[0], pts: index(byInst.get(FOCUS) ?? []) ?? [] };
   const comb = { name: 'Peers combined', color: dash.colors[1],
     pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level)) ?? [] };
-  const W = Math.max(260, el.clientWidth), H = Math.round(Math.min(520, Math.max(280, W * 0.45)));
+  const W = Math.max(260, el.clientWidth);
+  const H = gpick.inst ? gHeight(W) : Math.round(Math.min(520, Math.max(280, W * 0.45)));
   const { svg, tip } = svgIn(el, W, H);
   if (!york.pts.length || !years.length) return;
+  const picked = gpick.kind === 'inst' ? peers.find((s) => s.name === gpick.inst) ?? null : null;
   const all = [york, comb, ...peers].flatMap((s) => s.pts.map((d) => d.v));
   const peerVals = peers.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
   // Clip only outliers: peers far above the rest (a small school growing from a low base).
@@ -718,6 +722,7 @@ dash.draw('growth', (el) => {
   const left = measure(svg, ticks.map(fmtI)) + 8;
   const last = (s) => s.pts[s.pts.length - 1];
   const ends = [york, comb].filter((s) => s.pts.length).map((s) => ({ s, text: `${s.name === FOCUS ? 'York' : 'Peers'} ${fmtI(last(s).v)}` }));
+  if (picked) ends.push({ s: { ...picked, color: 'var(--color-fg)' }, text: `${picked.name} ${fmtI(last(picked).v)}` });
   const right = measure(svg, ends.map((e) => e.text), 'ux-lbl') + 12;
   const x = d3.scalePoint(years, [left + 6, W - right]);
   yGrid(svg, y, ticks, fmtI, left, W - right + 4);
@@ -729,8 +734,15 @@ dash.draw('growth', (el) => {
   const peerPaths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(peers).join('path')
     .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', MUTED).attr('stroke-width', 1.25)
     .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const peerStyle = (near) => peerPaths
+    .style('stroke', (s) => (s === picked ? 'var(--color-fg)' : s === near ? 'var(--color-fg-muted)' : MUTED))
+    .attr('stroke-width', (s) => (s === picked ? 2.5 : s === near ? 2 : 1.25));
+  peerStyle(null);
+  if (picked) peerPaths.filter((s) => s === picked).raise();
+  const isPicked = (s) => (s === york ? gpick.kind === 'inst' && gpick.inst === FOCUS : gpick.kind === 'comb');
   svg.append('g').selectAll('path').data([comb, york].filter((s) => s.pts.length)).join('path')
-    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', (s) => s.color).attr('stroke-width', (s) => (s === york ? 2.5 : 2))
+    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', (s) => s.color)
+    .attr('stroke-width', (s) => (s === york ? 2.5 : 2) + (isPicked(s) ? 1.5 : 0))
     .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
   const labels = ends.map((e) => ({ ...e, y: y(last(e.s).v) }));
   spread(labels, 14, 8, H - 30);
@@ -738,17 +750,29 @@ dash.draw('growth', (el) => {
     .attr('x', W - right + 8).attr('y', (d) => d.y).attr('dy', '0.32em').style('fill', (d) => d.s.color).text((d) => d.text);
   const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 10).attr('y2', H - 26).attr('opacity', 0);
   const dots = svg.append('g');
+  // The line nearest the pointer, within 14px.
+  const nearest = (e, list) => {
+    const [mx, my] = d3.pointer(e, svg.node());
+    const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
+    let near = null, best = 14;
+    for (const s of list) {
+      const d = s.pts.find((q) => q.year === yr);
+      if (d && Math.abs(y(d.v) - my) < best) { near = s; best = Math.abs(y(d.v) - my); }
+    }
+    return near;
+  };
   svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
+    .on('click', (e) => {
+      const s = nearest(e, [york, comb, ...peers]);
+      if (s) openFields(s === comb ? { kind: 'comb', inst: p.group } : { kind: 'inst', inst: s.name });
+    })
     .on('mousemove', (e) => {
-      const [mx, my] = d3.pointer(e, svg.node());
+      const [mx] = d3.pointer(e, svg.node());
       const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
       const at = (s) => s.pts.find((d) => d.year === yr);
-      let near = null;
-      for (const s of peers) {
-        const d = at(s);
-        if (d && Math.abs(y(d.v) - my) < 14 && (!near || Math.abs(y(d.v) - my) < Math.abs(y(at(near).v) - my))) near = s;
-      }
-      peerPaths.style('stroke', (s) => (s === near ? 'var(--color-fg-muted)' : MUTED)).attr('stroke-width', (s) => (s === near ? 2 : 1.25));
+      const near = nearest(e, peers);
+      e.currentTarget.style.cursor = nearest(e, [york, comb, ...peers]) ? 'pointer' : '';
+      peerStyle(near);
       rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
       const shown = [york, comb].filter((s) => at(s));
       dots.selectAll('circle').data(shown).join('circle').attr('r', 3.5).attr('cx', x(yr)).attr('cy', (s) => y(at(s).v)).style('fill', (s) => s.color);
@@ -760,8 +784,191 @@ dash.draw('growth', (el) => {
       tip.hidden = true;
       rule.attr('opacity', 0);
       dots.selectAll('circle').remove();
-      peerPaths.style('stroke', MUTED).attr('stroke-width', 1.25);
+      peerStyle(null);
     });
+});
+
+// Fields of study for the institution clicked on the Growth chart: lines indexed to 2012-13 = 100,
+// fields that grew (green) above, fields that dropped (red) below, and a list of every field with its change.
+// gpick.kind is 'inst' (one institution) or 'comb' (the comparison group combined); gpick.field is the highlighted field.
+const gpick = { kind: null, inst: null, field: null };
+const gHeight = (W) => Math.round(Math.min(600, Math.max(440, W * 0.75)));
+const GDRAWS = ['growth', 'gf-title', 'gf-chart', 'gf-list'];
+function syncGpick() {
+  const open = !!gpick.inst;
+  document.querySelectorAll('.ux .ux-gwrap').forEach((w) => w.classList.toggle('is-open', open));
+  document.querySelectorAll('.ux .ux-gside, .ux .ux-gpick').forEach((n) => { n.hidden = !open; });
+}
+function openFields(pick) {
+  const same = gpick.kind === pick.kind && gpick.inst === pick.inst;
+  Object.assign(gpick, pick);
+  if (!same) gpick.field = null;
+  syncGpick();
+  GDRAWS.forEach((n) => dash.draw(n));
+}
+function closeFields() {
+  Object.assign(gpick, { kind: null, inst: null, field: null });
+  syncGpick();
+  GDRAWS.forEach((n) => dash.draw(n));
+}
+// Picking a field highlights it in both charts and in the list; picking it again clears it.
+function pickField(f) {
+  gpick.field = gField() === f ? '' : f;
+  ['gf-chart', 'gf-list'].forEach((n) => dash.draw(n));
+  const it = document.querySelector('.ux .ux-gli[aria-selected="true"]');
+  if (it) it.scrollIntoView({ block: 'nearest' });
+}
+// The highlighted field: the one picked here ('' = none), else the Field of study filter's.
+const gField = () => gpick.field ?? (isCip2(fieldOf(P())) ? fieldOf(P()) : null);
+const gEnd = (years, p) => (p.year !== FIRST && years.includes(p.year) ? p.year : years[years.length - 1]);
+function fieldSeries() {
+  const p = P();
+  if (!gpick.inst || dash.data('totals').status !== 'ok' || dash.data('group_totals').status !== 'ok') return null;
+  const rows = gpick.kind === 'comb'
+    ? dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && isCip2(r.field))
+    : dash.data('totals').data.filter((r) => r.institution === gpick.inst && r.level === p.level && isCip2(r.field));
+  const years = [...new Set(rows.map((r) => r.year))].sort(d3.ascending);
+  if (!years.length) return { years, end: null, list: [] };
+  const end = gEnd(years, p);
+  const list = [];
+  for (const [field, rs] of d3.group(rows, (r) => r.field)) {
+    const n = new Map(rs.map((r) => [r.year, r.headcount]));
+    const at = (yr) => n.get(yr) ?? 0; // a year without a row: no students in the field that year
+    const base = at(FIRST), last = at(end);
+    if (!base && !last) continue;
+    list.push({
+      field, name: fieldName(field), base, last,
+      rate: base ? last / base - 1 : null, // null: no students in 2012-13 (a new field)
+      up: !base || last >= base,
+      pts: base ? years.map((yr) => ({ year: yr, v: (at(yr) / base) * 100, n: at(yr) })) : [],
+    });
+  }
+  return { years, end, list };
+}
+const rateText = (d) => (d.rate == null ? 'new' : fmtD(d.rate));
+dash.draw('gf-title', (el) => {
+  if (!gpick.inst) return;
+  const p = P();
+  const fs = fieldSeries();
+  const b = document.createElement('b');
+  b.textContent = gpick.kind === 'comb' ? `${p.group} combined` : gpick.inst;
+  const span = fs && fs.end ? `, ${shortYear(FIRST)} to ${shortYear(fs.end)}` : '';
+  el.replaceChildren('Fields of study at ', b, ` · ${p.level.toLowerCase()}${span}`);
+});
+dash.draw('gf-chart', (el) => {
+  if (!gpick.inst || !gate(el, ['totals', 'group_totals'], true)) return;
+  const up = el.dataset.dir === 'up';
+  const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
+  const total = gHeight(Math.max(260, main.clientWidth));
+  const W = Math.max(220, el.clientWidth), H = Math.max(180, Math.round((total - 8) / 2));
+  const { svg, tip } = svgIn(el, W, H);
+  const fs = fieldSeries();
+  const color = up ? 'var(--color-ok)' : 'var(--color-bad)';
+  const series = fs ? fs.list.filter((d) => d.up === up && d.pts.length > 1) : [];
+  const count = fs ? fs.list.filter((d) => d.up === up).length : 0;
+  svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', color)
+    .text(`${up ? 'Grew' : 'Dropped'} · ${count} field${count === 1 ? '' : 's'}`);
+  if (!series.length) {
+    svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34).text(up ? 'No field grew.' : 'No field dropped.');
+    return;
+  }
+  const years = fs.years;
+  const vals = series.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
+  // Clip only outliers: fields far above the rest (a small field growing from a few students).
+  const sel = gField();
+  const hit = series.find((s) => s.field === sel);
+  const q90 = d3.quantile(vals, 0.9), top = vals[vals.length - 1];
+  // The picked field always fits.
+  const hi = Math.max(105, top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 * 1.08 : top * 1.03, hit ? d3.max(hit.pts, (d) => d.v) * 1.03 : 0);
+  const y = d3.scaleLinear([Math.min(100, vals[0]), hi], [H - 24, 22]).nice();
+  const ticks = y.ticks(4);
+  const left = measure(svg, ticks.map(fmtI)) + 8;
+  const right = 10;
+  const lblText = hit ? `${fit(svg, hit.name, Math.max(80, W - left - 120), 'ux-glbl')} ${rateText(hit)}` : '';
+  const x = d3.scalePoint(years, [left + 4, W - right]);
+  yGrid(svg, y, ticks, fmtI, left, W - right + 4);
+  svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
+  yearAxis(svg, years, x, H, fs.end);
+  const clip = 'clip-gf-' + Math.random().toString(36).slice(2, 8);
+  svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 16).attr('width', W).attr('height', H - 40);
+  const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
+  const paths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(series).join('path')
+    .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', color)
+    .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const style = (hov) => paths
+    .attr('stroke-width', (s) => (s === hit ? 3 : s === hov ? 2.25 : 1.25))
+    .style('opacity', (s) => (s === hit || s === hov ? 1 : hit ? 0.22 : 0.5));
+  style(null);
+  if (hit) {
+    paths.filter((s) => s === hit).raise();
+    const e = hit.pts.find((d) => d.year === fs.end) ?? hit.pts[hit.pts.length - 1];
+    const ly = y(e.v);
+    svg.append('circle').attr('r', 3.5).attr('cx', x(e.year)).attr('cy', ly).style('fill', color);
+    // Name and change just above the end point (below it when that would leave the chart).
+    svg.append('text').attr('class', 'ux-glbl').attr('x', x(e.year)).attr('y', ly < 40 ? ly + 16 : ly - 9)
+      .attr('text-anchor', 'end').style('fill', color).text(lblText);
+  }
+  const nearest = (e) => {
+    const [mx, my] = d3.pointer(e, svg.node());
+    const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
+    let near = null, best = 12;
+    for (const s of series) {
+      const d = s.pts.find((q) => q.year === yr);
+      const dy = d ? Math.abs(y(d.v) - my) : Infinity;
+      if (dy < best) { near = s; best = dy; }
+    }
+    return { yr, near };
+  };
+  svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
+    .on('click', (e) => { const { near } = nearest(e); if (near) pickField(near.field); })
+    .on('mousemove', (e) => {
+      const { yr, near } = nearest(e);
+      style(near);
+      const s = near ?? hit;
+      if (!s) { tip.hidden = true; return; }
+      const d = s.pts.find((q) => q.year === yr);
+      showTip(el, tip, e, `${s.name} · ${shortYear(yr)}`, [
+        { name: 'Headcount', value: fmtN(d ? d.n : 0) },
+        { name: 'Index (2012-13 = 100)', value: d ? fmtI(d.v) : '—' },
+        { name: `Change to ${shortYear(fs.end)}`, value: rateText(s) },
+      ]);
+    })
+    .on('mouseleave', () => { tip.hidden = true; style(null); });
+});
+dash.draw('gf-list', (el) => {
+  if (!gpick.inst || !gate(el, ['totals', 'group_totals'], true)) return;
+  const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
+  el.style.height = gHeight(Math.max(260, main.clientWidth)) + 'px';
+  const fs = fieldSeries();
+  const sel = gField();
+  const item = (d) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ux-gli ' + (d.up ? 'is-up' : 'is-down');
+    b.setAttribute('role', 'option');
+    b.setAttribute('aria-selected', String(d.field === sel));
+    b.title = `${d.name}: ${fmtN(d.base)} in ${shortYear(FIRST)}, ${fmtN(d.last)} in ${shortYear(fs.end)}`;
+    const n = document.createElement('span');
+    n.className = 'ux-gli-n';
+    n.textContent = d.name;
+    const v = document.createElement('span');
+    v.className = 'ux-gli-v';
+    v.textContent = rateText(d);
+    b.append(n, v);
+    b.onclick = () => pickField(d.field);
+    return b;
+  };
+  const head = (text, cls) => {
+    const h = document.createElement('div');
+    h.className = 'ux-glist-h ' + cls;
+    h.textContent = text;
+    return h;
+  };
+  const list = fs ? fs.list : [];
+  // Biggest change first in each group; new fields top the gains.
+  const ups = list.filter((d) => d.up).sort((a, b) => (b.rate ?? Infinity) - (a.rate ?? Infinity) || d3.descending(a.last, b.last));
+  const downs = list.filter((d) => !d.up).sort((a, b) => a.rate - b.rate);
+  el.replaceChildren(head(`Grew (${ups.length})`, 'is-up'), ...ups.map(item), head(`Dropped (${downs.length})`, 'is-down'), ...downs.map(item));
 });
 
 // York's share of all Ontario students over time.
