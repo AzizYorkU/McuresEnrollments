@@ -130,7 +130,7 @@ const P = () => dash.params();
 const ALL_F = 'All fields';
 const fieldOf = (p) => p.field || ALL_F;
 const isCip2 = (f) => /^\d\d /.test(f);
-const fieldName = (f) => f.replace(/^\d\d /, '');
+const fieldName = (f) => f; // shown with its 2-digit CIP code, e.g. "52 Business and management"
 const fieldCode = (p) => (isCip2(fieldOf(p)) ? fieldOf(p).split(' ')[0] : null);
 // One-file filters. The files aren't cross-tabulated, so one filter (these or field of study) applies at a time;
 // the active one is stored in the field param as prefix + category.
@@ -1165,18 +1165,12 @@ dash.draw('inst-rows', (tb) => {
 const TOP = 12;
 const selRows = (id) => {
   const rows = (bySel(dash.data(id).data).get(cmpKey(P())) ?? []).filter((r) => r.york > 0); // only what York has students in
-  if (id === 'cmp_cip2') return rows.map((r) => ({ ...r, code: r.category.slice(0, 2), category: fieldName(r.category), size: r.york + r.peers })); // names without the CIP code
+  if (id === 'cmp_cip2') return rows.map((r) => ({ ...r, code: r.category.slice(0, 2), category: fieldName(r.category), size: r.york + r.peers }));
   return rows;
 };
-// Program titles without the CIP code; a title shared by more than one code in the list keeps its code in brackets.
-const programTitle = (c) => c.replace(/^\d\d(\.\d+)? /, '');
-function programLabels(rows) {
-  const n = d3.rollup(rows, (v) => v.length, (r) => programTitle(r.category));
-  return rows.map((r) => {
-    const t = programTitle(r.category);
-    return { ...r, category: n.get(t) > 1 ? `${t} (${r.category.split(' ')[0]})` : t };
-  });
-}
+// Programs are shown with their 6-digit CIP code, e.g. "52.0201 Business administration…".
+const programTitle = (c) => c;
+const programLabels = (rows) => rows;
 const topRows = (id) => selRows(id).sort((a, b) => b.york + b.peers - (a.york + a.peers)).slice(0, TOP);
 
 // Field of study opens into its programs. One count (a number or all), the open fields and each chart's sort
