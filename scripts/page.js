@@ -436,7 +436,7 @@ dash.draw('sel-field', (el) => {
   const f = fieldOf(P());
   const s = subsetOf(f);
   if (f === ALL_F) el.textContent = 'all students';
-  else if (!s) el.textContent = f.replace(/^\d+ /, '');
+  else if (!s) el.textContent = f; // with its CIP code, like the field list
   else {
     const v = catLabel(s, f.slice(s.prefix.length));
     el.textContent = s.word ? `${s.word} ${s.id === 'citizen' ? v : v.toLowerCase()}` : v.toLowerCase();
