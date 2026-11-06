@@ -188,6 +188,7 @@ def section(d, tab, col, note):
               <tbody data-draw="dim-rows"></tbody>
             </table>
           </div>
+          <p class="ux-note ux-note-below"><b>pts</b> = percentage points, the plain difference between two percentages. For example, a York share of 20.7% against a peer share of 13.8% is a gap of +6.9 pts. A share that falls from 17.9% to 15.5% changes by −2.4 pts (a 13% drop in relative terms). The “since 2012-13” columns are percent changes in headcount.</p>
         </div>
       </div>
     </div>"""

@@ -7,6 +7,7 @@
 .ux-lede { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); }
 .ux .ux-lede b { color: var(--color-fg); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ux-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ux-note-below { margin-top: var(--cds-gap-sm); }
 .ux-msg { margin: 0; padding: var(--cds-pad-md) var(--cds-pad-lg); border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); color: var(--color-fg-muted); }
 
 .ux-filters { display: grid; gap: var(--cds-gap-sm); max-width: 72rem; }
