@@ -217,10 +217,10 @@ html = f"""<meta name="dash-one-writer">
     <p class="ux-nav-h">Against the group</p>
     <button class="ux-navlink" type="button" data-page="ranking">Ranking</button>
     <button class="ux-navlink" type="button" data-page="institutions">Institutions</button>
-    <p class="ux-nav-h">Breakdowns</p>
-    <button class="ux-navlink" type="button" data-page="mix">York’s mix</button>
-    <button class="ux-navlink" type="button" data-page="gains">Gains and losses</button>
-    <button class="ux-navlink" type="button" data-page="table">Breakdown table</button>
+    <p class="ux-nav-h ux-nav-breakdowns">Breakdowns</p>
+    <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="mix">York’s mix</button>
+    <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="gains">Gains and losses</button>
+    <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="table">Breakdown table</button>
   </nav>
 
   <div class="ux-main">

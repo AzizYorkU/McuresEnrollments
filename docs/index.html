@@ -242,10 +242,10 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     <p class="ux-nav-h">Against the group</p>
     <button class="ux-navlink" type="button" data-page="ranking">Ranking</button>
     <button class="ux-navlink" type="button" data-page="institutions">Institutions</button>
-    <p class="ux-nav-h">Breakdowns</p>
-    <button class="ux-navlink" type="button" data-page="mix">York’s mix</button>
-    <button class="ux-navlink" type="button" data-page="gains">Gains and losses</button>
-    <button class="ux-navlink" type="button" data-page="table">Breakdown table</button>
+    <p class="ux-nav-h ux-nav-breakdowns">Breakdowns</p>
+    <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="mix">York’s mix</button>
+    <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="gains">Gains and losses</button>
+    <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="table">Breakdown table</button>
   </nav>
 
   <div class="ux-main">
@@ -1510,11 +1510,17 @@ document.addEventListener('input', (e) => {
   if (e.target.matches('.ux .ux-search')) dash.draw('dim-rows');
 });
 
-const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'mix', 'gains', 'table'];
+// Breakdown pages (York's mix, Gains and losses, Breakdown table) are hidden for now (user request,
+// 2026-11-07). Set SHOW_BREAKDOWNS to true to bring them back; the code and data are untouched.
+const SHOW_BREAKDOWNS = false;
+const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
+const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
+if (!SHOW_BREAKDOWNS) {
+  document.querySelectorAll('.ux .ux-nav-breakdowns').forEach((el) => { el.hidden = true; });
+}
 
 // Filters that change nothing on the open page are disabled, with the reason as a tooltip.
-const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
 function idleFilters(p) {
   const page = pageOf(p);
   const off = {};
@@ -2544,6 +2550,7 @@ dash.draw('dim-rows', (tb) => {
 // A link names a page (#growth) or a breakdown (#by-age).
 const link = location.hash.slice(1);
 if (PAGES.includes(link)) dash.setParams({ page: link });
+else if (!SHOW_BREAKDOWNS) { /* breakdowns hidden */ }
 else if (link === 'by-cip') dash.setParams({ page: 'mix', dim: 'cip2' });
 else if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ page: 'mix', dim: link.slice(3) });
 

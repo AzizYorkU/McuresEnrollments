@@ -368,11 +368,17 @@ document.addEventListener('input', (e) => {
   if (e.target.matches('.ux .ux-search')) dash.draw('dim-rows');
 });
 
-const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'mix', 'gains', 'table'];
+// Breakdown pages (York's mix, Gains and losses, Breakdown table) are hidden for now (user request,
+// 2026-11-07). Set SHOW_BREAKDOWNS to true to bring them back; the code and data are untouched.
+const SHOW_BREAKDOWNS = false;
+const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
+const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
+if (!SHOW_BREAKDOWNS) {
+  document.querySelectorAll('.ux .ux-nav-breakdowns').forEach((el) => { el.hidden = true; });
+}
 
 // Filters that change nothing on the open page are disabled, with the reason as a tooltip.
-const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
 function idleFilters(p) {
   const page = pageOf(p);
   const off = {};
@@ -1402,6 +1408,7 @@ dash.draw('dim-rows', (tb) => {
 // A link names a page (#growth) or a breakdown (#by-age).
 const link = location.hash.slice(1);
 if (PAGES.includes(link)) dash.setParams({ page: link });
+else if (!SHOW_BREAKDOWNS) { /* breakdowns hidden */ }
 else if (link === 'by-cip') dash.setParams({ page: 'mix', dim: 'cip2' });
 else if (link.startsWith('by-') && document.querySelector(`.ux-dim[data-dim="${link.slice(3)}"]`)) dash.setParams({ page: 'mix', dim: link.slice(3) });
 
