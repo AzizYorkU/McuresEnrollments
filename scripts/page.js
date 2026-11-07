@@ -720,7 +720,7 @@ dash.draw('growth', (el) => {
   const comb = { name: 'Peers combined', color: dash.colors[1],
     pts: index(dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level)) ?? [] };
   const W = Math.max(260, el.clientWidth);
-  const H = gpick.inst ? gHeight(W) : Math.round(Math.min(520, Math.max(280, W * 0.45)));
+  const H = gpick.inst ? gHeight(el) : Math.round(Math.min(520, Math.max(280, W * 0.45)));
   const { svg, tip } = svgIn(el, W, H);
   if (!york.pts.length || !years.length) return;
   const picked = gpick.kind === 'inst' ? peers.find((s) => s.name === gpick.inst) ?? null : null;
@@ -804,7 +804,8 @@ dash.draw('growth', (el) => {
 // Fields of study for the institution clicked on the Growth chart: lines indexed to 2012-13 = 100,
 // fields that grew (green) above, fields that dropped (red) below, and a list of every field with its change.
 // gpick.kind is 'inst' (one institution) or 'comb' (the comparison group combined); gpick.field is the highlighted field.
-const gHeight = (W) => Math.round(Math.min(600, Math.max(440, W * 0.75)));
+// Panel height from the whole chart row's width, so the charts grow with the window.
+const gHeight = (el) => Math.round(Math.min(720, Math.max(460, (el.closest('.ux-gwrap')?.clientWidth ?? 1000) * 0.38)));
 const GDRAWS = ['growth', 'gf-title', 'gf-chart', 'gf-list', 'gf-warn'];
 // The source files aren't cross-tabulated: fields and programs aren't split by gender, citizenship, credential
 // or year of study, so with one of those filters on, the panel can only show all students.
@@ -939,8 +940,7 @@ dash.draw('gf-chart', (el) => {
   const prog = el.dataset.kind === 'prog';
   if (!gpick.inst || !gate(el, gSources(prog), true)) return;
   const up = el.dataset.dir === 'up';
-  const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
-  const total = gHeight(Math.max(260, main.clientWidth));
+  const total = gHeight(el);
   const W = Math.max(220, el.clientWidth), H = Math.max(180, Math.round((total - 8) / 2));
   const { svg, tip } = svgIn(el, W, H);
   const fs = prog ? progSeries() : fieldSeries();
@@ -1032,8 +1032,7 @@ dash.draw('gf-chart', (el) => {
 // The list: fields that grew, then fields that dropped; the highlighted field opens into its programs.
 dash.draw('gf-list', (el) => {
   if (!gpick.inst || !gate(el, gSources(true), true)) return;
-  const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
-  el.style.height = gHeight(Math.max(260, main.clientWidth)) + 'px';
+  el.style.height = gHeight(el) + 'px';
   const fs = fieldSeries();
   const sel = gField();
   const item = (d, sub) => {

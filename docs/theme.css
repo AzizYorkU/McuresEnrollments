@@ -74,7 +74,7 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); line-height: 1.45; }
-.site { max-width: 110rem; margin-inline: auto; padding: clamp(16px, 3vw, 40px); }
+.site { max-width: 160rem; margin-inline: auto; padding: clamp(16px, 3vw, 40px); }
 .dash-skeleton { position: relative; color: transparent !important; }
 .dash-skeleton::after { content: ""; position: absolute; inset: 0; border-radius: var(--cds-radius); background: var(--cds-chart-grid); animation: skel 1.2s ease-in-out infinite alternate; }
 span.dash-skeleton, b.dash-skeleton { display: inline-block; min-width: 4ch; min-height: 1em; }

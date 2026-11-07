@@ -187,7 +187,7 @@
 .ux-gpick { display: inline-flex; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-body); }
 .ux .ux-gpick b { font-weight: 600; }
 .ux-gwrap { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr); }
-.ux-gside { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(13rem, 17rem); min-width: 0; }
+.ux-gside { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(12rem, 15rem); min-width: 0; }
 .ux-gminis { display: grid; gap: var(--cds-gap-sm); grid-template-rows: 1fr 1fr; min-width: 0; }
 .ux-gmini { position: relative; min-width: 0; }
 .ux-gmini .ux-svg { cursor: pointer; }
