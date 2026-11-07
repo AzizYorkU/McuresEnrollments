@@ -117,7 +117,7 @@ dash.calc('york_ontario', {
 const FOCUS = 'York';
 const FIRST = '2012-2013';
 // Growth page panel: the institution whose line was clicked (see openFields).
-const gpick = { kind: null, inst: null, field: null };
+const gpick = { kind: null, inst: null, field: null, prog: null };
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -819,7 +819,7 @@ dash.draw('gf-warn', (box) => {
   const what = s.prefix.replace(': ', '').toLowerCase();
   const b = document.createElement('b');
   b.textContent = `${s.prefix}${catLabel(s, fieldOf(p).slice(s.prefix.length))}`;
-  el.replaceChildren('The chart on the left shows ', b, `. The fields of study on the right show all students: the source data doesn’t split fields by ${what}, so the ${what} filter can’t apply to them.`);
+  el.replaceChildren('The chart on the left shows ', b, `. The fields of study and programs on the right show all students: the source data doesn’t split them by ${what}, so the ${what} filter can’t apply to them.`);
 });
 function syncGpick() {
   const open = !!gpick.inst;
@@ -830,42 +830,51 @@ function syncGpick() {
 function openFields(pick) {
   const same = gpick.kind === pick.kind && gpick.inst === pick.inst;
   Object.assign(gpick, pick);
-  if (!same) gpick.field = null;
+  if (!same) Object.assign(gpick, { field: null, prog: null });
   syncGpick();
   GDRAWS.forEach((n) => dash.draw(n));
 }
 function closeFields() {
-  Object.assign(gpick, { kind: null, inst: null, field: null });
+  Object.assign(gpick, { kind: null, inst: null, field: null, prog: null });
   syncGpick();
   GDRAWS.forEach((n) => dash.draw(n));
 }
-// Picking a field highlights it in both charts and in the list; picking it again clears it.
+// Picking a field highlights it in its charts and the list and shows its programs; picking it again clears it.
 function pickField(f) {
   gpick.field = gField() === f ? '' : f;
+  gpick.prog = null;
+  redrawPicks();
+}
+// Picking a program highlights it in the programs charts and the list.
+function pickProg(c) {
+  gpick.prog = gProg() === c ? null : c;
+  redrawPicks();
+}
+function redrawPicks() {
   ['gf-chart', 'gf-list'].forEach((n) => dash.draw(n));
   const it = document.querySelector('.ux .ux-gli[aria-selected="true"]');
   if (it) it.scrollIntoView({ block: 'nearest' });
 }
-// With a field picked in the Field of study filter, the panel lists that field's detailed programs instead of fields.
-const gPrograms = () => fieldCode(P()) != null;
-const gWord = (n) => (gPrograms() ? (n === 1 ? 'program' : 'programs') : (n === 1 ? 'field' : 'fields'));
-const gSources = () => ['totals', 'group_totals', ...(gPrograms() ? ['cip', 'peer_groups'] : [])];
-// The highlighted row: the one picked here ('' = none), else (fields only) the Field of study filter's.
-const gField = () => gpick.field ?? (!gPrograms() && isCip2(fieldOf(P())) ? fieldOf(P()) : null);
+// Fields (cip2) always fill the first pair of charts; the highlighted field's detailed programs (6-digit CIP)
+// fill the second pair. The Field of study filter's field is the default highlight.
+const gWord = (prog, n) => (prog ? (n === 1 ? 'program' : 'programs') : (n === 1 ? 'field' : 'fields'));
+const gSources = (prog) => ['totals', 'group_totals', ...(prog ? ['cip', 'peer_groups'] : [])];
+// The highlighted field: the one picked here ('' = none), else the Field of study filter's.
+const gField = () => gpick.field ?? (isCip2(fieldOf(P())) ? fieldOf(P()) : null);
+const gProg = () => gpick.prog ?? null;
 const gEnd = (years, p) => (p.year !== FIRST && years.includes(p.year) ? p.year : years[years.length - 1]);
 // cip rows by institution|level, parsed once.
 const cipIndex = memo((rows) => d3.group(rows.map((r) => {
   const [institution, level, year] = r.slice.split('|');
   return { institution, level, year, category: r.category, headcount: Number(r.headcount) };
 }), (r) => r.institution + '|' + r.level));
-function programRows(p) {
+function programRows(p, code) {
   const idx = cipIndex(dash.data('cip').data);
   const insts = gpick.kind === 'comb' ? membersOf(p.group) : [gpick.inst];
-  const code = fieldCode(p) + '.';
   const by = new Map(); // category|year -> summed headcount
   for (const inst of insts)
     for (const r of idx.get(inst + '|' + p.level) ?? []) {
-      if (!r.category.startsWith(code)) continue;
+      if (!r.category.startsWith(code + '.')) continue;
       const k = r.category + '|' + r.year;
       by.set(k, (by.get(k) ?? 0) + r.headcount);
     }
@@ -874,10 +883,14 @@ function programRows(p) {
     return { field: k.slice(0, i), year: k.slice(i + 1), headcount };
   });
 }
-function fieldSeries() {
+// Series for the fields (prog false) or for the highlighted field's programs (prog true).
+// Null while data loads; { years: [] } when there's nothing to show.
+function gSeries(prog) {
   const p = P();
-  if (!gpick.inst || gSources().some((id) => dash.data(id).status !== 'ok')) return null;
-  const rows = gPrograms() ? programRows(p) : gpick.kind === 'comb'
+  if (!gpick.inst || gSources(prog).some((id) => dash.data(id).status !== 'ok')) return null;
+  const f = gField();
+  if (prog && !f) return { years: [], end: null, list: [], none: true };
+  const rows = prog ? programRows(p, f.split(' ')[0]) : gpick.kind === 'comb'
     ? dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && isCip2(r.field))
     : dash.data('totals').data.filter((r) => r.institution === gpick.inst && r.level === p.level && isCip2(r.field));
   const years = [...new Set(rows.map((r) => r.year))].sort(d3.ascending);
@@ -886,12 +899,12 @@ function fieldSeries() {
   const list = [];
   for (const [field, rs] of d3.group(rows, (r) => r.field)) {
     const n = new Map(rs.map((r) => [r.year, r.headcount]));
-    const at = (yr) => n.get(yr) ?? 0; // a year without a row: no students in the field that year
+    const at = (yr) => n.get(yr) ?? 0; // a year without a row: no students that year
     const base = at(FIRST), last = at(end);
     if (!base && !last) continue;
     list.push({
-      field, name: gPrograms() ? programTitle(field) : fieldName(field), base, last,
-      rate: base ? last / base - 1 : null, // null: no students in 2012-13 (a new field)
+      field, name: prog ? programTitle(field) : fieldName(field), base, last,
+      rate: base ? last / base - 1 : null, // null: no students in 2012-13 (new)
       up: !base || last >= base,
       pts: base ? years.map((yr) => ({ year: yr, v: (at(yr) / base) * 100, n: at(yr) })) : [],
     });
@@ -901,6 +914,17 @@ function fieldSeries() {
   for (const d of list) if (dup.get(d.name) > 1) d.name += ` (${d.field.split(' ')[0]})`;
   return { years, end, list };
 }
+const fieldSeries = memoKey(() => gSeries(false));
+const progSeries = memoKey(() => gSeries(true));
+// Recomputed at most once per draw pass: the key changes with the params, the pick and the data status.
+function memoKey(fn) {
+  let key = null, val = null;
+  return () => {
+    const k = JSON.stringify([P(), gpick, gField(), ['totals', 'group_totals', 'cip', 'peer_groups'].map((id) => dash.data(id).status)]);
+    if (k !== key) { key = k; val = fn(); }
+    return val;
+  };
+}
 const rateText = (d) => (d.rate == null ? 'new' : fmtD(d.rate));
 dash.draw('gf-title', (el) => {
   if (!gpick.inst) return;
@@ -909,39 +933,47 @@ dash.draw('gf-title', (el) => {
   const b = document.createElement('b');
   b.textContent = gpick.kind === 'comb' ? `${p.group} combined` : gpick.inst;
   const span = (fs && fs.end ? `, ${shortYear(FIRST)} to ${shortYear(fs.end)}` : '') + (subsetOf(fieldOf(p)) ? ' · all students' : '');
-  if (gPrograms()) {
-    const f = document.createElement('b');
-    f.textContent = fieldName(fieldOf(p));
-    el.replaceChildren('Detailed programs in ', f, ' at ', b, ` · ${p.level.toLowerCase()}${span}`);
-  } else el.replaceChildren('Fields of study at ', b, ` · ${p.level.toLowerCase()}${span}`);
+  el.replaceChildren('Fields of study and detailed programs at ', b, ` · ${p.level.toLowerCase()}${span}`);
 });
 dash.draw('gf-chart', (el) => {
-  if (!gpick.inst || !gate(el, gSources(), true)) return;
+  const prog = el.dataset.kind === 'prog';
+  if (!gpick.inst || !gate(el, gSources(prog), true)) return;
   const up = el.dataset.dir === 'up';
   const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
   const total = gHeight(Math.max(260, main.clientWidth));
   const W = Math.max(220, el.clientWidth), H = Math.max(180, Math.round((total - 8) / 2));
   const { svg, tip } = svgIn(el, W, H);
-  const fs = fieldSeries();
+  const fs = prog ? progSeries() : fieldSeries();
   const color = up ? 'var(--color-ok)' : 'var(--color-bad)';
+  // The programs pair names its field above the top chart.
+  const head = prog && up ? 18 : 0;
+  if (head) {
+    const f = gField();
+    svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', 'var(--color-fg)')
+      .text(f ? fit(svg, `Programs in ${fieldName(f)}`, W - 4, 'ux-lbl ux-lbl-strong') : 'Detailed programs');
+  }
+  if (prog && fs && fs.none) {
+    if (up) svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34).text(fit(svg, 'Pick a field (a line or the list) to see its programs.', W - 4));
+    return;
+  }
   const series = fs ? fs.list.filter((d) => d.up === up && d.pts.length > 1) : [];
   const count = fs ? fs.list.filter((d) => d.up === up).length : 0;
-  svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', color)
-    .text(`${up ? 'Grew' : 'Dropped'} · ${count} ${gWord(count)}`);
+  svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12 + head).style('fill', color)
+    .text(`${up ? 'Grew' : 'Dropped'} · ${count} ${gWord(prog, count)}`);
   if (!series.length) {
-    const none = count ? `Only new ${gWord(2)}: no 2012-13 headcount to index.` : `No ${gWord(1)} ${up ? 'grew' : 'dropped'}.`;
-    svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34).text(none);
+    const none = count ? `Only new ${gWord(prog, 2)}: no 2012-13 headcount to index.` : `No ${gWord(prog, 1)} ${up ? 'grew' : 'dropped'}.`;
+    svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34 + head).text(fit(svg, none, W - 4));
     return;
   }
   const years = fs.years;
   const vals = series.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
-  // Clip only outliers: fields far above the rest (a small field growing from a few students).
-  const sel = gField();
+  // Clip only outliers: lines far above the rest (a small field growing from a few students).
+  const sel = prog ? gProg() : gField();
   const hit = series.find((s) => s.field === sel);
   const q90 = d3.quantile(vals, 0.9), top = vals[vals.length - 1];
-  // The picked field always fits.
+  // The picked line always fits.
   const hi = Math.max(105, top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 * 1.08 : top * 1.03, hit ? d3.max(hit.pts, (d) => d.v) * 1.03 : 0);
-  const y = d3.scaleLinear([Math.min(100, vals[0]), hi], [H - 24, 22]).nice();
+  const y = d3.scaleLinear([Math.min(100, vals[0]), hi], [H - 24, 22 + head]).nice();
   const ticks = y.ticks(4);
   const left = measure(svg, ticks.map(fmtI)) + 8;
   const right = 10;
@@ -951,7 +983,7 @@ dash.draw('gf-chart', (el) => {
   svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
   yearAxis(svg, years, x, H, fs.end);
   const clip = 'clip-gf-' + Math.random().toString(36).slice(2, 8);
-  svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 16).attr('width', W).attr('height', H - 40);
+  svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 16 + head).attr('width', W).attr('height', H - 40 - head);
   const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
   const paths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(series).join('path')
     .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', color)
@@ -966,7 +998,7 @@ dash.draw('gf-chart', (el) => {
     const ly = y(e.v);
     svg.append('circle').attr('r', 3.5).attr('cx', x(e.year)).attr('cy', ly).style('fill', color);
     // Name and change just above the end point (below it when that would leave the chart).
-    svg.append('text').attr('class', 'ux-glbl').attr('x', x(e.year)).attr('y', ly < 40 ? ly + 16 : ly - 9)
+    svg.append('text').attr('class', 'ux-glbl').attr('x', x(e.year)).attr('y', ly < 40 + head ? ly + 16 : ly - 9)
       .attr('text-anchor', 'end').style('fill', color).text(lblText);
   }
   const nearest = (e) => {
@@ -981,10 +1013,11 @@ dash.draw('gf-chart', (el) => {
     return { yr, near };
   };
   svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
-    .on('click', (e) => { const { near } = nearest(e); if (near) pickField(near.field); })
+    .on('click', (e) => { const { near } = nearest(e); if (near) (prog ? pickProg : pickField)(near.field); })
     .on('mousemove', (e) => {
       const { yr, near } = nearest(e);
       style(near);
+      e.currentTarget.style.cursor = near ? 'pointer' : '';
       const s = near ?? hit;
       if (!s) { tip.hidden = true; return; }
       const d = s.pts.find((q) => q.year === yr);
@@ -996,27 +1029,28 @@ dash.draw('gf-chart', (el) => {
     })
     .on('mouseleave', () => { tip.hidden = true; style(null); });
 });
+// The list: fields that grew, then fields that dropped; the highlighted field opens into its programs.
 dash.draw('gf-list', (el) => {
-  if (!gpick.inst || !gate(el, gSources(), true)) return;
+  if (!gpick.inst || !gate(el, gSources(true), true)) return;
   const main = el.closest('.ux-gwrap').querySelector('[data-draw="growth"]');
   el.style.height = gHeight(Math.max(260, main.clientWidth)) + 'px';
   const fs = fieldSeries();
   const sel = gField();
-  const item = (d) => {
+  const item = (d, sub) => {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'ux-gli ' + (d.up ? 'is-up' : 'is-down');
+    b.className = 'ux-gli ' + (d.up ? 'is-up' : 'is-down') + (sub ? ' ux-gli-sub' : '');
     b.setAttribute('role', 'option');
-    b.setAttribute('aria-selected', String(d.field === sel));
+    b.setAttribute('aria-selected', String(sub ? d.field === gProg() : d.field === sel));
     b.title = `${d.name}: ${fmtN(d.base)} in ${shortYear(FIRST)}, ${fmtN(d.last)} in ${shortYear(fs.end)}`;
     const n = document.createElement('span');
     n.className = 'ux-gli-n';
-    n.textContent = d.name;
+    n.textContent = (sub ? '' : d.field === sel ? '▾ ' : '▸ ') + d.name;
     const v = document.createElement('span');
     v.className = 'ux-gli-v';
     v.textContent = rateText(d);
     b.append(n, v);
-    b.onclick = () => pickField(d.field);
+    b.onclick = () => (sub ? pickProg : pickField)(d.field);
     return b;
   };
   const head = (text, cls) => {
@@ -1025,11 +1059,16 @@ dash.draw('gf-list', (el) => {
     h.textContent = text;
     return h;
   };
-  const list = fs ? fs.list : [];
-  // Biggest change first in each group; new fields top the gains.
-  const ups = list.filter((d) => d.up).sort((a, b) => (b.rate ?? Infinity) - (a.rate ?? Infinity) || d3.descending(a.last, b.last));
-  const downs = list.filter((d) => !d.up).sort((a, b) => a.rate - b.rate);
-  el.replaceChildren(head(`Grew (${ups.length})`, 'is-up'), ...ups.map(item), head(`Dropped (${downs.length})`, 'is-down'), ...downs.map(item));
+  // Biggest change first in each group; new ones top the gains.
+  const order = (list) => [
+    ...list.filter((d) => d.up).sort((a, b) => (b.rate ?? Infinity) - (a.rate ?? Infinity) || d3.descending(a.last, b.last)),
+    ...list.filter((d) => !d.up).sort((a, b) => a.rate - b.rate),
+  ];
+  const progs = order(progSeries()?.list ?? []);
+  const rows = (ds) => ds.flatMap((d) => [item(d, false), ...(d.field === sel ? progs.map((q) => item(q, true)) : [])]);
+  const list = fs ? order(fs.list) : [];
+  const ups = list.filter((d) => d.up), downs = list.filter((d) => !d.up);
+  el.replaceChildren(head(`Grew (${ups.length})`, 'is-up'), ...rows(ups), head(`Dropped (${downs.length})`, 'is-down'), ...rows(downs));
 });
 
 // York's share of all Ontario students over time.
