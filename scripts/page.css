@@ -125,6 +125,11 @@
 .ux-chart-big { min-height: 280px; }
 .ux-scroll-tall { max-height: 40rem; }
 .ux-page .ux-bars { max-width: 60rem; }
+/* Growth panel open: the menu becomes one row on top (same look as on narrow screens). */
+.ux-app.is-wide { grid-template-columns: minmax(0, 1fr); }
+.ux-app.is-wide .ux-nav { position: static; display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+.ux-app.is-wide .ux-nav-h { display: none; }
+.ux-app.is-wide .ux-navlink { white-space: nowrap; flex: none; }
 @container (max-width: 44rem) {
   .ux-app { grid-template-columns: minmax(0, 1fr); }
   .ux-nav { position: static; display: flex; flex-wrap: nowrap; overflow-x: auto; gap: var(--cds-gap-xs); }

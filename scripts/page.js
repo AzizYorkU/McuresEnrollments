@@ -404,6 +404,7 @@ dash.onData(() => {
   const p = P();
   const page = pageOf(p);
   greyFilters(p);
+  syncWide();
   document.querySelectorAll('.ux .ux-navlink').forEach((b) => {
     if (b.dataset.page === page) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
@@ -822,8 +823,14 @@ dash.draw('gf-warn', (box) => {
   b.textContent = `${s.prefix}${catLabel(s, fieldOf(p).slice(s.prefix.length))}`;
   el.replaceChildren('The chart on the left shows ', b, `. The fields of study and programs on the right show all students: the source data doesn’t split them by ${what}, so the ${what} filter can’t apply to them.`);
 });
+// While the Growth panel is open, the menu moves to one row across the top so the charts get its column.
+function syncWide() {
+  const wide = !!gpick.inst && pageOf(P()) === 'growth';
+  document.querySelectorAll('.ux .ux-app').forEach((a) => a.classList.toggle('is-wide', wide));
+}
 function syncGpick() {
   const open = !!gpick.inst;
+  syncWide();
   document.querySelectorAll('.ux .ux-gwrap').forEach((w) => w.classList.toggle('is-open', open));
   document.querySelectorAll('.ux .ux-gside, .ux .ux-gpick').forEach((n) => { n.hidden = !open; });
   greyFilters(P());
@@ -831,9 +838,12 @@ function syncGpick() {
 function openFields(pick) {
   const same = gpick.kind === pick.kind && gpick.inst === pick.inst;
   Object.assign(gpick, pick);
+  const was = !!document.querySelector('.ux .ux-app.is-wide');
   if (!same) Object.assign(gpick, { field: null, prog: null });
   syncGpick();
   GDRAWS.forEach((n) => dash.draw(n));
+  // Opening moves the menu above the page, which pushes the chart down: bring it back into view.
+  if (!was) document.querySelector('.ux #growth-card')?.scrollIntoView({ block: 'start' });
 }
 function closeFields() {
   Object.assign(gpick, { kind: null, inst: null, field: null, prog: null });
