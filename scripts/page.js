@@ -117,7 +117,7 @@ dash.calc('york_ontario', {
 const FOCUS = 'York';
 const FIRST = '2012-2013';
 // Growth page panel: the institution whose line was clicked (see openFields).
-const gpick = { kind: null, inst: null, field: null, prog: null };
+const gpick = { kind: null, inst: null, field: null, prog: null, allProgs: false }; // allProgs: fields hidden, every program shown
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -355,6 +355,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (e.target.closest('.ux .ux-gclose')) { closeFields(); return; }
+  if (e.target.matches('.ux .ux-gfields')) { setAllProgs(!e.target.checked); return; }
   if (e.target.closest('.ux .ux-reset')) { if (gpick.inst) closeFields(); dash.resetParams(); }
 });
 document.addEventListener('change', (e) => {
@@ -831,8 +832,13 @@ function syncWide() {
 function syncGpick() {
   const open = !!gpick.inst;
   syncWide();
-  document.querySelectorAll('.ux .ux-gwrap').forEach((w) => w.classList.toggle('is-open', open));
-  document.querySelectorAll('.ux .ux-gside, .ux .ux-gpick').forEach((n) => { n.hidden = !open; });
+  document.querySelectorAll('.ux .ux-gwrap').forEach((w) => {
+    w.classList.toggle('is-open', open);
+    w.classList.toggle('no-fields', gpick.allProgs);
+  });
+  document.querySelectorAll('.ux .ux-gside').forEach((n) => { n.hidden = !open; });
+  document.querySelectorAll('.ux .ux-gminis-fields').forEach((n) => { n.hidden = gpick.allProgs; });
+  document.querySelectorAll('.ux .ux-gfields').forEach((c) => { c.checked = !gpick.allProgs; });
   greyFilters(P());
 }
 function openFields(pick) {
@@ -844,6 +850,14 @@ function openFields(pick) {
   GDRAWS.forEach((n) => dash.draw(n));
   // Opening moves the menu above the page, which pushes the chart down: bring it back into view.
   if (!was) document.querySelector('.ux #growth-card')?.scrollIntoView({ block: 'start' });
+}
+// The Show fields of study box: unticked hides the fields charts, and the programs charts and list show
+// every detailed program at the institution (not just one field's). Stays as set until the page reloads.
+function setAllProgs(all) {
+  gpick.allProgs = all;
+  gpick.prog = null;
+  syncGpick();
+  GDRAWS.forEach((n) => dash.draw(n));
 }
 function closeFields() {
   Object.assign(gpick, { kind: null, inst: null, field: null, prog: null });
@@ -885,7 +899,7 @@ function programRows(p, code) {
   const by = new Map(); // category|year -> summed headcount
   for (const inst of insts)
     for (const r of idx.get(inst + '|' + p.level) ?? []) {
-      if (!r.category.startsWith(code + '.')) continue;
+      if (code && !r.category.startsWith(code + '.')) continue; // no code: every program
       const k = r.category + '|' + r.year;
       by.set(k, (by.get(k) ?? 0) + r.headcount);
     }
@@ -900,8 +914,8 @@ function gSeries(prog) {
   const p = P();
   if (!gpick.inst || gSources(prog).some((id) => dash.data(id).status !== 'ok')) return null;
   const f = gField();
-  if (prog && !f) return { years: [], end: null, list: [], none: true };
-  const rows = prog ? programRows(p, f.split(' ')[0]) : gpick.kind === 'comb'
+  if (prog && !f && !gpick.allProgs) return { years: [], end: null, list: [], none: true };
+  const rows = prog ? programRows(p, gpick.allProgs ? '' : f.split(' ')[0]) : gpick.kind === 'comb'
     ? dash.data('group_totals').data.filter((r) => r.group === p.group && r.level === p.level && isCip2(r.field))
     : dash.data('totals').data.filter((r) => r.institution === gpick.inst && r.level === p.level && isCip2(r.field));
   const years = [...new Set(rows.map((r) => r.year))].sort(d3.ascending);
@@ -944,7 +958,7 @@ dash.draw('gf-title', (el) => {
   const b = document.createElement('b');
   b.textContent = gpick.kind === 'comb' ? `${p.group} combined` : gpick.inst;
   const span = (fs && fs.end ? `, ${shortYear(FIRST)} to ${shortYear(fs.end)}` : '') + (subsetOf(fieldOf(p)) ? ' · all students' : '');
-  el.replaceChildren('Fields of study and detailed programs at ', b, ` · ${p.level.toLowerCase()}${span}`);
+  el.replaceChildren(gpick.allProgs ? 'All detailed programs at ' : 'Fields of study and detailed programs at ', b, ` · ${p.level.toLowerCase()}${span}`);
 });
 dash.draw('gf-chart', (el) => {
   const prog = el.dataset.kind === 'prog';
@@ -956,7 +970,7 @@ dash.draw('gf-chart', (el) => {
   const fs = prog ? progSeries() : fieldSeries();
   const color = up ? 'var(--color-ok)' : 'var(--color-bad)';
   // The programs pair names its field above the top chart.
-  const head = prog && up ? 18 : 0;
+  const head = prog && up && !gpick.allProgs ? 18 : 0;
   if (head) {
     const f = gField();
     svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', 'var(--color-fg)')
@@ -1074,6 +1088,15 @@ dash.draw('gf-list', (el) => {
     ...list.filter((d) => !d.up).sort((a, b) => a.rate - b.rate),
   ];
   const progs = order(progSeries()?.list ?? []);
+  if (gpick.allProgs) {
+    // Fields hidden: every program, flat.
+    const ups = progs.filter((d) => d.up), downs = progs.filter((d) => !d.up);
+    el.setAttribute('aria-label', 'Detailed programs by change');
+    el.replaceChildren(head(`Grew (${ups.length} programs)`, 'is-up'), ...ups.map((d) => item(d, true)),
+      head(`Dropped (${downs.length} programs)`, 'is-down'), ...downs.map((d) => item(d, true)));
+    return;
+  }
+  el.setAttribute('aria-label', 'Fields of study by change');
   const rows = (ds) => ds.flatMap((d) => [item(d, false), ...(d.field === sel ? progs.map((q) => item(q, true)) : [])]);
   const list = fs ? order(fs.list) : [];
   const ups = list.filter((d) => d.up), downs = list.filter((d) => !d.up);

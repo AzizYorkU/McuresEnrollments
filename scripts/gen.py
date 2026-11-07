@@ -290,16 +290,16 @@ html = f"""<meta name="dash-one-writer">
     <section class="ux-page" data-page="growth" id="growth" hidden>
       <div class="ux-card" id="growth-card">
         <h2>Growth since 2012-13</h2>
-        <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer; click any line to see how that institution’s fields of study grew or dropped, and pick a field to see its detailed programs.</p>
+        <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer; click any line to see how that institution’s fields of study grew or dropped, and pick a field to see its detailed programs (untick Show fields of study to see all its programs at once).</p>
         <div class="ux-card-head">
           <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
-          <div class="ux-gpick" hidden><span data-draw="gf-title" data-source="totals group_totals cip peer_groups"></span><button class="ux-btn ux-gclose" type="button" aria-label="Close the fields of study">Close ✕</button></div>
         </div>
         <div data-draw="gf-warn" data-source="totals"></div>
         <div class="ux-gwrap">
           <div class="ux-chart ux-chart-big dash-skeleton" data-draw="growth" data-source="totals group_totals peer_groups"></div>
           <div class="ux-gside" hidden>
-            <div class="ux-gminis">
+            <div class="ux-gpick"><span data-draw="gf-title" data-source="totals group_totals cip peer_groups"></span><label class="ux-gtoggle"><input type="checkbox" class="ux-gfields" checked> Show fields of study</label><button class="ux-btn ux-gclose" type="button" aria-label="Close the fields of study">Close ✕</button></div>
+            <div class="ux-gminis ux-gminis-fields">
               <div class="ux-gmini" data-draw="gf-chart" data-kind="field" data-dir="up" data-source="totals group_totals"></div>
               <div class="ux-gmini" data-draw="gf-chart" data-kind="field" data-dir="down" data-source="totals group_totals"></div>
             </div>

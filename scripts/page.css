@@ -189,17 +189,22 @@
 .ux-bar-head .ux-exp + .ux-bar-label { flex: 1 1 auto; }
 .ux-exp { font-size: 1.15em; }
 /* Growth page: click an institution's line to open its fields of study beside the chart. */
-.ux-gpick { display: inline-flex; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-body); }
+.ux-gpick { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-body); }
+.ux-gpick .ux-gclose { margin-left: auto; }
+.ux-gtoggle { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); cursor: pointer; white-space: nowrap; }
+.ux-gtoggle input { margin: 0; accent-color: var(--color-fg); }
 .ux .ux-gpick b { font-weight: 600; }
 .ux-gwrap { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr); }
-.ux-gside { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(12rem, 15rem); min-width: 0; }
+.ux-gside { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(12rem, 15rem); min-width: 0; align-content: start; }
+.ux-gwrap.no-fields .ux-gside { grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem); }
 .ux-gminis { display: grid; gap: var(--cds-gap-sm); grid-template-rows: 1fr 1fr; min-width: 0; }
 .ux-gmini { position: relative; min-width: 0; }
 .ux-gmini .ux-svg { cursor: pointer; }
 @container (min-width: 82rem) {
   .ux-gwrap.is-open { grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr); }
+  .ux-gwrap.is-open.no-fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
 }
-@media (max-width: 40rem) { .ux-gside { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 40rem) { .ux-gside, .ux-gwrap.no-fields .ux-gside { grid-template-columns: minmax(0, 1fr); } }
 .ux-gli-sub { padding-left: 22px; font-size: 0.95em; color: var(--color-fg-muted); }
 .ux-glist { overflow-y: auto; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
 .ux-glist-h { position: sticky; top: 0; z-index: 1; padding: 6px 10px 4px; font-weight: 600; background: var(--color-bg); border-bottom: 1px solid var(--color-border-line); }
