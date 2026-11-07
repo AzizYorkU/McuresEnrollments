@@ -976,7 +976,10 @@ dash.draw('gf-chart', (el) => {
     const name = gpick.allProgs ? 'All detailed programs' : f ? `Programs in ${fieldName(f)}` : 'Detailed programs';
     const list = fs && !fs.none ? fs.list : null;
     const g = list ? list.filter((d) => d.up).length : 0;
-    const ratio = list ? `(${g} grew : ${list.length - g} dropped)` : '';
+    const dn = list ? list.length - g : 0;
+    // #grew / #dropped; nothing dropped: no ratio to show.
+    const rv = dn ? (g / dn).toFixed(2) : '—';
+    const ratio = list ? `(${g} grew : ${dn} dropped = ${rv})` : '';
     const rw = ratio ? measure(svg, [ratio], 'ux-lbl ux-lbl-strong') + 8 : 0;
     const t = svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', 'var(--color-fg)');
     t.append('tspan').text(fit(svg, name, Math.max(60, W - 4 - rw), 'ux-lbl ux-lbl-strong'));
@@ -984,8 +987,9 @@ dash.draw('gf-chart', (el) => {
       t.append('tspan').text(' (').style('fill', 'var(--color-fg)');
       t.append('tspan').text(`${g} grew`).style('fill', 'var(--color-ok)');
       t.append('tspan').text(' : ').style('fill', 'var(--color-fg)');
-      t.append('tspan').text(`${list.length - g} dropped`).style('fill', 'var(--color-bad)');
-      t.append('tspan').text(')').style('fill', 'var(--color-fg)');
+      t.append('tspan').text(`${dn} dropped`).style('fill', 'var(--color-bad)');
+      t.append('tspan').text(` = ${rv})`).style('fill', 'var(--color-fg)');
+      t.append('title').text(`Grew ÷ dropped: ${g} ÷ ${dn}` + (dn ? ` = ${rv}` : ' (nothing dropped)'));
     }
   }
   if (prog && fs && fs.none) {
