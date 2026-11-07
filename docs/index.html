@@ -2126,15 +2126,27 @@ dash.draw('gf-chart', (el) => {
   const { svg, tip } = svgIn(el, W, H);
   const fs = prog ? progSeries() : fieldSeries();
   const color = up ? 'var(--color-ok)' : 'var(--color-bad)';
-  // The programs pair names its field above the top chart.
-  const head = prog && up && !gpick.allProgs ? 18 : 0;
+  // The programs pair names its field above the top chart, with the grew : dropped count.
+  const head = prog && up ? 18 : 0;
   if (head) {
     const f = gField();
-    svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', 'var(--color-fg)')
-      .text(f ? fit(svg, `Programs in ${fieldName(f)}`, W - 4, 'ux-lbl ux-lbl-strong') : 'Detailed programs');
+    const name = gpick.allProgs ? 'All detailed programs' : f ? `Programs in ${fieldName(f)}` : 'Detailed programs';
+    const list = fs && !fs.none ? fs.list : null;
+    const g = list ? list.filter((d) => d.up).length : 0;
+    const ratio = list ? `(${g} grew : ${list.length - g} dropped)` : '';
+    const rw = ratio ? measure(svg, [ratio], 'ux-lbl ux-lbl-strong') + 8 : 0;
+    const t = svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12).style('fill', 'var(--color-fg)');
+    t.append('tspan').text(fit(svg, name, Math.max(60, W - 4 - rw), 'ux-lbl ux-lbl-strong'));
+    if (ratio) {
+      t.append('tspan').text(' (').style('fill', 'var(--color-fg)');
+      t.append('tspan').text(`${g} grew`).style('fill', 'var(--color-ok)');
+      t.append('tspan').text(' : ').style('fill', 'var(--color-fg)');
+      t.append('tspan').text(`${list.length - g} dropped`).style('fill', 'var(--color-bad)');
+      t.append('tspan').text(')').style('fill', 'var(--color-fg)');
+    }
   }
   if (prog && fs && fs.none) {
-    if (up) svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34).text(fit(svg, 'Pick a field (a line or the list) to see its programs.', W - 4));
+    if (up) svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34 + head).text(fit(svg, 'Pick a field (a line or the list) to see its programs.', W - 4));
     return;
   }
   const series = fs ? fs.list.filter((d) => d.up === up && d.pts.length > 1) : [];
