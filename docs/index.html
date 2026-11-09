@@ -156,13 +156,17 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 }
 
 /* Overview: ranked lists, one per measure */
-.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); gap: var(--cds-gap-md); align-items: stretch; }
+.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr)); gap: var(--cds-gap-md); align-items: stretch; }
 .ux-list-card { display: flex; flex-direction: column; gap: var(--cds-gap-xs); padding: var(--cds-pad-lg) var(--cds-pad-md); }
 .ux-list-l { margin: 0; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
 .ux-rank { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); }
 .ux .ux-rank b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .ux-list { list-style: none; margin: var(--cds-gap-xs) 0 0; padding: 0; display: grid; min-height: 12rem; align-content: start; font-size: var(--cds-font-size-body); font-variant-numeric: tabular-nums; }
-.ux-li { display: grid; grid-template-columns: 1.6em minmax(0, 1fr) auto; gap: var(--cds-gap-sm); align-items: baseline; padding: 6px var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
+.ux-list { overflow-x: auto; }
+.ux-li { display: grid; font-size: 0.875rem; grid-template-columns: 1.2rem minmax(5.6rem, 1fr) 3.2rem 4.1rem 3.6rem; column-gap: 5px; align-items: baseline; padding: 6px var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
+.ux-list.has-measure .ux-li { grid-template-columns: 1.2rem minmax(5.6rem, 1fr) 3.2rem 4.1rem 3.6rem 3.3rem; column-gap: 4px; }
+.ux-li.is-head { align-items: end; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.2; }
+.ux-li-h { white-space: pre; }
 .ux-li:last-child { border-bottom: 0; }
 .ux-li-rank { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); text-align: right; }
 .ux-li-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -312,15 +316,8 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
-        <div class="ux-card ux-list-card" id="list-ontario_share">
-          <p class="ux-list-l">Share of students</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-ontario_share" data-source="york_standing">—</b></h3>
-          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="ontario_share" data-source="totals group_totals peer_groups"></ol>
-          <p class="ux-note">York since 2012-13: <b data-draw="o-base" data-source="york_ontario">—</b></p>
-          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
-        </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Initial heads are 2012-13; change in heads is the selected year minus 2012-13. In the International share list, heads count international students only. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
@@ -1768,49 +1765,73 @@ const rank = (f) => (el) => {
 ['headcount', 'change_base', 'change_prev', 'intl_share', 'ontario_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
 
 // Overview: one ranked list per measure, York highlighted, peers combined at the foot.
+// heads: the count behind the measure, shown as initial, selected year and change.
+// label: the ranked measure's own column; without one, the selected-year heads are what's ranked.
 const LISTS = {
-  headcount: { fmt: fmtN },
-  change_base: { fmt: fmtD, signed: true, comb: true },
-  change_prev: { fmt: fmtD, signed: true, comb: true },
-  intl_share: { fmt: fmtP, comb: true },
-  ontario_share: { fmt: fmtP },
+  headcount: { fmt: fmtN, heads: 'headcount' },
+  change_base: { fmt: fmtD, signed: true, comb: true, heads: 'headcount', label: 'Growth\nRate' },
+  intl_share: { fmt: fmtP, comb: true, heads: 'international', label: 'Intl\nShare' },
 };
+const fmtHeadsChange = (v) => (v === 0 ? '0' : d3.format('+,')(v));
 dash.draw('ov-list', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
   const f = el.dataset.field;
   const spec = LISTS[f];
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
-  const rows = dash.data('totals').data
+  const totals = dash.data('totals').data;
+  const rows = totals
     .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
     .sort((a, b) => b[f] - a[f]);
-  const item = (rank, name, value, cls) => {
+  el.classList.toggle('has-measure', !!spec.label);
+  const span = (text, cls) => {
+    const s = document.createElement('span');
+    s.textContent = text;
+    if (cls) s.className = cls;
+    return s;
+  };
+  const heading = () => {
+    const li = document.createElement('li');
+    li.className = 'ux-li is-head';
+    const cols = ['Initial\nHeads', 'Selected\nYear Heads', 'Change\nin Heads', ...(spec.label ? [spec.label] : [])];
+    li.append(span(''), span(''), ...cols.map((c, i) => {
+      const h = span(c, 'ux-li-v ux-li-h');
+      if (i === 0) h.title = `Heads in ${shortYear(FIRST)}`;
+      if (i === 1) h.title = `Heads in ${shortYear(p.year)}`;
+      return h;
+    }));
+    return li;
+  };
+  const item = (rank, name, source, row, base, cls) => {
     const li = document.createElement('li');
     li.className = 'ux-li' + (cls ? ' ' + cls : '');
     if (cls === 'is-york') li.style.setProperty('--york', dash.colors[0]);
-    const n = document.createElement('span');
-    n.className = 'ux-li-rank';
-    n.textContent = rank;
-    const nm = document.createElement('span');
-    nm.className = 'ux-li-name';
-    nm.textContent = name;
-    if (spec.signed) value.classList.add(...tone(value.dataset.raw ? Number(value.dataset.raw) : 0).split(' ').filter(Boolean));
-    value.classList.add('ux-li-v');
-    li.append(n, nm, value);
+    const h = spec.heads;
+    const from = base?.[h], to = row[h];
+    const change = from == null || to == null ? null : to - from;
+    const cells = [
+      from == null ? span('—') : cite('span', fmtN(from), source, h, 'key=' + enc(base.key)),
+      to == null ? span('—') : cite('span', fmtN(to), source, h, 'key=' + enc(row.key)),
+      span(change == null ? '—' : fmtHeadsChange(change), tone(change)),
+    ];
+    if (spec.label) {
+      const v = cite('span', spec.fmt(row[f]), source, f, 'key=' + enc(row.key));
+      if (spec.signed) v.className = tone(row[f]);
+      cells.push(v);
+    }
+    cells.forEach((c) => c.classList.add('ux-li-v'));
+    li.append(span(rank, 'ux-li-rank'), span(name, 'ux-li-name'), ...cells);
     return li;
   };
-  const items = rows.map((r, i) => {
-    const v = cite('span', spec.fmt(r[f]), 'totals', f, 'key=' + enc(r.key));
-    v.dataset.raw = r[f];
-    return item(String(i + 1), r.institution, v, r.institution === FOCUS ? 'is-york' : '');
-  });
-  const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
+  const tBy = byKeyRow(totals);
+  const items = rows.map((r, i) => item(String(i + 1), r.institution, 'totals', r,
+    tBy.get(`${r.field}|${r.institution}|${r.level}|${FIRST}`), r.institution === FOCUS ? 'is-york' : ''));
+  const gBy = byKeyRow(dash.data('group_totals').data);
+  const comb = gBy.get(groupKey(p));
   if (spec.comb && comb && comb[f] != null) {
-    const v = cite('span', spec.fmt(comb[f]), 'group_totals', f, 'key=' + enc(comb.key));
-    v.dataset.raw = comb[f];
-    items.push(item('', 'Peers', v, 'is-comb'));
+    items.push(item('', 'Peers', 'group_totals', comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'is-comb'));
   }
-  el.replaceChildren(...items);
+  el.replaceChildren(heading(), ...items);
 });
 
 // Overview: a small chart under each list, York (and peers combined) every year.

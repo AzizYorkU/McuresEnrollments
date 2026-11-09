@@ -276,15 +276,8 @@ html = f"""<meta name="dash-one-writer">
           <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
-        <div class="ux-card ux-list-card" id="list-ontario_share">
-          <p class="ux-list-l">Share of students</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-ontario_share" data-source="york_standing">—</b></h3>
-          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="ontario_share" data-source="totals group_totals peer_groups"></ol>
-          <p class="ux-note">York since 2012-13: <b data-draw="o-base" data-source="york_ontario">—</b></p>
-          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="ontario_share" data-source="totals group_totals"></div>
-        </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Initial heads are 2012-13; change in heads is the selected year minus 2012-13. In the International share list, heads count international students only. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>

@@ -611,49 +611,73 @@ const rank = (f) => (el) => {
 ['headcount', 'change_base', 'change_prev', 'intl_share', 'ontario_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
 
 // Overview: one ranked list per measure, York highlighted, peers combined at the foot.
+// heads: the count behind the measure, shown as initial, selected year and change.
+// label: the ranked measure's own column; without one, the selected-year heads are what's ranked.
 const LISTS = {
-  headcount: { fmt: fmtN },
-  change_base: { fmt: fmtD, signed: true, comb: true },
-  change_prev: { fmt: fmtD, signed: true, comb: true },
-  intl_share: { fmt: fmtP, comb: true },
-  ontario_share: { fmt: fmtP },
+  headcount: { fmt: fmtN, heads: 'headcount' },
+  change_base: { fmt: fmtD, signed: true, comb: true, heads: 'headcount', label: 'Growth\nRate' },
+  intl_share: { fmt: fmtP, comb: true, heads: 'international', label: 'Intl\nShare' },
 };
+const fmtHeadsChange = (v) => (v === 0 ? '0' : d3.format('+,')(v));
 dash.draw('ov-list', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
   const f = el.dataset.field;
   const spec = LISTS[f];
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
-  const rows = dash.data('totals').data
+  const totals = dash.data('totals').data;
+  const rows = totals
     .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
     .sort((a, b) => b[f] - a[f]);
-  const item = (rank, name, value, cls) => {
+  el.classList.toggle('has-measure', !!spec.label);
+  const span = (text, cls) => {
+    const s = document.createElement('span');
+    s.textContent = text;
+    if (cls) s.className = cls;
+    return s;
+  };
+  const heading = () => {
+    const li = document.createElement('li');
+    li.className = 'ux-li is-head';
+    const cols = ['Initial\nHeads', 'Selected\nYear Heads', 'Change\nin Heads', ...(spec.label ? [spec.label] : [])];
+    li.append(span(''), span(''), ...cols.map((c, i) => {
+      const h = span(c, 'ux-li-v ux-li-h');
+      if (i === 0) h.title = `Heads in ${shortYear(FIRST)}`;
+      if (i === 1) h.title = `Heads in ${shortYear(p.year)}`;
+      return h;
+    }));
+    return li;
+  };
+  const item = (rank, name, source, row, base, cls) => {
     const li = document.createElement('li');
     li.className = 'ux-li' + (cls ? ' ' + cls : '');
     if (cls === 'is-york') li.style.setProperty('--york', dash.colors[0]);
-    const n = document.createElement('span');
-    n.className = 'ux-li-rank';
-    n.textContent = rank;
-    const nm = document.createElement('span');
-    nm.className = 'ux-li-name';
-    nm.textContent = name;
-    if (spec.signed) value.classList.add(...tone(value.dataset.raw ? Number(value.dataset.raw) : 0).split(' ').filter(Boolean));
-    value.classList.add('ux-li-v');
-    li.append(n, nm, value);
+    const h = spec.heads;
+    const from = base?.[h], to = row[h];
+    const change = from == null || to == null ? null : to - from;
+    const cells = [
+      from == null ? span('—') : cite('span', fmtN(from), source, h, 'key=' + enc(base.key)),
+      to == null ? span('—') : cite('span', fmtN(to), source, h, 'key=' + enc(row.key)),
+      span(change == null ? '—' : fmtHeadsChange(change), tone(change)),
+    ];
+    if (spec.label) {
+      const v = cite('span', spec.fmt(row[f]), source, f, 'key=' + enc(row.key));
+      if (spec.signed) v.className = tone(row[f]);
+      cells.push(v);
+    }
+    cells.forEach((c) => c.classList.add('ux-li-v'));
+    li.append(span(rank, 'ux-li-rank'), span(name, 'ux-li-name'), ...cells);
     return li;
   };
-  const items = rows.map((r, i) => {
-    const v = cite('span', spec.fmt(r[f]), 'totals', f, 'key=' + enc(r.key));
-    v.dataset.raw = r[f];
-    return item(String(i + 1), r.institution, v, r.institution === FOCUS ? 'is-york' : '');
-  });
-  const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
+  const tBy = byKeyRow(totals);
+  const items = rows.map((r, i) => item(String(i + 1), r.institution, 'totals', r,
+    tBy.get(`${r.field}|${r.institution}|${r.level}|${FIRST}`), r.institution === FOCUS ? 'is-york' : ''));
+  const gBy = byKeyRow(dash.data('group_totals').data);
+  const comb = gBy.get(groupKey(p));
   if (spec.comb && comb && comb[f] != null) {
-    const v = cite('span', spec.fmt(comb[f]), 'group_totals', f, 'key=' + enc(comb.key));
-    v.dataset.raw = comb[f];
-    items.push(item('', 'Peers', v, 'is-comb'));
+    items.push(item('', 'Peers', 'group_totals', comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'is-comb'));
   }
-  el.replaceChildren(...items);
+  el.replaceChildren(heading(), ...items);
 });
 
 // Overview: a small chart under each list, York (and peers combined) every year.
