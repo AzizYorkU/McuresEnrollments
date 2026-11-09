@@ -55,7 +55,7 @@ writes = [
         "updated": {"at": now, "by": "Claude, rolled up from cip.sas7bdat"}, "fixed": True}),
     w("set", "datasets", "peer_groups", data={
         "title": "Comparison groups",
-        "description": "Which institutions make up each group York is compared with: Large universities (over 20,000 students in 2024-25), "
+        "description": "Which institutions make up each group York is compared with: Top 5 universities (the largest by 2024-25 headcount, York among them), Large universities (over 20,000 students in 2024-25), "
                        "GTA universities, and all other Ontario universities. Edit this file to change a group.",
         "source": {"kind": "file", "url": f"/_blob/{BLOBS['peer_groups']}", "name": "peer_groups.csv", "format": "csv"},
         "updated": {"at": now, "by": "Claude, chosen from 2024-25 headcounts"}}),

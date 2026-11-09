@@ -17,7 +17,8 @@ CIP2 = {"01": "Agriculture and veterinary sciences", "03": "Natural resources an
         "50": "Visual and performing arts", "51": "Health professions", "52": "Business and management",
         "53": "Secondary and preparatory programs", "54": "History", "55": "French language and literature",
         "60": "Residency programs", "61": "Medical residency and fellowship programs", "89": "Not reported or not classified"}
-GROUPS = [("Large universities", ["Toronto", "Western", "Ottawa", "Waterloo", "McMaster", "Metropolitan", "Guelph", "Queen's", "Carleton"]),
+GROUPS = [("Top 5 universities", ["Toronto", "Western", "Ottawa", "Waterloo"]),  # largest by 2024-25 headcount; York, 2nd, is the fifth
+          ("Large universities", ["Toronto", "Western", "Ottawa", "Waterloo", "McMaster", "Metropolitan", "Guelph", "Queen's", "Carleton"]),
           ("GTA universities", ["Toronto", "Metropolitan", "Ontario Tech", "OCADU"]),
           ("All other Ontario universities", None)]  # None: every institution but York
 
