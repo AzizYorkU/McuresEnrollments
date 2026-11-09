@@ -147,7 +147,14 @@
 .ux-list { overflow-x: auto; }
 .ux-li { display: grid; font-size: 0.875rem; grid-template-columns: 1.1rem 5.6rem minmax(3.2rem, 1fr) minmax(4.1rem, 1fr) minmax(3.6rem, 1fr) minmax(3.3rem, 1fr); column-gap: 4px; align-items: baseline; padding: 6px var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
 .ux-li.is-head { align-items: end; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.2; }
-.ux-li-h { white-space: pre; }
+.ux-li-sort { position: relative; justify-self: end; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; line-height: inherit; text-align: right; white-space: pre; cursor: pointer; }
+.ux-li-sort.is-left { justify-self: start; text-align: left; }
+.ux-li-sort:hover, .ux-li-sort[data-dir] { color: var(--color-fg); }
+.ux-li.is-head { padding-top: calc(6px + 1.2em); }
+.ux-li-sort[data-dir]::before { position: absolute; bottom: 100%; right: 0; line-height: 1.2; }
+.ux-li-sort.is-left[data-dir]::before { right: auto; left: 0; }
+.ux-li-sort[data-dir="asc"]::before { content: "↑"; }
+.ux-li-sort[data-dir="desc"]::before { content: "↓"; }
 .ux-li:last-child { border-bottom: 0; }
 .ux-li-rank { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); text-align: right; }
 .ux-li-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
