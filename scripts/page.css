@@ -147,6 +147,7 @@
 .ux-list { overflow-x: auto; }
 .ux-li { display: grid; font-size: 0.875rem; grid-template-columns: 1.1rem 5.6rem minmax(3.2rem, 1fr) minmax(4.1rem, 1fr) minmax(3.6rem, 1fr) minmax(3.3rem, 1fr); column-gap: 4px; align-items: baseline; padding: 6px var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
 .ux-li.is-head { align-items: end; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.2; }
+.ux-li.is-bold { font-weight: 600; }
 .ux-li-sort { position: relative; justify-self: end; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; line-height: inherit; text-align: right; white-space: pre; cursor: pointer; }
 .ux-li-sort.is-left { justify-self: start; text-align: left; }
 .ux-li-sort:hover, .ux-li-sort[data-dir] { color: var(--color-fg); }
@@ -201,6 +202,8 @@
 /* Growth page: click an institution's line to open its fields of study beside the chart. */
 .ux-gpick { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-body); }
 .ux-gpick .ux-gclose { margin-left: auto; }
+.ux-gunit { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); font-size: var(--cds-font-size-body); }
+.ux [data-gunit][hidden] { display: none; }
 .ux-gtoggle { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); cursor: pointer; white-space: nowrap; }
 .ux-gtoggle input { margin: 0; accent-color: var(--color-fg); }
 .ux .ux-gpick b { font-weight: 600; }

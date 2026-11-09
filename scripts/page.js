@@ -118,6 +118,7 @@ const FOCUS = 'York';
 const FIRST = '2012-2013';
 // Growth page panel: the institution whose line was clicked (see openFields).
 const gpick = { kind: null, inst: null, field: null, prog: null, allProgs: false }; // allProgs: fields hidden, every program shown
+const gHeads = (p) => p.gunit === 'heads'; // the Growth page's radio; up here because onData reads it
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -354,6 +355,7 @@ document.addEventListener('click', (e) => {
     dash.setLink(pageOf(P()));
     return;
   }
+  if (e.target.matches('.ux .ux-gunit input')) { dash.setParams({ gunit: e.target.value }); return; }
   if (e.target.closest('.ux .ux-gclose')) { closeFields(); return; }
   if (e.target.matches('.ux .ux-gfields')) { setAllProgs(!e.target.checked); return; }
   if (e.target.closest('.ux .ux-reset')) {
@@ -418,6 +420,9 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-page').forEach((s) => { s.hidden = !s.dataset.page.split(' ').includes(page); });
   document.querySelectorAll('.ux [data-view]').forEach((v) => { v.hidden = v.dataset.view !== page; });
   document.querySelectorAll('.ux .ux-level').forEach((s) => { s.value = p.level; });
+  const unit = gHeads(p) ? 'heads' : 'pct';
+  document.querySelectorAll('.ux .ux-gunit input').forEach((r) => { r.checked = r.value === unit; });
+  document.querySelectorAll('.ux [data-gunit]').forEach((n) => { n.hidden = n.dataset.gunit !== unit; });
   document.querySelectorAll('.ux .ux-sw[data-i]').forEach((s) => { s.style.background = dash.colors[Number(s.dataset.i)]; });
   document.querySelectorAll('.ux .ux-sw[data-muted]').forEach((s) => { s.style.background = MUTED; });
   document.querySelectorAll('.ux .ux-dimtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dim === p.dim)));
@@ -626,6 +631,7 @@ const LISTS = {
 const fmtHeadsChange = (v) => (v === 0 ? '0' : d3.format('+,')(v));
 // Column headings sort their own table. # keeps each university's rank on the table's measure; Peers stays at the foot.
 const OV_SORT_DEFAULT = { key: 'value', dir: 'desc' };
+const OV_BOLD = new Set(['York', 'Ottawa', 'Western']);
 const OV_LEFT_COLS = new Set(['rank', 'institution']); // lowest or A-Z on the first click
 function drawOvList(el) {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
@@ -688,7 +694,7 @@ function drawOvList(el) {
   };
   const item = (d, cls) => {
     const li = document.createElement('li');
-    li.className = 'ux-li' + (cls ? ' ' + cls : '');
+    li.className = 'ux-li' + (cls ? ' ' + cls : '') + (OV_BOLD.has(d.institution) ? ' is-bold' : '');
     if (cls === 'is-york') li.style.setProperty('--york', dash.colors[0]);
     const v = d.value == null ? span('—') : cite('span', vfmt(d.value), d.source, vf, 'key=' + enc(d.row.key));
     if (spec.signed) v.className = tone(d.value);
@@ -759,18 +765,26 @@ dash.draw('ov-spark', (el) => {
     .on('mouseleave', () => { tip.hidden = true; rule.attr('opacity', 0); });
 });
 
-// Growth since 2012-13, indexed to 100: York, peers combined, and each peer.
+// The Growth page's radio: plot % change since 2012-13 (from v, indexed to 100) or number of heads (n).
+const fmtChg = (v) => (Math.round(v) === 100 ? '0%' : d3.format('+.0%')(v / 100 - 1));
+const gVal = (heads) => (heads ? (d) => d.n : (d) => d.v);
+const gFmt = (heads) => (heads ? fmtN : fmtChg);
+
+// Growth since 2012-13: York, peers combined, and each peer. Peers combined isn't plotted as heads:
+// its total would squash every university at the bottom of the scale, so it's named in the tooltip instead.
 // Clicking a line opens that institution's fields of study beside the chart (gpick, below).
 dash.draw('growth', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
   const tot = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
   const years = [...new Set(tot.map((r) => r.year))].sort(d3.ascending);
+  const heads = gHeads(p);
+  const val = gVal(heads), fmtV = gFmt(heads);
   const index = (rows) => {
     const base = rows.find((r) => r.year === FIRST);
-    if (!base) return null;
+    if (!base && !heads) return null; // no 2012-13 headcount: no % change to plot
     return rows.filter((r) => years.includes(r.year)).sort((a, b) => d3.ascending(a.year, b.year))
-      .map((r) => ({ year: r.year, v: (r.headcount / base.headcount) * 100 }));
+      .map((r) => ({ year: r.year, n: r.headcount, v: base ? (r.headcount / base.headcount) * 100 : null }));
   };
   const byInst = d3.group(tot, (r) => r.institution);
   const peers = membersOf(p.group).map((m) => ({ name: m, pts: index(byInst.get(m) ?? []) })).filter((s) => s.pts && s.pts.length > 1);
@@ -782,26 +796,28 @@ dash.draw('growth', (el) => {
   const { svg, tip } = svgIn(el, W, H);
   if (!york.pts.length || !years.length) return;
   const picked = gpick.kind === 'inst' ? peers.find((s) => s.name === gpick.inst) ?? null : null;
-  const all = [york, comb, ...peers].flatMap((s) => s.pts.map((d) => d.v));
-  const peerVals = peers.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
-  // Clip only outliers: peers far above the rest (a small school growing from a low base).
+  const mains = (heads ? [york] : [york, comb]).filter((s) => s.pts.length);
+  const plotted = [...mains, ...peers];
+  const all = plotted.flatMap((s) => s.pts.map(val));
+  const peerVals = peers.flatMap((s) => s.pts.map(val)).sort(d3.ascending);
+  // Clip only outliers on the % plot: peers far above the rest (a small school growing from a low base).
   const q90 = d3.quantile(peerVals, 0.9) ?? 100, top = peerVals[peerVals.length - 1] ?? 100;
   const peerHi = top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 : top;
-  const hi = Math.max(d3.max([york, comb], (s) => d3.max(s.pts, (d) => d.v)) ?? 100, peerHi);
-  const y = d3.scaleLinear([Math.min(100, d3.min(all)), hi * 1.03], [H - 26, 10]).nice();
+  const hi = heads ? d3.max(all) : Math.max(d3.max([york, comb], (s) => d3.max(s.pts, (d) => d.v)) ?? 100, peerHi);
+  const y = d3.scaleLinear([heads ? 0 : Math.min(100, d3.min(all)), hi * 1.03], [H - 26, 10]).nice();
   const ticks = y.ticks(5);
-  const left = measure(svg, ticks.map(fmtI)) + 8;
+  const left = measure(svg, ticks.map(fmtV)) + 8;
   const last = (s) => s.pts[s.pts.length - 1];
-  const ends = [york, comb].filter((s) => s.pts.length).map((s) => ({ s, text: `${s.name === FOCUS ? 'York' : 'Peers'} ${fmtI(last(s).v)}` }));
-  if (picked) ends.push({ s: { ...picked, color: 'var(--color-fg)' }, text: `${picked.name} ${fmtI(last(picked).v)}` });
+  const ends = mains.map((s) => ({ s, text: `${s.name === FOCUS ? 'York' : 'Peers'} ${fmtV(val(last(s)))}` }));
+  if (picked) ends.push({ s: { ...picked, color: 'var(--color-fg)' }, text: `${picked.name} ${fmtV(val(last(picked)))}` });
   const right = measure(svg, ends.map((e) => e.text), 'ux-lbl') + 12;
   const x = d3.scalePoint(years, [left + 6, W - right]);
-  yGrid(svg, y, ticks, fmtI, left, W - right + 4);
-  svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
+  yGrid(svg, y, ticks, fmtV, left, W - right + 4);
+  if (!heads) svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
   yearAxis(svg, years, x, H, p.year);
   const clip = 'clip-growth-' + Math.random().toString(36).slice(2, 8);
   svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', H - 24);
-  const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
+  const line = d3.line().x((d) => x(d.year)).y((d) => y(val(d)));
   const peerPaths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(peers).join('path')
     .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', MUTED).attr('stroke-width', 1.25)
     .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
@@ -811,11 +827,11 @@ dash.draw('growth', (el) => {
   peerStyle(null);
   if (picked) peerPaths.filter((s) => s === picked).raise();
   const isPicked = (s) => (s === york ? gpick.kind === 'inst' && gpick.inst === FOCUS : gpick.kind === 'comb');
-  svg.append('g').selectAll('path').data([comb, york].filter((s) => s.pts.length)).join('path')
+  svg.append('g').selectAll('path').data(mains.slice().reverse()).join('path')
     .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', (s) => s.color)
     .attr('stroke-width', (s) => (s === york ? 2.5 : 2) + (isPicked(s) ? 1.5 : 0))
     .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-  const labels = ends.map((e) => ({ ...e, y: y(last(e.s).v) }));
+  const labels = ends.map((e) => ({ ...e, y: y(val(last(e.s))) }));
   spread(labels, 14, 8, H - 30);
   svg.append('g').selectAll('text').data(labels).join('text').attr('class', 'ux-lbl ux-lbl-strong')
     .attr('x', W - right + 8).attr('y', (d) => d.y).attr('dy', '0.32em').style('fill', (d) => d.s.color).text((d) => d.text);
@@ -828,13 +844,13 @@ dash.draw('growth', (el) => {
     let near = null, best = 14;
     for (const s of list) {
       const d = s.pts.find((q) => q.year === yr);
-      if (d && Math.abs(y(d.v) - my) < best) { near = s; best = Math.abs(y(d.v) - my); }
+      if (d && Math.abs(y(val(d)) - my) < best) { near = s; best = Math.abs(y(val(d)) - my); }
     }
     return near;
   };
   svg.append('rect').attr('x', left).attr('width', W - left).attr('y', 0).attr('height', H).style('fill', 'transparent')
     .on('click', (e) => {
-      const s = nearest(e, [york, comb, ...peers]);
+      const s = nearest(e, plotted);
       if (s) openFields(s === comb ? { kind: 'comb', inst: p.group } : { kind: 'inst', inst: s.name });
     })
     .on('mousemove', (e) => {
@@ -842,14 +858,15 @@ dash.draw('growth', (el) => {
       const yr = years[d3.leastIndex(years, (v) => Math.abs(x(v) - mx))];
       const at = (s) => s.pts.find((d) => d.year === yr);
       const near = nearest(e, peers);
-      e.currentTarget.style.cursor = nearest(e, [york, comb, ...peers]) ? 'pointer' : '';
+      e.currentTarget.style.cursor = nearest(e, plotted) ? 'pointer' : '';
       peerStyle(near);
       rule.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
-      const shown = [york, comb].filter((s) => at(s));
-      dots.selectAll('circle').data(shown).join('circle').attr('r', 3.5).attr('cx', x(yr)).attr('cy', (s) => y(at(s).v)).style('fill', (s) => s.color);
-      const lines = shown.map((s) => ({ color: s.color, name: s.name, value: fmtI(at(s).v) }));
-      if (near) lines.push({ color: 'var(--color-fg-muted)', name: near.name, value: fmtI(at(near).v) });
-      showTip(el, tip, e, shortYear(yr) + ' · 2012-13 = 100', lines);
+      const shown = mains.filter((s) => at(s));
+      dots.selectAll('circle').data(shown).join('circle').attr('r', 3.5).attr('cx', x(yr)).attr('cy', (s) => y(val(at(s)))).style('fill', (s) => s.color);
+      const lines = shown.map((s) => ({ color: s.color, name: s.name, value: fmtV(val(at(s))) }));
+      if (heads && at(comb)) lines.push({ color: comb.color, name: comb.name, value: fmtN(at(comb).n) });
+      if (near) lines.push({ color: 'var(--color-fg-muted)', name: near.name, value: fmtV(val(at(near))) });
+      showTip(el, tip, e, shortYear(yr) + (heads ? ' · heads' : ' · change since 2012-13'), lines);
     })
     .on('mouseleave', () => {
       tip.hidden = true;
@@ -859,7 +876,7 @@ dash.draw('growth', (el) => {
     });
 });
 
-// Fields of study for the institution clicked on the Growth chart: lines indexed to 2012-13 = 100,
+// Fields of study for the institution clicked on the Growth chart: % change since 2012-13 or heads (the radio),
 // fields that grew (green) above, fields that dropped (red) below, and a list of every field with its change.
 // gpick.kind is 'inst' (one institution) or 'comb' (the comparison group combined); gpick.field is the highlighted field.
 // Panel height from the whole chart row's width, so the charts grow with the window.
@@ -987,7 +1004,7 @@ function gSeries(prog) {
       field, name: prog ? programTitle(field) : fieldName(field), base, last,
       rate: base ? last / base - 1 : null, // null: no students in 2012-13 (new)
       up: !base || last >= base,
-      pts: base ? years.map((yr) => ({ year: yr, v: (at(yr) / base) * 100, n: at(yr) })) : [],
+      pts: years.map((yr) => ({ year: yr, v: base ? (at(yr) / base) * 100 : null, n: at(yr) })),
     });
   }
   // A program title shared by more than one code keeps its code in brackets.
@@ -1052,35 +1069,38 @@ dash.draw('gf-chart', (el) => {
     if (up) svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34 + head).text(fit(svg, 'Pick a field (a line or the list) to see its programs.', W - 4));
     return;
   }
-  const series = fs ? fs.list.filter((d) => d.up === up && d.pts.length > 1) : [];
+  const heads = gHeads(P());
+  const val = gVal(heads), fmtV = gFmt(heads);
+  // A field with no 2012-13 headcount has no % change to plot, but it does have heads.
+  const series = fs ? fs.list.filter((d) => d.up === up && d.pts.length > 1 && (heads || d.rate != null)) : [];
   const count = fs ? fs.list.filter((d) => d.up === up).length : 0;
   svg.append('text').attr('class', 'ux-lbl ux-lbl-strong').attr('x', 0).attr('y', 12 + head).style('fill', color)
     .text(`${up ? 'Grew' : 'Dropped'} · ${count} ${gWord(prog, count)}`);
   if (!series.length) {
-    const none = count ? `Only new ${gWord(prog, 2)}: no 2012-13 headcount to index.` : `No ${gWord(prog, 1)} ${up ? 'grew' : 'dropped'}.`;
+    const none = count ? (heads ? `These ${gWord(prog, 2)} have one year of data, so there’s no line to draw.` : `Only new ${gWord(prog, 2)}: no 2012-13 headcount to index.`) : `No ${gWord(prog, 1)} ${up ? 'grew' : 'dropped'}.`;
     svg.append('text').attr('class', 'ux-tick').attr('x', 0).attr('y', 34 + head).text(fit(svg, none, W - 4));
     return;
   }
   const years = fs.years;
-  const vals = series.flatMap((s) => s.pts.map((d) => d.v)).sort(d3.ascending);
-  // Clip only outliers: lines far above the rest (a small field growing from a few students).
+  const vals = series.flatMap((s) => s.pts.map(val)).sort(d3.ascending);
+  // Clip only outliers on the % plot: lines far above the rest (a small field growing from a few students).
   const sel = prog ? gProg() : gField();
   const hit = series.find((s) => s.field === sel);
   const q90 = d3.quantile(vals, 0.9), top = vals[vals.length - 1];
   // The picked line always fits.
-  const hi = Math.max(105, top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 * 1.08 : top * 1.03, hit ? d3.max(hit.pts, (d) => d.v) * 1.03 : 0);
-  const y = d3.scaleLinear([Math.min(100, vals[0]), hi], [H - 24, 22 + head]).nice();
+  const hi = heads ? Math.max(1, top * 1.03) : Math.max(105, top - 100 > 2.5 * Math.max(q90 - 100, 1) ? q90 * 1.08 : top * 1.03, hit ? d3.max(hit.pts, (d) => d.v) * 1.03 : 0);
+  const y = d3.scaleLinear([heads ? 0 : Math.min(100, vals[0]), hi], [H - 24, 22 + head]).nice();
   const ticks = y.ticks(4);
-  const left = measure(svg, ticks.map(fmtI)) + 8;
+  const left = measure(svg, ticks.map(fmtV)) + 8;
   const right = 10;
-  const lblText = hit ? `${fit(svg, hit.name, Math.max(80, W - left - 120), 'ux-glbl')} ${rateText(hit)}` : '';
+  const lblText = hit ? `${fit(svg, hit.name, Math.max(80, W - left - 120), 'ux-glbl')} ${heads ? fmtN(hit.last) : rateText(hit)}` : '';
   const x = d3.scalePoint(years, [left + 4, W - right]);
-  yGrid(svg, y, ticks, fmtI, left, W - right + 4);
-  svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
+  yGrid(svg, y, ticks, fmtV, left, W - right + 4);
+  if (!heads) svg.append('line').attr('class', 'ux-rule').attr('x1', left).attr('x2', W - right + 4).attr('y1', y(100)).attr('y2', y(100)).attr('stroke-dasharray', '4 3');
   yearAxis(svg, years, x, H, fs.end);
   const clip = 'clip-gf-' + Math.random().toString(36).slice(2, 8);
   svg.append('clipPath').attr('id', clip).append('rect').attr('x', 0).attr('y', 16 + head).attr('width', W).attr('height', H - 40 - head);
-  const line = d3.line().x((d) => x(d.year)).y((d) => y(d.v));
+  const line = d3.line().x((d) => x(d.year)).y((d) => y(val(d)));
   const paths = svg.append('g').attr('clip-path', `url(#${clip})`).selectAll('path').data(series).join('path')
     .attr('d', (s) => line(s.pts)).style('fill', 'none').style('stroke', color)
     .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
@@ -1091,7 +1111,7 @@ dash.draw('gf-chart', (el) => {
   if (hit) {
     paths.filter((s) => s === hit).raise();
     const e = hit.pts.find((d) => d.year === fs.end) ?? hit.pts[hit.pts.length - 1];
-    const ly = y(e.v);
+    const ly = y(val(e));
     svg.append('circle').attr('r', 3.5).attr('cx', x(e.year)).attr('cy', ly).style('fill', color);
     // Name and change just above the end point (below it when that would leave the chart).
     svg.append('text').attr('class', 'ux-glbl').attr('x', x(e.year)).attr('y', ly < 40 + head ? ly + 16 : ly - 9)
@@ -1103,7 +1123,7 @@ dash.draw('gf-chart', (el) => {
     let near = null, best = 12;
     for (const s of series) {
       const d = s.pts.find((q) => q.year === yr);
-      const dy = d ? Math.abs(y(d.v) - my) : Infinity;
+      const dy = d ? Math.abs(y(val(d)) - my) : Infinity;
       if (dy < best) { near = s; best = dy; }
     }
     return { yr, near };
@@ -1119,7 +1139,7 @@ dash.draw('gf-chart', (el) => {
       const d = s.pts.find((q) => q.year === yr);
       showTip(el, tip, e, `${s.name} · ${shortYear(yr)}`, [
         { name: 'Headcount', value: fmtN(d ? d.n : 0) },
-        { name: 'Index (2012-13 = 100)', value: d ? fmtI(d.v) : '—' },
+        { name: 'Change since 2012-13', value: d && d.v != null ? fmtChg(d.v) : '—' },
         { name: `Change to ${shortYear(fs.end)}`, value: rateText(s) },
       ]);
     })

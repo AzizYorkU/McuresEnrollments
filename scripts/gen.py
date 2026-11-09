@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -283,9 +283,10 @@ html = f"""<meta name="dash-one-writer">
     <section class="ux-page" data-page="growth" id="growth" hidden>
       <div class="ux-card" id="growth-card">
         <h2>Growth since 2012-13</h2>
-        <p class="ux-note">Headcount indexed to 2012-13 = 100, so institutions of any size compare. Hover a grey line to name the peer; click any line to see how that institution’s fields of study grew or dropped, and pick a field to see its detailed programs (untick Show fields of study to see all its programs at once).</p>
+        <p class="ux-note"><span data-gunit="pct">Percentage change in headcount since 2012-13, so institutions of any size compare.</span><span data-gunit="heads" hidden>Number of students each year. Peers combined isn’t plotted because its total would flatten the other lines; hover the chart to see it.</span> Hover a grey line to name the peer; click any line to see how that institution’s fields of study grew or dropped, and pick a field to see its detailed programs (untick Show fields of study to see all its programs at once).</p>
         <div class="ux-card-head">
-          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
+          <div class="ux-legend-static"><span class="ux-key"><i class="ux-sw" data-i="0"></i>York</span><span class="ux-key" data-gunit="pct"><i class="ux-sw" data-i="1"></i>Peers combined</span><span class="ux-key"><i class="ux-sw" data-muted></i>Each peer</span></div>
+          <div class="ux-gunit" role="radiogroup" aria-label="Plot growth as"><label class="ux-gtoggle"><input type="radio" name="gunit" value="pct" checked> %</label><label class="ux-gtoggle"><input type="radio" name="gunit" value="heads"> # of heads</label></div>
         </div>
         <div data-draw="gf-warn" data-source="totals"></div>
         <div class="ux-gwrap">
@@ -303,7 +304,7 @@ html = f"""<meta name="dash-one-writer">
             <div class="ux-glist" data-draw="gf-list" data-source="totals group_totals cip peer_groups" role="listbox" aria-label="Fields of study by change"></div>
           </div>
         </div>
-        <p class="ux-note">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
+        <p class="ux-note" data-gunit="pct">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
       </div>
     </section>
 
