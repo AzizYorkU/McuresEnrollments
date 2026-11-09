@@ -156,15 +156,14 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 }
 
 /* Overview: ranked lists, one per measure */
-.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr)); gap: var(--cds-gap-md); align-items: stretch; }
+.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24.6rem), 1fr)); gap: var(--cds-gap-md); align-items: stretch; }
 .ux-list-card { display: flex; flex-direction: column; gap: var(--cds-gap-xs); padding: var(--cds-pad-lg) var(--cds-pad-md); }
 .ux-list-l { margin: 0; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
 .ux-rank { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); }
 .ux .ux-rank b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .ux-list { list-style: none; margin: var(--cds-gap-xs) 0 0; padding: 0; display: grid; min-height: 12rem; align-content: start; font-size: var(--cds-font-size-body); font-variant-numeric: tabular-nums; }
 .ux-list { overflow-x: auto; }
-.ux-li { display: grid; font-size: 0.875rem; grid-template-columns: 1.2rem 5.8rem minmax(3.2rem, 1fr) minmax(4.1rem, 1fr) minmax(3.6rem, 1fr); column-gap: 5px; align-items: baseline; padding: 6px var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
-.ux-list.has-measure .ux-li { grid-template-columns: 1.2rem 5.8rem minmax(3.2rem, 1fr) minmax(4.1rem, 1fr) minmax(3.6rem, 1fr) minmax(3.3rem, 1fr); column-gap: 4px; }
+.ux-li { display: grid; font-size: 0.875rem; grid-template-columns: 1.1rem 5.6rem minmax(3.2rem, 1fr) minmax(4.1rem, 1fr) minmax(3.6rem, 1fr) minmax(3.3rem, 1fr); column-gap: 4px; align-items: baseline; padding: 6px var(--cds-pad-xs); border-bottom: 1px solid var(--color-border-line); }
 .ux-li.is-head { align-items: end; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.2; }
 .ux-li-h { white-space: pre; }
 .ux-li:last-child { border-bottom: 0; }
@@ -317,7 +316,7 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
           <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
         </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Initial heads are 2012-13; change in heads is the selected year minus 2012-13. In the International share list, heads count international students only. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
+      <p class="ux-note">Selected year and study level, highest first. York is highlighted. Peers: the group’s members added together, not ranked. Initial heads are 2012-13; change in heads is the selected year minus 2012-13. Share of students: York’s or the institution’s share of all Ontario university students; it ranks the same as headcount. In the International share list, heads count international students only. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
@@ -1766,9 +1765,9 @@ const rank = (f) => (el) => {
 
 // Overview: one ranked list per measure, York highlighted, peers combined at the foot.
 // heads: the count behind the measure, shown as initial, selected year and change.
-// label: the ranked measure's own column; without one, the selected-year heads are what's ranked.
+// label: the % in the last column; value names its field and format when it isn't the list's own field.
 const LISTS = {
-  headcount: { fmt: fmtN, heads: 'headcount' },
+  headcount: { fmt: fmtN, heads: 'headcount', label: 'Share of\nStudents', value: { field: 'ontario_share', fmt: fmtP } },
   change_base: { fmt: fmtD, signed: true, comb: true, heads: 'headcount', label: 'Growth\nRate' },
   intl_share: { fmt: fmtP, comb: true, heads: 'international', label: 'Intl\nShare' },
 };
@@ -1783,7 +1782,6 @@ dash.draw('ov-list', (el) => {
   const rows = totals
     .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
     .sort((a, b) => b[f] - a[f]);
-  el.classList.toggle('has-measure', !!spec.label);
   const span = (text, cls) => {
     const s = document.createElement('span');
     s.textContent = text;
@@ -1793,7 +1791,7 @@ dash.draw('ov-list', (el) => {
   const heading = () => {
     const li = document.createElement('li');
     li.className = 'ux-li is-head';
-    const cols = ['Initial\nHeads', 'Selected\nYear Heads', 'Change\nin Heads', ...(spec.label ? [spec.label] : [])];
+    const cols = ['Initial\nHeads', 'Selected\nYear Heads', 'Change\nin Heads', spec.label];
     li.append(span(''), span(''), ...cols.map((c, i) => {
       const h = span(c, 'ux-li-v ux-li-h');
       if (i === 0) h.title = `Heads in ${shortYear(FIRST)}`;
@@ -1814,11 +1812,11 @@ dash.draw('ov-list', (el) => {
       to == null ? span('—') : cite('span', fmtN(to), source, h, 'key=' + enc(row.key)),
       span(change == null ? '—' : fmtHeadsChange(change), tone(change)),
     ];
-    if (spec.label) {
-      const v = cite('span', spec.fmt(row[f]), source, f, 'key=' + enc(row.key));
-      if (spec.signed) v.className = tone(row[f]);
-      cells.push(v);
-    }
+    const vf = spec.value?.field ?? f;
+    const vfmt = spec.value?.fmt ?? spec.fmt;
+    const v = row[vf] == null ? span('—') : cite('span', vfmt(row[vf]), source, vf, 'key=' + enc(row.key));
+    if (spec.signed) v.className = tone(row[vf]);
+    cells.push(v);
     cells.forEach((c) => c.classList.add('ux-li-v'));
     li.append(span(rank, 'ux-li-rank'), span(name, 'ux-li-name'), ...cells);
     return li;

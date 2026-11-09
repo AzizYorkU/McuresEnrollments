@@ -612,9 +612,9 @@ const rank = (f) => (el) => {
 
 // Overview: one ranked list per measure, York highlighted, peers combined at the foot.
 // heads: the count behind the measure, shown as initial, selected year and change.
-// label: the ranked measure's own column; without one, the selected-year heads are what's ranked.
+// label: the % in the last column; value names its field and format when it isn't the list's own field.
 const LISTS = {
-  headcount: { fmt: fmtN, heads: 'headcount' },
+  headcount: { fmt: fmtN, heads: 'headcount', label: 'Share of\nStudents', value: { field: 'ontario_share', fmt: fmtP } },
   change_base: { fmt: fmtD, signed: true, comb: true, heads: 'headcount', label: 'Growth\nRate' },
   intl_share: { fmt: fmtP, comb: true, heads: 'international', label: 'Intl\nShare' },
 };
@@ -629,7 +629,6 @@ dash.draw('ov-list', (el) => {
   const rows = totals
     .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
     .sort((a, b) => b[f] - a[f]);
-  el.classList.toggle('has-measure', !!spec.label);
   const span = (text, cls) => {
     const s = document.createElement('span');
     s.textContent = text;
@@ -639,7 +638,7 @@ dash.draw('ov-list', (el) => {
   const heading = () => {
     const li = document.createElement('li');
     li.className = 'ux-li is-head';
-    const cols = ['Initial\nHeads', 'Selected\nYear Heads', 'Change\nin Heads', ...(spec.label ? [spec.label] : [])];
+    const cols = ['Initial\nHeads', 'Selected\nYear Heads', 'Change\nin Heads', spec.label];
     li.append(span(''), span(''), ...cols.map((c, i) => {
       const h = span(c, 'ux-li-v ux-li-h');
       if (i === 0) h.title = `Heads in ${shortYear(FIRST)}`;
@@ -660,11 +659,11 @@ dash.draw('ov-list', (el) => {
       to == null ? span('—') : cite('span', fmtN(to), source, h, 'key=' + enc(row.key)),
       span(change == null ? '—' : fmtHeadsChange(change), tone(change)),
     ];
-    if (spec.label) {
-      const v = cite('span', spec.fmt(row[f]), source, f, 'key=' + enc(row.key));
-      if (spec.signed) v.className = tone(row[f]);
-      cells.push(v);
-    }
+    const vf = spec.value?.field ?? f;
+    const vfmt = spec.value?.fmt ?? spec.fmt;
+    const v = row[vf] == null ? span('—') : cite('span', vfmt(row[vf]), source, vf, 'key=' + enc(row.key));
+    if (spec.signed) v.className = tone(row[vf]);
+    cells.push(v);
     cells.forEach((c) => c.classList.add('ux-li-v'));
     li.append(span(rank, 'ux-li-rank'), span(name, 'ux-li-name'), ...cells);
     return li;
