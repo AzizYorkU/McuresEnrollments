@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -203,6 +203,33 @@ SHOWN = [x for x in DIMS if x[0] != "cip"]  # programs open inside the Field of 
 tabs = "\n".join(f'          <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in SHOWN)
 sections = "".join(section(*x) for x in SHOWN)
 
+def ov_detail(f, title, last, extra):
+    """An Overview tab: one panel showing a single number column, with that column as 3D bars beside it."""
+    options = [("from", "Initial Heads"), ("to", "Selected Year Heads"), ("change", "Change in Heads"), ("value", last)]
+    opts = "".join(f'<option value="{v}">{n}</option>' for v, n in options)
+    no_intl = '\n          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>' if f == "intl_share" else ""
+    return f"""
+      <div class="ux-ovd" data-ovpanel="{f}" hidden>
+        <div class="ux-card ux-list-card" id="detail-{f}">
+          <p class="ux-list-l">{title}</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-{f}" data-source="york_standing">—</b></h3>{no_intl}
+          <label class="ux-field ux-ovcol-field">Column shown <select class="ux-ovcol">{opts}</select></label>
+          <ol class="ux-list ux-list-one dash-skeleton" data-draw="ov-list" data-one data-field="{f}" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="{f}" data-source="totals group_totals"></div>
+        </div>
+        <div class="ux-card ux-ovd-chart" id="chart-{f}">
+          <h3 data-draw="ov-3d-title" data-field="{f}">—</h3>
+          <p class="ux-note">The same numbers as the table, in its order: sort the table and the bars follow. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure.{extra}</p>
+          <div class="ux-3d-box dash-skeleton" data-draw="ov-3d" data-field="{f}" data-source="totals group_totals peer_groups"></div>
+        </div>
+      </div>"""
+
+
+PEERS_NOTE = " Peers appears in the chart only for the % column, because its heads are the whole group’s total."
+ov_details = (ov_detail("headcount", "Headcount", "Share of Students", "")
+              + ov_detail("change_base", "Growth since 2012-13", "Growth Rate", PEERS_NOTE)
+              + ov_detail("intl_share", "International share", "Intl Share", " Heads count international students only." + PEERS_NOTE))
+
 html = f"""<meta name="dash-one-writer">
 <style>
 {css}
@@ -256,6 +283,13 @@ html = f"""<meta name="dash-one-writer">
     </div>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
+      <div class="ux-tabs ux-ovtabs" role="group" aria-label="Overview view">
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="compact" aria-pressed="true">Compact View</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="headcount" aria-pressed="false">Headcount</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="change_base" aria-pressed="false">Growth since 2012-13</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="intl_share" aria-pressed="false">International share</button>
+      </div>
+      <div class="ux-ovcompact" data-ovpanel="compact">
       <div class="ux-lists" id="figures">
         <div class="ux-card ux-list-card" id="list-headcount">
           <p class="ux-list-l">Headcount</p>
@@ -278,6 +312,7 @@ html = f"""<meta name="dash-one-writer">
         </div>
       </div>
       <p class="ux-note">Selected year and study level, highest first. Click any column heading to sort; # stays each university’s rank on that table’s measure. York is highlighted. Peers: the group’s members added together, not ranked. Initial heads are 2012-13; change in heads is the selected year minus 2012-13. Share of students: each institution’s share of all Ontario university students, which ranks the same as headcount. In the International share list, heads count international students only. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
+      </div>{ov_details}
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>

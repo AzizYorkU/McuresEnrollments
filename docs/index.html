@@ -9,7 +9,7 @@
 <script src="d3.min.js"></script>
 <script>
 window.DASH_SOURCES = {"status": "data/status.csv", "peer_groups": "data/peer_groups.csv", "cip2": "data/cip2.csv", "cip": "data/cip.csv", "country": "data/country.csv", "age": "data/age.csv", "gender": "data/gender.csv", "tongue": "data/tongue.csv", "credential": "data/credential.csv", "studyyear": "data/studyyear.csv"};
-window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct"};
+window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value"};
 </script>
 <script src="dash.js"></script>
 </head>
@@ -175,6 +175,13 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-li-sort[data-dir="asc"]::before { content: "↑"; }
 .ux-li-sort[data-dir="desc"]::before { content: "↓"; }
 .ux-li:last-child { border-bottom: 0; }
+/* Overview tabs: one panel with its 3D chart beside it; stacked when there isn't room for both. */
+.ux-ovtabs { margin-bottom: var(--cds-gap-md); }
+.ux-ovcompact { display: grid; gap: var(--cds-gap-md); }
+.ux-ovd { display: grid; grid-template-columns: minmax(20rem, 1fr) minmax(0, 2fr); gap: var(--cds-gap-md); align-items: stretch; }
+.ux-ovcol-field { margin-top: var(--cds-gap-xs); }
+.ux-list-one .ux-li { grid-template-columns: 1.4rem minmax(0, 1fr) minmax(7rem, auto); column-gap: 8px; }
+@container (max-width: 60rem) { .ux-ovd { grid-template-columns: minmax(0, 1fr); } }
 .ux-li-rank { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); text-align: right; }
 .ux-li-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ux-li-v { text-align: right; }
@@ -305,6 +312,13 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     </div>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
+      <div class="ux-tabs ux-ovtabs" role="group" aria-label="Overview view">
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="compact" aria-pressed="true">Compact View</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="headcount" aria-pressed="false">Headcount</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="change_base" aria-pressed="false">Growth since 2012-13</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="intl_share" aria-pressed="false">International share</button>
+      </div>
+      <div class="ux-ovcompact" data-ovpanel="compact">
       <div class="ux-lists" id="figures">
         <div class="ux-card ux-list-card" id="list-headcount">
           <p class="ux-list-l">Headcount</p>
@@ -327,6 +341,50 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
         </div>
       </div>
       <p class="ux-note">Selected year and study level, highest first. Click any column heading to sort; # stays each university’s rank on that table’s measure. York is highlighted. Peers: the group’s members added together, not ranked. Initial heads are 2012-13; change in heads is the selected year minus 2012-13. Share of students: each institution’s share of all Ontario university students, which ranks the same as headcount. In the International share list, heads count international students only. Small charts: York (and peers combined, where comparable) each year from 2012-13. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
+      </div>
+      <div class="ux-ovd" data-ovpanel="headcount" hidden>
+        <div class="ux-card ux-list-card" id="detail-headcount">
+          <p class="ux-list-l">Headcount</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
+          <label class="ux-field ux-ovcol-field">Column shown <select class="ux-ovcol"><option value="from">Initial Heads</option><option value="to">Selected Year Heads</option><option value="change">Change in Heads</option><option value="value">Share of Students</option></select></label>
+          <ol class="ux-list ux-list-one dash-skeleton" data-draw="ov-list" data-one data-field="headcount" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="headcount" data-source="totals group_totals"></div>
+        </div>
+        <div class="ux-card ux-ovd-chart" id="chart-headcount">
+          <h3 data-draw="ov-3d-title" data-field="headcount">—</h3>
+          <p class="ux-note">The same numbers as the table, in its order: sort the table and the bars follow. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure.</p>
+          <div class="ux-3d-box dash-skeleton" data-draw="ov-3d" data-field="headcount" data-source="totals group_totals peer_groups"></div>
+        </div>
+      </div>
+      <div class="ux-ovd" data-ovpanel="change_base" hidden>
+        <div class="ux-card ux-list-card" id="detail-change_base">
+          <p class="ux-list-l">Growth since 2012-13</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-change_base" data-source="york_standing">—</b></h3>
+          <label class="ux-field ux-ovcol-field">Column shown <select class="ux-ovcol"><option value="from">Initial Heads</option><option value="to">Selected Year Heads</option><option value="change">Change in Heads</option><option value="value">Growth Rate</option></select></label>
+          <ol class="ux-list ux-list-one dash-skeleton" data-draw="ov-list" data-one data-field="change_base" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="change_base" data-source="totals group_totals"></div>
+        </div>
+        <div class="ux-card ux-ovd-chart" id="chart-change_base">
+          <h3 data-draw="ov-3d-title" data-field="change_base">—</h3>
+          <p class="ux-note">The same numbers as the table, in its order: sort the table and the bars follow. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure. Peers appears in the chart only for the % column, because its heads are the whole group’s total.</p>
+          <div class="ux-3d-box dash-skeleton" data-draw="ov-3d" data-field="change_base" data-source="totals group_totals peer_groups"></div>
+        </div>
+      </div>
+      <div class="ux-ovd" data-ovpanel="intl_share" hidden>
+        <div class="ux-card ux-list-card" id="detail-intl_share">
+          <p class="ux-list-l">International share</p>
+          <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
+          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>
+          <label class="ux-field ux-ovcol-field">Column shown <select class="ux-ovcol"><option value="from">Initial Heads</option><option value="to">Selected Year Heads</option><option value="change">Change in Heads</option><option value="value">Intl Share</option></select></label>
+          <ol class="ux-list ux-list-one dash-skeleton" data-draw="ov-list" data-one data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
+          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
+        </div>
+        <div class="ux-card ux-ovd-chart" id="chart-intl_share">
+          <h3 data-draw="ov-3d-title" data-field="intl_share">—</h3>
+          <p class="ux-note">The same numbers as the table, in its order: sort the table and the bars follow. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure. Heads count international students only. Peers appears in the chart only for the % column, because its heads are the whole group’s total.</p>
+          <div class="ux-3d-box dash-skeleton" data-draw="ov-3d" data-field="intl_share" data-source="totals group_totals peer_groups"></div>
+        </div>
+      </div>
     </section>
 
     <section class="ux-page" data-page="growth" id="growth" hidden>
@@ -1283,6 +1341,12 @@ const FIRST = '2012-2013';
 // Growth page panel: the institution whose line was clicked (see openFields).
 const gpick = { kind: null, inst: null, field: null, prog: null, allProgs: false }; // allProgs: fields hidden, every program shown
 const gHeads = (p) => p.gunit === 'heads'; // the Growth page's radio; up here because onData reads it
+// Overview tabs: the compact three panels, or one panel with a 3D chart (the tab is the panel's field).
+// ovcol is the single number column those panels show. Up here because onData reads them.
+const OV_TABS = ['compact', 'headcount', 'change_base', 'intl_share'];
+const ovTab = (p) => (OV_TABS.includes(p.ovtab) ? p.ovtab : 'compact');
+const OV_COLS = ['from', 'to', 'change', 'value'];
+const ovCol = (p) => (OV_COLS.includes(p.ovcol) ? p.ovcol : 'value');
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -1503,6 +1567,11 @@ document.addEventListener('click', (e) => {
     document.querySelector('.ux .ux-main')?.scrollIntoView({ block: 'start' });
     return;
   }
+  const ovtab = e.target.closest('.ux .ux-ovtab');
+  if (ovtab) {
+    dash.setParams({ ovtab: ovtab.dataset.ovtab });
+    return;
+  }
   const rview = e.target.closest('.ux .ux-rviewtab');
   if (rview) {
     dash.setParams({ rview: rview.dataset.rview });
@@ -1524,12 +1593,13 @@ document.addEventListener('click', (e) => {
   if (e.target.matches('.ux .ux-gfields')) { setAllProgs(!e.target.checked); return; }
   if (e.target.closest('.ux .ux-reset')) {
     if (gpick.inst) closeFields();
-    Object.keys(LISTS).forEach((f) => sortBy.delete('ov-' + f));
+    Object.keys(LISTS).forEach((f) => { sortBy.delete('ov-' + f); sortBy.delete('ovd-' + f); });
     dash.resetParams();
     dash.draw('ov-list');
   }
 });
 document.addEventListener('change', (e) => {
+  if (e.target.matches('.ux .ux-ovcol')) dash.setParams({ ovcol: e.target.value });
   if (e.target.matches('.ux .ux-level')) {
     // Year of study is undergraduate-only, so moving to Graduate clears it.
     const clear = e.target.value === 'Graduate' && fieldOf(P()).startsWith('Year of study: ');
@@ -1595,6 +1665,11 @@ dash.onData(() => {
   const rv = p.rview === '3d' ? '3d' : 'bars';
   document.querySelectorAll('.ux .ux-rviewtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.rview === rv)));
   document.querySelectorAll('.ux [data-rview-panel]').forEach((c) => { c.hidden = c.dataset.rviewPanel !== rv; });
+  // Overview tabs.
+  const ot = ovTab(p);
+  document.querySelectorAll('.ux .ux-ovtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.ovtab === ot)));
+  document.querySelectorAll('.ux [data-ovpanel]').forEach((c) => { c.hidden = c.dataset.ovpanel !== ot; });
+  document.querySelectorAll('.ux .ux-ovcol').forEach((s) => { s.value = ovCol(p); });
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
@@ -1797,16 +1872,19 @@ const fmtHeadsChange = (v) => (v === 0 ? '0' : d3.format('+,')(v));
 const OV_SORT_DEFAULT = { key: 'value', dir: 'desc' };
 const OV_BOLD = new Set(['York', 'Ottawa', 'Western']);
 const OV_LEFT_COLS = new Set(['rank', 'institution']); // lowest or A-Z on the first click
-function drawOvList(el) {
-  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
-  const p = P();
-  const f = el.dataset.field;
+const OV_COL_NAMES = { from: 'Initial Heads', to: 'Selected Year Heads', change: 'Change in Heads' };
+const ovColName = (f, col) => OV_COL_NAMES[col] ?? LISTS[f].label.replace('\n', ' ');
+// A tab's table shows one number column, so its sort falls back to that column when it sorted on one now hidden.
+function ovDetailSort(f, p) {
+  const col = ovCol(p);
+  const s = sortBy.get('ovd-' + f);
+  return s && (OV_LEFT_COLS.has(s.key) || s.key === col) ? s : { key: col, dir: 'desc' };
+}
+// One list's rows, sorted, plus the group's members added together (not ranked), for the table and its 3D chart.
+function ovRecords(f, p, sort) {
   const spec = LISTS[f];
-  const sortId = 'ov-' + f;
-  const sort = sortBy.get(sortId) ?? OV_SORT_DEFAULT;
   const h = spec.heads;
   const vf = spec.value?.field ?? f;
-  const vfmt = spec.value?.fmt ?? spec.fmt;
   const pool = new Set([FOCUS, ...membersOf(p.group)]);
   const totals = dash.data('totals').data;
   const tBy = byKeyRow(totals);
@@ -1819,6 +1897,26 @@ function drawOvList(el) {
     .sort((a, b) => b[f] - a[f])
     .map((r, i) => record(r, tBy.get(`${r.field}|${r.institution}|${r.level}|${FIRST}`), 'totals', r.institution, i + 1))
     .sort(cmpOn(sort.key, sort.dir));
+  const gBy = byKeyRow(dash.data('group_totals').data);
+  const comb = gBy.get(groupKey(p));
+  const combined = spec.comb && comb && comb[f] != null
+    ? record(comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'group_totals', 'Peers', null) : null;
+  return { records, combined };
+}
+function drawOvList(el) {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const f = el.dataset.field;
+  const spec = LISTS[f];
+  // data-one: a tab's table, showing only the column picked in its dropdown.
+  const one = 'one' in el.dataset;
+  const col = ovCol(p);
+  const sortId = (one ? 'ovd-' : 'ov-') + f;
+  const sort = one ? ovDetailSort(f, p) : sortBy.get(sortId) ?? OV_SORT_DEFAULT;
+  const h = spec.heads;
+  const vf = spec.value?.field ?? f;
+  const vfmt = spec.value?.fmt ?? spec.fmt;
+  const { records, combined } = ovRecords(f, p, sort);
   const span = (text, cls) => {
     const s = document.createElement('span');
     s.textContent = text;
@@ -1835,7 +1933,7 @@ function drawOvList(el) {
       { key: 'to', label: 'Selected\nYear Heads', name: 'Selected year heads', title: `Heads in ${shortYear(p.year)}. ` },
       { key: 'change', label: 'Change\nin Heads', name: 'Change in heads' },
       { key: 'value', label: spec.label, name: spec.label.replace('\n', ' ') },
-    ];
+    ].filter((c) => !one || OV_LEFT_COLS.has(c.key) || c.key === col);
     li.append(...cols.map((c) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -1850,6 +1948,7 @@ function drawOvList(el) {
         const dir = on ? (sort.dir === 'asc' ? 'desc' : 'asc') : OV_LEFT_COLS.has(c.key) ? 'asc' : 'desc';
         sortBy.set(sortId, { key: c.key, dir });
         drawOvList(el);
+        if (one) dash.draw('ov-3d'); // the chart's bars follow the table's order
         el.querySelector(`.ux-li-sort[data-col="${c.key}"]`)?.focus();
       };
       return b;
@@ -1862,22 +1961,19 @@ function drawOvList(el) {
     if (cls === 'is-york') li.style.setProperty('--york', dash.colors[0]);
     const v = d.value == null ? span('—') : cite('span', vfmt(d.value), d.source, vf, 'key=' + enc(d.row.key));
     if (spec.signed) v.className = tone(d.value);
-    const cells = [
+    const all = [
       d.from == null ? span('—') : cite('span', fmtN(d.from), d.source, h, 'key=' + enc(d.base.key)),
       d.to == null ? span('—') : cite('span', fmtN(d.to), d.source, h, 'key=' + enc(d.row.key)),
       span(d.change == null ? '—' : fmtHeadsChange(d.change), tone(d.change)),
       v,
     ];
+    const cells = one ? [all[OV_COLS.indexOf(col)]] : all;
     cells.forEach((c) => c.classList.add('ux-li-v'));
     li.append(span(d.rank == null ? '' : String(d.rank), 'ux-li-rank'), span(d.institution, 'ux-li-name'), ...cells);
     return li;
   };
   const items = records.map((d) => item(d, d.institution === FOCUS ? 'is-york' : ''));
-  const gBy = byKeyRow(dash.data('group_totals').data);
-  const comb = gBy.get(groupKey(p));
-  if (spec.comb && comb && comb[f] != null) {
-    items.push(item(record(comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'group_totals', 'Peers', null), 'is-comb'));
-  }
+  if (combined) items.push(item(combined, 'is-comb'));
   el.replaceChildren(heading(), ...items);
 }
 dash.draw('ov-list', drawOvList);
@@ -2761,21 +2857,26 @@ function rgbOf(el, css) {
 }
 const shade = ([r, g, b], k, a = 1) => `rgba(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)},${a})`;
 
-function build3d(el) {
+// view: the rotation this chart reads and changes; start: what Reset view returns it to; onFrom: adds a From year picker.
+function build3d(el, view, start, onFrom) {
   const head = document.createElement('div');
   head.className = 'ux-3d-head';
-  const lab = document.createElement('label');
-  lab.className = 'ux-3d-from';
-  lab.textContent = 'From ';
-  const from = document.createElement('select');
-  from.onchange = () => { from3d = from.value; draw3d(el); };
-  lab.append(from);
   const reset = document.createElement('button');
   reset.type = 'button';
   reset.className = 'ux-btn';
   reset.textContent = 'Reset view';
-  reset.onclick = () => { Object.assign(VIEW3D, DEFAULT3D); el._3d.paint(); };
-  head.append(lab, reset);
+  reset.onclick = () => { Object.assign(view, start); el._3d.paint(); };
+  let from = null;
+  if (onFrom) {
+    const lab = document.createElement('label');
+    lab.className = 'ux-3d-from';
+    lab.textContent = 'From ';
+    from = document.createElement('select');
+    from.onchange = () => onFrom(from.value);
+    lab.append(from);
+    head.append(lab);
+  }
+  head.append(reset);
   const wrap = document.createElement('div');
   wrap.className = 'ux-3d-wrap';
   const canvas = document.createElement('canvas');
@@ -2787,7 +2888,7 @@ function build3d(el) {
   tip.hidden = true;
   wrap.append(canvas, tip);
   el.replaceChildren(head, wrap);
-  const st = { canvas, tip, from, faces: [], hover: null, paint: () => {} };
+  const st = { canvas, tip, from, view, faces: [], hover: null, paint: () => {}, tipFor: () => ({ head: '', lines: [] }) };
   el._3d = st;
 
   let drag = null;
@@ -2798,8 +2899,8 @@ function build3d(el) {
   });
   canvas.addEventListener('pointermove', (e) => {
     if (drag) {
-      VIEW3D.yaw += (e.clientX - drag.x) * 0.008;
-      VIEW3D.pitch = Math.max(0.05, Math.min(1.5, VIEW3D.pitch + (e.clientY - drag.y) * 0.008));
+      view.yaw += (e.clientX - drag.x) * 0.008;
+      view.pitch = Math.max(0.05, Math.min(1.5, view.pitch + (e.clientY - drag.y) * 0.008));
       drag = { x: e.clientX, y: e.clientY };
       st.paint();
       return;
@@ -2817,14 +2918,8 @@ function build3d(el) {
       return;
     }
     const c = st.colorOf?.get(bar.name);
-    const mf = st.metric;
-    showTip(wrap, tip, e, `${bar.name} · ${shortYear(bar.year)}`, [
-      { name: METRIC_NAMES[mf], value: METRICS[mf].fmt(bar.v), color: c ? `rgb(${c.join(',')})` : undefined },
-      { name: 'Rank that year', value: `${bar.rank} of ${bar.of}` },
-      ...(mf !== 'headcount' ? [{ name: 'Headcount', value: fmtN(bar.n) }] : []),
-      ...(mf === 'headcount' && bar.first && bar.first.year !== bar.year
-        ? [{ name: `Change since ${shortYear(bar.first.year)}`, value: fmtD(bar.v / bar.first.v - 1) }] : []),
-    ]);
+    const t = st.tipFor(bar, c ? `rgb(${c.join(',')})` : undefined);
+    showTip(wrap, tip, e, t.head, t.lines);
   });
   const end = () => { drag = null; };
   canvas.addEventListener('pointerup', end);
@@ -2840,8 +2935,8 @@ function build3d(el) {
     const k = { ArrowLeft: [-0.12, 0], ArrowRight: [0.12, 0], ArrowUp: [0, -0.1], ArrowDown: [0, 0.1] }[e.key];
     if (!k) return;
     e.preventDefault();
-    VIEW3D.yaw += k[0];
-    VIEW3D.pitch = Math.max(0.05, Math.min(1.5, VIEW3D.pitch + k[1]));
+    view.yaw += k[0];
+    view.pitch = Math.max(0.05, Math.min(1.5, view.pitch + k[1]));
     st.paint();
   });
   return st;
@@ -2857,7 +2952,7 @@ function inside(x, y, pts) {
 
 function draw3d(el) {
   if (!gate(el, ['totals', 'peer_groups'], true)) return;
-  const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el);
+  const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el, VIEW3D, DEFAULT3D, (y) => { from3d = y; draw3d(el); });
   const p = P();
   const f = METRICS[p.metric] ? p.metric : 'change_base';
   const all = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
@@ -2880,16 +2975,34 @@ function draw3d(el) {
   for (const b of bars) if (!firstOf.has(b.name) || b.year < firstOf.get(b.name).year) firstOf.set(b.name, b);
   for (const b of bars) b.first = firstOf.get(b.name);
   st.canvas.setAttribute('aria-label', `3D bar chart of ${METRIC_NAMES[f].toLowerCase()} for ${insts.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(p.year)}. Drag or use the arrow keys to rotate.`);
-  st.metric = f;
+  st.tipFor = (bar, color) => ({
+    head: `${bar.name} · ${shortYear(bar.year)}`,
+    lines: [
+      { name: METRIC_NAMES[f], value: METRICS[f].fmt(bar.v), color },
+      { name: 'Rank that year', value: `${bar.rank} of ${bar.of}` },
+      ...(f !== 'headcount' ? [{ name: 'Headcount', value: fmtN(bar.n) }] : []),
+      ...(f === 'headcount' && bar.first && bar.first.year !== bar.year
+        ? [{ name: `Change since ${shortYear(bar.first.year)}`, value: fmtD(bar.v / bar.first.v - 1) }] : []),
+    ],
+  });
+  scene3d(el, st, {
+    bars, insts, years, heads: f === 'headcount',
+    emptyMsg: f === 'intl_share' ? 'International share is only available for all students.' : 'No figures for this measure and selection.',
+  });
+}
+// Paints bars {name, v, i, j} on the institution (i) and year (j) axes. years: null leaves the year axis unlabelled.
+function scene3d(el, st, { bars, insts, years, heads, emptyMsg, slantNames }) {
+  const view = st.view;
   // The height scale runs from the lowest value (or 0) to the highest (or 0); bars rise or fall from the 0 level.
   let lo = Math.min(0, d3.min(bars, (b) => b.v) ?? 0), hi = Math.max(0, d3.max(bars, (b) => b.v) ?? 0);
   if (hi === lo) hi = lo + 1;
-  const tickFmt = f === 'headcount' ? (t) => compact.format(t) : d3.format(hi - lo < 0.1 ? '.1%' : '.0%');
-  const nI = Math.max(1, insts.length), nY = Math.max(1, years.length);
+  const tickFmt = heads ? (t) => compact.format(t) : d3.format(hi - lo < 0.1 ? '.1%' : '.0%');
+  const nI = Math.max(1, insts.length), nY = Math.max(1, years?.length ?? 1);
   const Hh = Math.max(nI, nY) * 0.55;
 
   st.paint = () => {
-    const W = Math.max(280, st.canvas.parentElement.clientWidth), H = Math.round(Math.min(560, Math.max(340, W * 0.55)));
+    const W = Math.max(280, st.canvas.parentElement.clientWidth);
+    const H = Math.round(slantNames ? Math.min(640, Math.max(340, W * 0.72)) : Math.min(560, Math.max(340, W * 0.55)));
     const dpr = window.devicePixelRatio || 1;
     st.canvas.width = W * dpr;
     st.canvas.height = H * dpr;
@@ -2901,11 +3014,11 @@ function draw3d(el) {
       ctx.font = `13px ${getComputedStyle(el).fontFamily}`;
       ctx.fillStyle = shade(rgbOf(el, 'var(--color-fg-muted)'), 1);
       ctx.textAlign = 'center';
-      ctx.fillText(f === 'intl_share' ? 'International share is only available for all students.' : 'No figures for this measure and selection.', W / 2, H / 2);
+      ctx.fillText(emptyMsg, W / 2, H / 2);
       st.faces = [];
       return;
     }
-    const cy = Math.cos(VIEW3D.yaw), sy = Math.sin(VIEW3D.yaw), cp = Math.cos(VIEW3D.pitch), sp = Math.sin(VIEW3D.pitch);
+    const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw), cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
     const rot = (x, y, z) => {
       const x1 = x * cy - z * sy, z1 = x * sy + z * cy;
       return [x1, y * cp - z1 * sp, y * sp + z1 * cp];
@@ -2928,8 +3041,8 @@ function draw3d(el) {
     // a little lighter in dark mode.
     const dark = fg[0] + fg[1] + fg[2] > 380;
     // Colours follow the names (alphabetical), so a university keeps its colour when the measure or order changes.
-    const others = insts.filter((n) => n !== FOCUS).sort(d3.ascending);
-    const colorOf = new Map([[FOCUS, york], ...others.map((n, i) => {
+    const others = insts.filter((n) => n !== FOCUS && n !== 'Peers').sort(d3.ascending);
+    const colorOf = new Map([[FOCUS, york], ['Peers', muted], ...others.map((n, i) => {
       const c = d3.hcl(95 + (i * 255) / Math.max(1, others.length - (others.length > 1 ? 1 : 0)), 52, dark ? 70 : 58).rgb();
       return [n, [c.r, c.g, c.b]];
     })]);
@@ -2974,16 +3087,29 @@ function draw3d(el) {
     }
     // Institution labels along the near z edge, year labels along the near x edge.
     const out = (fromPt, toPt) => (toPt[0] >= fromPt[0] ? 'left' : 'right');
+    // slantNames: names that wouldn't fit side by side on one row are drawn at an angle instead.
+    ctx.font = `600 12px ${font}`;
+    const slot = nI > 1 ? Math.abs(proj(1.5, 0, nearZ)[0] - proj(0.5, 0, nearZ)[0]) : Infinity;
+    const slant = slantNames && d3.max(insts, (n) => ctx.measureText(n).width) > slot - 6;
     insts.forEach((name, i) => {
       const a = proj(i + 0.5, 0, nearZ), b = proj(i + 0.5, 0, nearZ + (nearZ === 0 ? -0.9 : 0.9));
-      ctx.textAlign = Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
       ctx.fillStyle = shade(colorOf.get(name), dark ? 1 : 0.85);
       ctx.font = `${name === FOCUS ? '600 ' : ''}12px ${font}`;
+      if (slant) {
+        ctx.save();
+        ctx.translate(a[0], a[1] + 8);
+        ctx.rotate(-Math.PI / 5);
+        ctx.textAlign = 'right';
+        ctx.fillText(name, 0, 0);
+        ctx.restore();
+        return;
+      }
+      ctx.textAlign = slantNames ? 'center' : Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
       ctx.fillText(name, b[0], b[1]);
     });
     ctx.font = `11px ${font}`;
     ctx.fillStyle = shade(muted, 1);
-    years.forEach((y, j) => {
+    (years ?? []).forEach((y, j) => {
       const a = proj(nearX, 0, j + 0.5), b = proj(nearX + (nearX === 0 ? -0.7 : 0.7), 0, j + 0.5);
       ctx.textAlign = Math.abs(b[0] - a[0]) < 4 ? 'center' : out(a, b);
       if (nY <= 8 || j % 2 === (nY - 1) % 2) ctx.fillText(shortYear(y), b[0], b[1]);
@@ -3031,11 +3157,54 @@ function draw3d(el) {
 }
 dash.draw('bars3d', draw3d);
 
+// Overview tabs: the table's column as 3D bars, one per row and in the table's order, so sorting the table reorders them.
+// Largest at the back on the default sort, so tall bars don't hide the others. Peers' heads are the group's total and
+// would flatten every university, so Peers is plotted only for the % column.
+const OV_VIEW3D = { yaw: 0.38, pitch: 0.34 };
+const OV_START3D = { ...OV_VIEW3D };
+dash.draw('ov-3d', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el, OV_VIEW3D, OV_START3D);
+  const p = P();
+  const f = el.dataset.field;
+  const col = ovCol(p);
+  const pct = col === 'value';
+  const spec = LISTS[f];
+  const fmt = pct ? spec.value?.fmt ?? spec.fmt : col === 'change' ? fmtHeadsChange : fmtN;
+  const { records, combined } = ovRecords(f, p, ovDetailSort(f, p));
+  const rows = [...records, ...(pct && combined ? [combined] : [])].filter((d) => d[col] != null);
+  const bars = rows.map((d, i) => ({ name: d.institution, v: d[col], i, j: 0, rank: d.rank }));
+  const insts = bars.map((b) => b.name);
+  const name = ovColName(f, col);
+  st.canvas.setAttribute('aria-label', `3D bar chart of ${name} for ${insts.join(', ')}. Drag or use the arrow keys to rotate.`);
+  st.tipFor = (bar, color) => ({
+    head: bar.name,
+    lines: [
+      { name, value: fmt(bar.v), color },
+      ...(bar.rank == null ? [] : [{ name: 'Rank', value: `${bar.rank} of ${records.length}` }]),
+    ],
+  });
+  scene3d(el, st, {
+    bars, insts, years: null, heads: !pct, slantNames: true,
+    emptyMsg: f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.'
+      : f === 'change_base' && p.year === FIRST ? 'Pick a year after 2012-13 to see the change.' : 'No figures for this selection.',
+  });
+});
+// The chart's heading: the column and the years it covers.
+dash.draw('ov-3d-title', (el) => {
+  const p = P();
+  const f = el.dataset.field;
+  const col = ovCol(p);
+  const span = p.year === FIRST ? shortYear(FIRST) : `${shortYear(FIRST)} to ${shortYear(p.year)}`;
+  const when = col === 'from' ? shortYear(FIRST) : col === 'change' || (col === 'value' && f === 'change_base') ? span : shortYear(p.year);
+  el.textContent = `${ovColName(f, col)} by university, ${when}`;
+});
+
 // Filter dropdowns: the page's own list replaces the browser's, so moving through it with the arrow keys applies
 // each choice straight away (the browser's list only reports a choice when it closes). The <select> stays the
 // source of truth: the list is drawn from its options, and choosing sets its value and fires its change event.
 (() => {
-  const FILTER = '.ux .ux-filters select';
+  const FILTER = '.ux .ux-filters select, .ux .ux-ovcol';
   let dd = null; // the open list: { sel, box, start, obs }
   let typed = '', typedAt = 0;
 

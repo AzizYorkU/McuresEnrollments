@@ -157,6 +157,13 @@
 .ux-li-sort[data-dir="asc"]::before { content: "↑"; }
 .ux-li-sort[data-dir="desc"]::before { content: "↓"; }
 .ux-li:last-child { border-bottom: 0; }
+/* Overview tabs: one panel with its 3D chart beside it; stacked when there isn't room for both. */
+.ux-ovtabs { margin-bottom: var(--cds-gap-md); }
+.ux-ovcompact { display: grid; gap: var(--cds-gap-md); }
+.ux-ovd { display: grid; grid-template-columns: minmax(20rem, 1fr) minmax(0, 2fr); gap: var(--cds-gap-md); align-items: stretch; }
+.ux-ovcol-field { margin-top: var(--cds-gap-xs); }
+.ux-list-one .ux-li { grid-template-columns: 1.4rem minmax(0, 1fr) minmax(7rem, auto); column-gap: 8px; }
+@container (max-width: 60rem) { .ux-ovd { grid-template-columns: minmax(0, 1fr); } }
 .ux-li-rank { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); text-align: right; }
 .ux-li-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ux-li-v { text-align: right; }
