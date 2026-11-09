@@ -125,6 +125,7 @@ const OV_TABS = ['compact', 'headcount', 'change_base', 'intl_share'];
 const ovTab = (p) => (OV_TABS.includes(p.ovtab) ? p.ovtab : 'compact');
 const OV_COLS = ['from', 'to', 'change', 'value'];
 const ovCol = (p) => (OV_COLS.includes(p.ovcol) ? p.ovcol : 'value');
+const ov3Col = (p) => (OV_COLS.includes(p.ov3col) ? p.ov3col : 'value'); // the chart's own pick, beside the chart
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -378,6 +379,7 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('change', (e) => {
   if (e.target.matches('.ux .ux-ovcol')) dash.setParams({ ovcol: e.target.value });
+  if (e.target.matches('.ux .ux-ov3col')) dash.setParams({ ov3col: e.target.value });
   if (e.target.matches('.ux .ux-level')) {
     // Year of study is undergraduate-only, so moving to Graduate clears it.
     const clear = e.target.value === 'Graduate' && fieldOf(P()).startsWith('Year of study: ');
@@ -448,6 +450,7 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-ovtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.ovtab === ot)));
   document.querySelectorAll('.ux [data-ovpanel]').forEach((c) => { c.hidden = c.dataset.ovpanel !== ot; });
   document.querySelectorAll('.ux .ux-ovcol').forEach((s) => { s.value = ovCol(p); });
+  document.querySelectorAll('.ux .ux-ov3col').forEach((s) => { s.value = ov3Col(p); });
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
@@ -1935,54 +1938,78 @@ function scene3d(el, st, { bars, insts, years, heads, emptyMsg, slantNames }) {
 }
 dash.draw('bars3d', draw3d);
 
-// Overview tabs: the table's column as 3D bars, one per row and in the table's order, so sorting the table reorders them.
-// Largest at the back on the default sort, so tall bars don't hide the others. Peers' heads are the group's total and
-// would flatten every university, so Peers is plotted only for the % column.
-const OV_VIEW3D = { yaw: 0.38, pitch: 0.34 };
+// Overview tabs: the number picked beside the chart as 3D bars, universities (in the table's order, so sorting the
+// table reorders them) by year (2012-13 to the selected year). Initial Heads doesn't change by year, so it has one row.
+// Peers' heads are the group's total and would flatten every university, so Peers is plotted only for the % column.
+const OV_VIEW3D = { yaw: 2.6, pitch: 0.5 }; // the latest years at the back, so the tall recent bars don't hide the rest
 const OV_START3D = { ...OV_VIEW3D };
 dash.draw('ov-3d', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el, OV_VIEW3D, OV_START3D);
   const p = P();
   const f = el.dataset.field;
-  const col = ovCol(p);
+  const col = ov3Col(p);
   const pct = col === 'value';
   const spec = LISTS[f];
+  const h = spec.heads;
+  const vf = spec.value?.field ?? f;
   const fmt = pct ? spec.value?.fmt ?? spec.fmt : col === 'change' ? fmtHeadsChange : fmtN;
   const { records, combined } = ovRecords(f, p, ovDetailSort(f, p));
-  const rows = [...records, ...(pct && combined ? [combined] : [])].filter((d) => d[col] != null);
-  const bars = rows.map((d, i) => ({ name: d.institution, v: d[col], i, j: 0, rank: d.rank }));
-  const insts = bars.map((b) => b.name);
+  const totals = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
+  const years = col === 'from' ? [FIRST] : [...new Set(totals.map((r) => r.year))].filter((y) => y <= p.year).sort(d3.ascending);
+  const tBy = new Map(totals.map((r) => [`${r.institution}|${r.year}`, r]));
+  const gBy = new Map(dash.data('group_totals').data
+    .filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level).map((r) => [r.year, r]));
+  const rowOf = (inst, y) => (inst === 'Peers' ? gBy.get(y) : tBy.get(`${inst}|${y}`));
+  const valueOf = (inst, y) => {
+    const r = rowOf(inst, y);
+    if (!r) return null;
+    if (pct) return r[vf] ?? null;
+    if (col === 'change') {
+      const b = rowOf(inst, FIRST);
+      return r[h] == null || b?.[h] == null ? null : r[h] - b[h];
+    }
+    return r[h] ?? null;
+  };
+  const insts = [...records.map((d) => d.institution), ...(pct && combined ? ['Peers'] : [])];
+  const bars = [];
+  years.forEach((y, j) => {
+    const yr = insts.map((name, i) => ({ name, i, j, year: y, v: valueOf(name, y), n: rowOf(name, y)?.[h] })).filter((b) => b.v != null);
+    const ranked = yr.filter((b) => b.name !== 'Peers').sort((a, c) => c.v - a.v);
+    ranked.forEach((b, k) => { b.rank = k + 1; b.of = ranked.length; });
+    bars.push(...yr);
+  });
+  const shown = insts.filter((n) => bars.some((b) => b.name === n));
+  bars.forEach((b) => { b.i = shown.indexOf(b.name); });
   const name = ovColName(f, col);
-  st.canvas.setAttribute('aria-label', `3D bar chart of ${name} for ${insts.join(', ')}. Drag or use the arrow keys to rotate.`);
+  st.canvas.setAttribute('aria-label', `3D bar chart of ${name} for ${shown.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(years.at(-1) ?? p.year)}. Drag or use the arrow keys to rotate.`);
   st.tipFor = (bar, color) => ({
-    head: bar.name,
+    head: `${bar.name} · ${shortYear(bar.year)}`,
     lines: [
       { name, value: fmt(bar.v), color },
-      ...(bar.rank == null ? [] : [{ name: 'Rank', value: `${bar.rank} of ${records.length}` }]),
+      ...(bar.rank == null ? [] : [{ name: 'Rank that year', value: `${bar.rank} of ${bar.of}` }]),
+      ...(pct && bar.n != null ? [{ name: h === 'international' ? 'International heads' : 'Heads', value: fmtN(bar.n) }] : []),
     ],
   });
   scene3d(el, st, {
-    bars, insts, years: null, heads: !pct, slantNames: true,
-    emptyMsg: f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.'
-      : f === 'change_base' && p.year === FIRST ? 'Pick a year after 2012-13 to see the change.' : 'No figures for this selection.',
+    bars, insts: shown, years, heads: !pct, slantNames: true,
+    emptyMsg: f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.' : 'No figures for this selection.',
   });
 });
-// The chart's heading: the column and the years it covers.
+// The chart's heading: the number and the years it covers.
 dash.draw('ov-3d-title', (el) => {
   const p = P();
   const f = el.dataset.field;
-  const col = ovCol(p);
+  const col = ov3Col(p);
   const span = p.year === FIRST ? shortYear(FIRST) : `${shortYear(FIRST)} to ${shortYear(p.year)}`;
-  const when = col === 'from' ? shortYear(FIRST) : col === 'change' || (col === 'value' && f === 'change_base') ? span : shortYear(p.year);
-  el.textContent = `${ovColName(f, col)} by university, ${when}`;
+  el.textContent = `${ovColName(f, col)} by university and year, ${col === 'from' ? shortYear(FIRST) : span}`;
 });
 
 // Filter dropdowns: the page's own list replaces the browser's, so moving through it with the arrow keys applies
 // each choice straight away (the browser's list only reports a choice when it closes). The <select> stays the
 // source of truth: the list is drawn from its options, and choosing sets its value and fires its change event.
 (() => {
-  const FILTER = '.ux .ux-filters select, .ux .ux-ovcol';
+  const FILTER = '.ux .ux-filters select, .ux .ux-ovcol, .ux .ux-ov3col';
   let dd = null; // the open list: { sel, box, start, obs }
   let typed = '', typedAt = 0;
 

@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value", "ov3col": "value"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -219,7 +219,8 @@ def ov_detail(f, title, last, extra):
         </div>
         <div class="ux-card ux-ovd-chart" id="chart-{f}">
           <h3 data-draw="ov-3d-title" data-field="{f}">—</h3>
-          <p class="ux-note">The same numbers as the table, in its order: sort the table and the bars follow. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure.{extra}</p>
+          <label class="ux-field ux-ovcol-field">Chart shows <select class="ux-ov3col">{opts}</select></label>
+          <p class="ux-note">One row of bars per year, universities in the table's order: sort the table and the bars follow. Initial Heads has only the 2012-13 row, since it doesn't change by year. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure.{extra}</p>
           <div class="ux-3d-box dash-skeleton" data-draw="ov-3d" data-field="{f}" data-source="totals group_totals peer_groups"></div>
         </div>
       </div>"""

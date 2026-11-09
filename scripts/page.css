@@ -243,3 +243,4 @@
 
 .ux-gwarn { padding: var(--cds-pad-sm) var(--cds-pad-md); border-style: solid; border-color: var(--color-bad); color: var(--color-fg); font-size: var(--cds-font-size-caption); }
 [data-draw="gf-warn"]:empty { display: none; }
+
