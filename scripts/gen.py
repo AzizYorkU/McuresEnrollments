@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value", "ov3col": "value", "ovview": "heat"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value", "ov3col": "value", "ovview": "heat", "fmeasure": "total", "fmodel": "damped", "fhold": "no"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -250,6 +250,8 @@ html = f"""<meta name="dash-one-writer">
     <p class="ux-nav-h">Against the group</p>
     <button class="ux-navlink" type="button" data-page="ranking">Ranking</button>
     <button class="ux-navlink" type="button" data-page="institutions">Institutions</button>
+    <p class="ux-nav-h">Looking ahead</p>
+    <button class="ux-navlink" type="button" data-page="forecast">Forecast</button>
     <p class="ux-nav-h ux-nav-breakdowns">Breakdowns</p>
     <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="mix">York’s mix</button>
     <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="gains">Gains and losses</button>
@@ -399,6 +401,23 @@ html = f"""<meta name="dash-one-writer">
             <tbody data-draw="inst-rows"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <section class="ux-page" data-page="forecast" id="forecast" hidden>
+      <div class="ux-card" id="fc-card">
+        <h2 data-draw="fc-title" data-source="totals peer_groups">Forecast</h2>
+        <div class="ux-fc-ctl">
+          <div class="ux-fmeasure" role="radiogroup" aria-label="Students"><label class="ux-gtoggle"><input type="radio" name="fmeasure" value="total" checked> All students</label><label class="ux-gtoggle"><input type="radio" name="fmeasure" value="dom"> Domestic</label><label class="ux-gtoggle"><input type="radio" name="fmeasure" value="intl"> International</label></div>
+          <label class="ux-field">Model <select class="ux-fmodel"><option value="damped">Damped trend</option><option value="linear">Linear trend</option><option value="drift">Average change (drift)</option></select></label>
+          <label class="ux-gtoggle ux-fhold-l"><input type="checkbox" class="ux-fhold"> Hold international students at their latest level (study-permit cap scenario)</label>
+        </div>
+        <p class="ux-note">Solid lines are actual headcounts, dashed lines the forecast; the shaded band is the 80% range for the highlighted university (click a line, name or table row to pick another). Each university is forecast from its own history only, with domestic and international students forecast separately and added up. The models can’t see policy changes, such as the 2024 cap on international study permits, or the recent fall in international numbers beyond what the trend shows. With 13 years of data, treat the forecast as “if recent trends continue”, not a prediction.</p>
+        <div class="ux-chart ux-chart-big dash-skeleton" data-draw="fc-chart" data-source="totals group_totals peer_groups"></div>
+      </div>
+      <div class="ux-card" id="fc-table-card">
+        <h2>Forecast by university</h2>
+        <div class="ux-scroll dash-skeleton" data-draw="fc-table" data-source="totals group_totals peer_groups"></div>
       </div>
     </section>
 

@@ -249,3 +249,15 @@
 .ux-ovview { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); padding-bottom: 6px; font-size: var(--cds-font-size-body); }
 .ux-3d-box { position: relative; }
 .ux-ovmsg { color: var(--color-fg-muted); padding: var(--cds-pad-md) 0; }
+/* Forecast page */
+.ux-fc-ctl { display: flex; flex-wrap: wrap; align-items: end; gap: var(--cds-gap-sm) var(--cds-gap-lg); margin: var(--cds-gap-xs) 0 var(--cds-gap-sm); }
+.ux-fc-ctl .ux-field { flex: 0 1 16rem; }
+.ux-fmeasure { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); padding-bottom: 6px; }
+.ux-fhold-l { padding-bottom: 6px; }
+.ux-fc-table th { padding: var(--cds-pad-xs) var(--cds-pad-sm); vertical-align: bottom; }
+.ux-fc-table th.ux-num { text-align: right; }
+.ux-fc-table tr.is-york td { background: color-mix(in srgb, var(--series-0) 14%, transparent); font-weight: 600; }
+.ux-fc-table tr.is-bold td { font-weight: 600; }
+.ux-fc-table tr.is-comb td { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); }
+.ux-fc-table tr.is-picked td:first-child { box-shadow: inset 3px 0 0 var(--color-fg); }
+.ux-fc-table tbody tr:hover td { background: color-mix(in srgb, var(--color-fg) 5%, transparent); }

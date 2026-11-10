@@ -395,7 +395,7 @@ document.addEventListener('input', (e) => {
 // 2026-11-07). Set SHOW_BREAKDOWNS to true to bring them back; the code and data are untouched.
 const SHOW_BREAKDOWNS = false;
 const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
-const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
+const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'forecast', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
 if (!SHOW_BREAKDOWNS) {
   document.querySelectorAll('.ux .ux-nav-breakdowns').forEach((el) => { el.hidden = true; });
@@ -407,6 +407,7 @@ function idleFilters(p) {
   const off = {};
   if (page === 'share') off['f-group'] = 'The share of Ontario chart compares York with all of Ontario, not with a comparison group.';
   // These charts show every year; the year only matters once the Growth panel is open (it ends the change).
+  if (page === 'forecast') off['f-year'] = 'Forecasts always start from the latest year of data, so the year doesn’t change them.';
   if (page === 'share' || (page === 'growth' && !gpick.inst)) off['f-year'] = 'This chart shows every year from 2012-13 on, so the year doesn’t change it.' + (page === 'growth' ? ' Click a line: the year then sets the end of each field’s change.' : '');
   if (BREAKDOWN_PAGES.includes(page)) {
     for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = 'The breakdowns aren’t cross-tabulated with this filter, so it doesn’t change them.';
@@ -2236,11 +2237,303 @@ dash.draw('ov-3d-title', (el) => {
   el.textContent = `${ovColName(f, col)} by university and year, ${col === 'from' ? shortYear(FIRST) : span}`;
 });
 
+// Forecast page: each university's headcount 5 years past the last year of data, from its own 2012-13 on history.
+// Domestic and international students are forecast separately and added up, because international numbers turned
+// with the 2024 study-permit cap; fhold keeps international at its last level instead (a scenario, not a forecast).
+// Models (fmodel): damped trend (Holt's linear method with a damped trend, fitted by least squares; the default),
+// linear trend (straight line through all the years) or drift (the average yearly change carried forward).
+// Every model is backtested: fitted on the years up to 3 before the last, then checked against the 3 it didn't see.
+const FC_H = 5;
+const FC_BACK = 3;
+const FC_Z = 1.2816; // 80% range
+const FC_MODELS = { damped: 'Damped trend', linear: 'Linear trend', drift: 'Average change (drift)' };
+const FC_MEASURES = { total: 'All students', dom: 'Domestic students', intl: 'International students' };
+const fcModel = (p) => (FC_MODELS[p.fmodel] ? p.fmodel : 'damped');
+const fcMeasure = (p, hasIntl) => (hasIntl && FC_MEASURES[p.fmeasure] ? p.fmeasure : 'total');
+const fcState = { inst: FOCUS };
+const fcCache = new Map();
+
+// Each model takes the history y (oldest first) and returns { mean: [h values], sd: [h values] } for h = 1..H.
+function fcDamped(y, H) {
+  const n = y.length;
+  if (n < 4) return fcDrift(y, H);
+  let best = null;
+  for (let a = 0.1; a <= 1.0001; a += 0.05) {
+    for (const bs of [0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]) {
+      for (const phi of [0.8, 0.85, 0.9, 0.95, 0.98]) {
+        let l = y[0], b = y[1] - y[0], sse = 0;
+        for (let t = 1; t < n; t++) {
+          const f = l + phi * b;
+          const e = y[t] - f;
+          sse += e * e;
+          const l1 = f + a * e;
+          b = phi * b + a * bs * e;
+          l = l1;
+        }
+        if (!best || sse < best.sse) best = { a, bs, phi, l, b, sse };
+      }
+    }
+  }
+  const { a, bs, phi, l, b, sse } = best;
+  const s2 = sse / Math.max(1, n - 1 - 3);
+  const mean = [], sd = [];
+  let damp = 0, acc = 1;
+  for (let h = 1; h <= H; h++) {
+    damp += phi ** h;
+    mean.push(l + damp * b);
+    sd.push(Math.sqrt(s2 * acc));
+    const c = a * (1 + (bs * phi * (1 - phi ** h)) / (1 - phi));
+    acc += c * c;
+  }
+  return { mean, sd };
+}
+function fcLinear(y, H) {
+  const n = y.length;
+  const xs = y.map((_, i) => i);
+  const mx = d3.mean(xs), my = d3.mean(y);
+  const sxx = d3.sum(xs, (x) => (x - mx) ** 2);
+  const slope = d3.sum(xs, (x, i) => (x - mx) * (y[i] - my)) / sxx;
+  const icpt = my - slope * mx;
+  const s2 = d3.sum(y, (v, i) => (v - icpt - slope * i) ** 2) / Math.max(1, n - 2);
+  const mean = [], sd = [];
+  for (let h = 1; h <= H; h++) {
+    const x = n - 1 + h;
+    mean.push(icpt + slope * x);
+    sd.push(Math.sqrt(s2 * (1 + 1 / n + (x - mx) ** 2 / sxx)));
+  }
+  return { mean, sd };
+}
+function fcDrift(y, H) {
+  const n = y.length;
+  const d = (y[n - 1] - y[0]) / (n - 1);
+  const s2 = n > 2 ? d3.sum(d3.range(1, n), (t) => (y[t] - y[t - 1] - d) ** 2) / (n - 2) : 0;
+  const mean = [], sd = [];
+  for (let h = 1; h <= H; h++) {
+    mean.push(y[n - 1] + h * d);
+    sd.push(Math.sqrt(s2 * h * (1 + h / (n - 1))));
+  }
+  return { mean, sd };
+}
+const FC_FN = { damped: fcDamped, linear: fcLinear, drift: fcDrift };
+
+// Forecast one university's (or the group's) history: { dom, intl, total } rows by year.
+// measure picks the series; total = domestic + international (independent errors) when international is known.
+function fcRun(hist, model, measure, hold, H) {
+  const fn = FC_FN[model];
+  const flat = (v) => ({ mean: Array(H).fill(v), sd: Array(H).fill(0) });
+  const part = (key) => {
+    const y = hist.map((r) => r[key]);
+    if (key === 'intl' && hold) return flat(y.at(-1));
+    return fn(y, H);
+  };
+  const hasIntl = hist.every((r) => r.intl != null);
+  if (!hasIntl) return fn(hist.map((r) => r.total), H);
+  if (measure === 'dom') return part('dom');
+  if (measure === 'intl') return part('intl');
+  const d = part('dom'), i = part('intl');
+  return { mean: d.mean.map((v, k) => v + i.mean[k]), sd: d.sd.map((v, k) => Math.hypot(v, i.sd[k])) };
+}
+const fcClamp = (f) => ({ mean: f.mean.map((v) => Math.max(0, v)), sd: f.sd });
+
+// Histories for York, each group member and the group combined, for the level and field (Year filter not used).
+function fcData(p) {
+  const key = [p.group, p.level, fieldOf(p), fcModel(p), p.fmeasure, p.fhold].join('|');
+  if (fcCache.has(key)) return fcCache.get(key);
+  const totals = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
+  const years = [...new Set(totals.map((r) => r.year))].sort(d3.ascending);
+  const pool = [FOCUS, ...membersOf(p.group).filter((n) => n !== FOCUS)];
+  const row = (r) => (r ? { total: r.headcount, intl: r.international, dom: r.international == null ? null : r.headcount - r.international } : null);
+  const series = new Map();
+  for (const inst of pool) {
+    const by = new Map(totals.filter((r) => r.institution === inst).map((r) => [r.year, r]));
+    const hist = years.map((y) => row(by.get(y)));
+    if (hist.every(Boolean) && hist.at(-1).total > 0) series.set(inst, hist);
+  }
+  const members = [...series.keys()].filter((n) => n !== FOCUS);
+  if (members.length) {
+    series.set('Peers', years.map((_, j) => {
+      const rs = members.map((n) => series.get(n)[j]);
+      const intl = rs.some((r) => r.intl == null) ? null : d3.sum(rs, (r) => r.intl);
+      const total = d3.sum(rs, (r) => r.total);
+      return { total, intl, dom: intl == null ? null : total - intl };
+    }));
+  }
+  const hasIntl = [...series.values()].every((h) => h.every((r) => r.intl != null));
+  const measure = fcMeasure(p, hasIntl);
+  const hold = p.fhold === 'yes';
+  const last = years.at(-1);
+  const y0 = Number(last.slice(0, 4));
+  const fYears = d3.range(1, FC_H + 1).map((h) => `${y0 + h}-${y0 + h + 1}`);
+  const out = [];
+  for (const [inst, hist] of series) {
+    const actual = hist.map((r) => (measure === 'total' ? r.total : r[measure]));
+    const f = fcClamp(fcRun(hist, fcModel(p), measure, hold, FC_H));
+    // Backtest every model on the last FC_BACK years: mean absolute % error.
+    const back = {};
+    for (const m of Object.keys(FC_MODELS)) {
+      const fb = fcRun(hist.slice(0, -FC_BACK), m, measure, false, FC_BACK);
+      const errs = fb.mean.map((v, k) => Math.abs(v - actual[actual.length - FC_BACK + k]) / Math.max(1, actual[actual.length - FC_BACK + k]));
+      back[m] = { err: d3.mean(errs), pred: fb.mean };
+    }
+    out.push({ inst, actual, f, back, lastV: actual.at(-1), endV: f.mean.at(-1) });
+  }
+  const res = { years, fYears, measure, hasIntl, hold, out, model: fcModel(p) };
+  fcCache.set(key, res);
+  return res;
+}
+dash.onData(() => fcCache.clear());
+
+// The chart: every university's history (solid) and forecast (dashed); the picked one (York at first) gets its
+// 80% range and, when asked, the backtest line.
+dash.draw('fc-chart', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const d = fcData(p);
+  fcSync(p, d);
+  if (!d.out.length) { el.textContent = 'No figures for this selection.'; return; }
+  if (!d.out.some((o) => o.inst === fcState.inst)) fcState.inst = d.out[0].inst;
+  const allYears = [...d.years, ...d.fYears];
+  const W = Math.max(320, el.clientWidth), H = Math.min(520, Math.max(320, W * 0.48));
+  const { svg, tip } = svgIn(el, W, H);
+  const colors = ovColors(el, d.out.map((o) => o.inst));
+  const showPeers = fcState.inst === 'Peers';
+  const lines = d.out.filter((o) => o.inst !== 'Peers' || showPeers);
+  const hiV = d3.max(lines, (o) => Math.max(d3.max(o.actual), d3.max(o.f.mean.map((m, k) => (o.inst === fcState.inst ? m + FC_Z * o.f.sd[k] : m)))));
+  const labelW = measure(svg, lines.map((o) => o.inst)) + 12;
+  const m = { l: 52, r: labelW + 8, t: 14, b: 30 };
+  const x = d3.scalePoint(allYears, [m.l, W - m.r]);
+  const y = d3.scaleLinear([0, hiV * 1.05], [H - m.b, m.t]).nice();
+  const ax = svg.append('g').attr('class', 'ux-tick');
+  y.ticks(5).forEach((t) => {
+    ax.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--color-border-line)');
+    ax.append('text').attr('x', m.l - 6).attr('y', y(t)).attr('dy', '0.35em').attr('text-anchor', 'end').text(compact.format(t));
+  });
+  allYears.forEach((yr, j) => {
+    if (x.step() < 48 && j % 2 !== (allYears.length - 1) % 2) return;
+    ax.append('text').attr('x', x(yr)).attr('y', H - 8).attr('text-anchor', 'middle')
+      .attr('class', d.fYears.includes(yr) ? 'is-on' : null).text(shortYear(yr));
+  });
+  // The forecast years shaded, with a label.
+  const fx0 = (x(d.years.at(-1)) + x(d.fYears[0])) / 2;
+  svg.append('rect').attr('x', fx0).attr('y', m.t).attr('width', W - m.r - fx0 + 4).attr('height', H - m.b - m.t)
+    .attr('fill', 'var(--color-fg)').attr('opacity', 0.035);
+  svg.append('text').attr('class', 'ux-tick').attr('x', fx0 + 6).attr('y', m.t + 12).text('Forecast');
+  const sel = d.out.find((o) => o.inst === fcState.inst);
+  const fPts = (o) => [[d.years.at(-1), o.lastV], ...d.fYears.map((yr, k) => [yr, o.f.mean[k]])];
+  // The picked university's 80% range.
+  const band = d3.area().x((q) => x(q[0])).y0((q) => y(q[1])).y1((q) => y(q[2]));
+  svg.append('path').attr('fill', colors.get(sel.inst)).attr('opacity', 0.16)
+    .attr('d', band([[d.years.at(-1), sel.lastV, sel.lastV], ...d.fYears.map((yr, k) => [yr, Math.max(0, sel.f.mean[k] - FC_Z * sel.f.sd[k]), sel.f.mean[k] + FC_Z * sel.f.sd[k]])]));
+  const line = d3.line().x((q) => x(q[0])).y((q) => y(q[1]));
+  const order = [...lines].sort((a, b) => (a.inst === sel.inst) - (b.inst === sel.inst) || (a.inst === FOCUS) - (b.inst === FOCUS));
+  const g = svg.append('g').selectAll('g').data(order).join('g').style('cursor', 'pointer');
+  const on = (o) => o.inst === sel.inst || o.inst === FOCUS;
+  g.append('path').attr('fill', 'none').attr('stroke', (o) => colors.get(o.inst)).attr('stroke-width', (o) => (o.inst === sel.inst ? 3 : on(o) ? 2.4 : 1.4))
+    .attr('opacity', (o) => (on(o) ? 1 : 0.6)).attr('d', (o) => line(d.years.map((yr, j) => [yr, o.actual[j]])));
+  g.append('path').attr('fill', 'none').attr('stroke', (o) => colors.get(o.inst)).attr('stroke-dasharray', '5 4')
+    .attr('stroke-width', (o) => (o.inst === sel.inst ? 3 : on(o) ? 2.4 : 1.4)).attr('opacity', (o) => (on(o) ? 1 : 0.6)).attr('d', (o) => line(fPts(o)));
+  g.append('path').attr('fill', 'none').attr('stroke', 'transparent').attr('stroke-width', 12)
+    .attr('d', (o) => line([...d.years.map((yr, j) => [yr, o.actual[j]]), ...fPts(o).slice(1)]));
+  // Names at the right end, nudged apart so they don't overlap.
+  const labs = order.map((o) => ({ o, y: y(o.endV) })).sort((a, b) => a.y - b.y);
+  for (let k = 1; k < labs.length; k++) labs[k].y = Math.max(labs[k].y, labs[k - 1].y + 13);
+  const over = labs.length ? labs.at(-1).y - (H - m.b) : 0;
+  if (over > 0) labs.forEach((l) => { l.y -= over; });
+  svg.append('g').selectAll('text').data(labs).join('text').attr('x', W - m.r + 6).attr('y', (l) => l.y).attr('dy', '0.35em')
+    .attr('font-size', 12).attr('fill', (l) => colors.get(l.o.inst)).attr('font-weight', (l) => (on(l.o) ? 600 : 400))
+    .attr('opacity', (l) => (on(l.o) ? 1 : 0.7)).style('cursor', 'pointer').text((l) => l.o.inst)
+    .on('click', (e, l) => fcPick(l.o.inst));
+  g.on('click', (e, o) => fcPick(o.inst));
+  // Hover: figures at the nearest year.
+  g.on('pointermove', (e, o) => {
+    const [mx] = d3.pointer(e, svg.node());
+    const j = d3.leastIndex(allYears, (yr) => Math.abs(x(yr) - mx));
+    const yr = allYears[j];
+    const k = j - d.years.length;
+    const lines = k < 0 ? [{ name: 'Actual', value: fmtN(o.actual[j]), color: colors.get(o.inst) }]
+      : [{ name: 'Forecast', value: fmtN(Math.round(o.f.mean[k])), color: colors.get(o.inst) },
+        { name: '80% range', value: `${fmtN(Math.max(0, Math.round(o.f.mean[k] - FC_Z * o.f.sd[k])))} – ${fmtN(Math.round(o.f.mean[k] + FC_Z * o.f.sd[k]))}` },
+        { name: `vs ${shortYear(d.years.at(-1))}`, value: fmtD(o.f.mean[k] / o.lastV - 1) }];
+    showTip(el, tip, e, `${o.inst} · ${shortYear(yr)}`, lines);
+  }).on('pointerleave', () => { tip.hidden = true; });
+  svg.attr('role', 'img').attr('aria-label', `${FC_MEASURES[d.measure]}: history from ${shortYear(d.years[0])} and ${FC_MODELS[d.model].toLowerCase()} forecast to ${shortYear(d.fYears.at(-1))} for ${lines.map((o) => o.inst).join(', ')}.`);
+});
+function fcPick(inst) {
+  fcState.inst = inst;
+  dash.draw('fc-chart');
+  dash.draw('fc-table');
+  dash.draw('fc-title');
+}
+// Radio and checkbox states, and the measure choice greyed out where international isn't known.
+function fcSync(p, d) {
+  document.querySelectorAll('.ux .ux-fmeasure input').forEach((r) => {
+    r.checked = r.value === d.measure;
+    r.disabled = !d.hasIntl && r.value !== 'total';
+    r.closest('label').title = r.disabled ? 'Domestic and international numbers are only known for all students; clear the filters to use them.' : '';
+  });
+  document.querySelectorAll('.ux .ux-fmodel').forEach((s) => { s.value = fcModel(p); });
+  document.querySelectorAll('.ux .ux-fhold').forEach((c) => {
+    c.checked = d.hold;
+    c.disabled = !d.hasIntl || d.measure === 'dom';
+    c.closest('label').title = c.disabled ? (d.hasIntl ? 'Domestic students don’t include international ones.' : 'Only for all students.') : '';
+  });
+}
+dash.draw('fc-title', (el) => {
+  if (!gate(el, ['totals', 'peer_groups'], true)) return;
+  const d = fcData(P());
+  el.textContent = `${FC_MEASURES[d.measure]}: forecast to ${shortYear(d.fYears.at(-1))}${d.hold && d.measure !== 'dom' ? ', international held at its ' + shortYear(d.years.at(-1)) + ' level' : ''}`;
+});
+// The table: last actual, forecast in the last year, change and 80% range, and the backtest error of the chosen model.
+dash.draw('fc-table', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const d = fcData(P());
+  const lastY = shortYear(d.years.at(-1)), endY = shortYear(d.fYears.at(-1));
+  const rows = d.out.filter((o) => o.inst !== 'Peers').sort((a, b) => b.endV - a.endV);
+  const peers = d.out.find((o) => o.inst === 'Peers');
+  const t = document.createElement('table');
+  t.className = 'ux-table ux-fc-table';
+  t.innerHTML = `<thead><tr><th>#</th><th>University</th><th class="ux-num">${lastY}<br>actual</th><th class="ux-num">${endY}<br>forecast</th>`
+    + `<th class="ux-num">Change</th><th class="ux-num">80% range ${endY}</th><th class="ux-num" title="How far off this model was when fitted without the last ${FC_BACK} years and asked to forecast them (mean absolute % error).">Backtest<br>error</th></tr></thead>`;
+  const tb = document.createElement('tbody');
+  const tr = (o, rank) => {
+    const r = document.createElement('tr');
+    if (o.inst === FOCUS) r.className = 'is-york';
+    if (o.inst === 'Peers') r.className = 'is-comb';
+    if (o.inst === fcState.inst) r.classList.add('is-picked');
+    if (OV_BOLD.has(o.inst)) r.classList.add('is-bold');
+    const chg = o.endV / o.lastV - 1;
+    const sd = o.f.sd.at(-1);
+    r.append(td(rank ?? ''), td(o.inst), td(fmtN(o.lastV), 'ux-num'), td(fmtN(Math.round(o.endV)), 'ux-num'), td(fmtD(chg), signed(chg)),
+      td(`${compact.format(Math.max(0, o.endV - FC_Z * sd))} – ${compact.format(o.endV + FC_Z * sd)}`, 'ux-num'),
+      td(fmtP(o.back[d.model].err), 'ux-num'));
+    r.style.cursor = 'pointer';
+    r.title = 'Show this one’s range on the chart';
+    r.onclick = () => fcPick(o.inst);
+    return r;
+  };
+  rows.forEach((o, k) => tb.append(tr(o, k + 1)));
+  if (peers) tb.append(tr(peers, null));
+  t.append(tb);
+  // Which model did best in the backtest, across the universities shown.
+  const avg = Object.fromEntries(Object.keys(FC_MODELS).map((mm) => [mm, d3.mean(rows, (o) => o.back[mm].err)]));
+  const bestM = Object.keys(avg).sort((a, b) => avg[a] - avg[b])[0];
+  const note = document.createElement('p');
+  note.className = 'ux-note';
+  note.textContent = `Backtest (fitted on ${shortYear(d.years[0])} to ${shortYear(d.years.at(-1 - FC_BACK))}, checked against the next ${FC_BACK} years), average error across these universities: `
+    + Object.keys(FC_MODELS).map((mm) => `${FC_MODELS[mm]} ${fmtP(avg[mm])}`).join(' · ') + `. Lowest: ${FC_MODELS[bestM]}.`;
+  el.replaceChildren(t, note);
+});
+document.addEventListener('change', (e) => {
+  if (e.target.matches('.ux .ux-fmeasure input')) dash.setParams({ fmeasure: e.target.value });
+  if (e.target.matches('.ux .ux-fmodel')) dash.setParams({ fmodel: e.target.value });
+  if (e.target.matches('.ux .ux-fhold')) dash.setParams({ fhold: e.target.checked ? 'yes' : 'no' });
+});
+
 // Filter dropdowns: the page's own list replaces the browser's, so moving through it with the arrow keys applies
 // each choice straight away (the browser's list only reports a choice when it closes). The <select> stays the
 // source of truth: the list is drawn from its options, and choosing sets its value and fires its change event.
 (() => {
-  const FILTER = '.ux .ux-filters select, .ux .ux-ovcol, .ux .ux-ov3col';
+  const FILTER = '.ux .ux-filters select, .ux .ux-ovcol, .ux .ux-ov3col, .ux .ux-fmodel';
   let dd = null; // the open list: { sel, box, start, obs }
   let typed = '', typedAt = 0;
 
