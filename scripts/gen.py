@@ -246,7 +246,6 @@ html = f"""<meta name="dash-one-writer">
     <p class="ux-nav-h">York overall</p>
     <button class="ux-navlink" type="button" data-page="overview">Overview</button>
     <button class="ux-navlink" type="button" data-page="growth">Growth since 2012-13</button>
-    <button class="ux-navlink" type="button" data-page="share">Share of Ontario</button>
     <p class="ux-nav-h">Against the group</p>
     <button class="ux-navlink" type="button" data-page="ranking">Ranking</button>
     <button class="ux-navlink" type="button" data-page="institutions">Institutions</button>
@@ -348,14 +347,6 @@ html = f"""<meta name="dash-one-writer">
           </div>
         </div>
         <p class="ux-note" data-gunit="pct">The scale stops near the fastest-growing peers; a small institution growing from a low base can run off the top.</p>
-      </div>
-    </section>
-
-    <section class="ux-page" data-page="share" id="share" hidden>
-      <div class="ux-card" id="share-card">
-        <h2>York’s share of students</h2>
-        <p class="ux-note">York’s headcount as a share of all Ontario universities combined, each year.</p>
-        <div class="ux-chart ux-chart-big dash-skeleton" data-draw="share" data-source="york_ontario"></div>
       </div>
     </section>
 

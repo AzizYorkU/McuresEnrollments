@@ -395,7 +395,8 @@ document.addEventListener('input', (e) => {
 // 2026-11-07). Set SHOW_BREAKDOWNS to true to bring them back; the code and data are untouched.
 const SHOW_BREAKDOWNS = false;
 const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
-const PAGES = ['overview', 'growth', 'share', 'ranking', 'institutions', 'forecast', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
+// 'share' (Share of Ontario) was removed at the user's request; old links fall back to the overview.
+const PAGES = ['overview', 'growth', 'ranking', 'institutions', 'forecast', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
 if (!SHOW_BREAKDOWNS) {
   document.querySelectorAll('.ux .ux-nav-breakdowns').forEach((el) => { el.hidden = true; });
