@@ -380,6 +380,7 @@ document.addEventListener('click', (e) => {
 document.addEventListener('change', (e) => {
   if (e.target.matches('.ux .ux-ovcol')) dash.setParams({ ovcol: e.target.value });
   if (e.target.matches('.ux .ux-ov3col')) dash.setParams({ ov3col: e.target.value });
+  if (e.target.matches('.ux .ux-ovview input')) dash.setParams({ ovview: e.target.value });
   if (e.target.matches('.ux .ux-level')) {
     // Year of study is undergraduate-only, so moving to Graduate clears it.
     const clear = e.target.value === 'Graduate' && fieldOf(P()).startsWith('Year of study: ');
@@ -451,6 +452,10 @@ dash.onData(() => {
   document.querySelectorAll('.ux [data-ovpanel]').forEach((c) => { c.hidden = c.dataset.ovpanel !== ot; });
   document.querySelectorAll('.ux .ux-ovcol').forEach((s) => { s.value = ovCol(p); });
   document.querySelectorAll('.ux .ux-ov3col').forEach((s) => { s.value = ov3Col(p); });
+  // The chart type radio, and the note sentences for that type.
+  const ovv = ['bar', 'heat', 'bump', 'small'].includes(p.ovview) ? p.ovview : 'heat';
+  document.querySelectorAll('.ux .ux-ovview input').forEach((r) => { r.checked = r.value === ovv; });
+  document.querySelectorAll('.ux [data-ovv]').forEach((n) => { n.hidden = !n.dataset.ovv.split(' ').includes(ovv); });
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
@@ -1938,22 +1943,20 @@ function scene3d(el, st, { bars, insts, years, heads, emptyMsg, slantNames }) {
 }
 dash.draw('bars3d', draw3d);
 
-// Overview tabs: the number picked beside the chart as 3D bars, universities (in the table's order, so sorting the
-// table reorders them) by year (2012-13 to the selected year). Initial Heads doesn't change by year, so it has one row.
-// Peers' heads are the group's total and would flatten every university, so Peers is plotted only for the % column.
+// Overview tabs: the number picked beside the chart, universities (in the table's order, so sorting the table reorders
+// them) by year (2012-13 to the selected year). Initial Heads doesn't change by year, so it has one year.
+// Peers' heads are the group's total and would flatten every university, so Peers is shown only for the % column.
+// ovview picks the view: heat (heatmap), bump (rank by year), small (small multiples) or bar (3D bars).
 const OV_VIEW3D = { yaw: 2.6, pitch: 0.5 }; // the latest years at the back, so the tall recent bars don't hide the rest
 const OV_START3D = { ...OV_VIEW3D };
-dash.draw('ov-3d', (el) => {
-  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
-  const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el, OV_VIEW3D, OV_START3D);
-  const p = P();
-  const f = el.dataset.field;
+function ovSeries(f, p) {
   const col = ov3Col(p);
   const pct = col === 'value';
   const spec = LISTS[f];
   const h = spec.heads;
   const vf = spec.value?.field ?? f;
   const fmt = pct ? spec.value?.fmt ?? spec.fmt : col === 'change' ? fmtHeadsChange : fmtN;
+  const signed = col === 'change' || (pct && !!spec.signed);
   const { records, combined } = ovRecords(f, p, ovDetailSort(f, p));
   const totals = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
   const years = col === 'from' ? [FIRST] : [...new Set(totals.map((r) => r.year))].filter((y) => y <= p.year).sort(d3.ascending);
@@ -1971,31 +1974,259 @@ dash.draw('ov-3d', (el) => {
     }
     return r[h] ?? null;
   };
-  const insts = [...records.map((d) => d.institution), ...(pct && combined ? ['Peers'] : [])];
+  const all = [...records.map((d) => d.institution), ...(pct && combined ? ['Peers'] : [])];
   const bars = [];
   years.forEach((y, j) => {
-    const yr = insts.map((name, i) => ({ name, i, j, year: y, v: valueOf(name, y), n: rowOf(name, y)?.[h] })).filter((b) => b.v != null);
+    const yr = all.map((name) => ({ name, j, year: y, v: valueOf(name, y), n: rowOf(name, y)?.[h] })).filter((b) => b.v != null);
     const ranked = yr.filter((b) => b.name !== 'Peers').sort((a, c) => c.v - a.v);
     ranked.forEach((b, k) => { b.rank = k + 1; b.of = ranked.length; });
     bars.push(...yr);
   });
-  const shown = insts.filter((n) => bars.some((b) => b.name === n));
-  bars.forEach((b) => { b.i = shown.indexOf(b.name); });
+  // Only years and universities with a figure (growth has none in 2012-13 itself).
+  const insts = all.filter((n) => bars.some((b) => b.name === n));
+  const shownYears = years.filter((y) => bars.some((b) => b.year === y));
+  bars.forEach((b) => { b.i = insts.indexOf(b.name); b.j = shownYears.indexOf(b.year); });
   const name = ovColName(f, col);
-  st.canvas.setAttribute('aria-label', `3D bar chart of ${name} for ${shown.join(', ')}, ${shortYear(years[0] ?? p.year)} to ${shortYear(years.at(-1) ?? p.year)}. Drag or use the arrow keys to rotate.`);
-  st.tipFor = (bar, color) => ({
-    head: `${bar.name} · ${shortYear(bar.year)}`,
-    lines: [
-      { name, value: fmt(bar.v), color },
-      ...(bar.rank == null ? [] : [{ name: 'Rank that year', value: `${bar.rank} of ${bar.of}` }]),
-      ...(pct && bar.n != null ? [{ name: h === 'international' ? 'International heads' : 'Heads', value: fmtN(bar.n) }] : []),
-    ],
-  });
-  scene3d(el, st, {
-    bars, insts: shown, years, heads: !pct, slantNames: true,
-    emptyMsg: f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.' : 'No figures for this selection.',
-  });
+  const tipLines = (b, color) => [
+    { name, value: fmt(b.v), color },
+    ...(b.rank == null ? [] : [{ name: 'Rank that year', value: `${b.rank} of ${b.of}` }]),
+    ...(pct && b.n != null ? [{ name: h === 'international' ? 'International heads' : 'Heads', value: fmtN(b.n) }] : []),
+  ];
+  const emptyMsg = f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.' : 'No figures for this selection.';
+  return { col, pct, signed, fmt, years: shownYears, insts, bars, name, tipLines, emptyMsg, heads: !pct };
+}
+// One colour per university, the same as the 3D chart's: York orange, Peers muted, the others evenly spaced hues by name.
+function ovColors(el, insts) {
+  const fg = rgbOf(el, 'var(--color-fg)');
+  const dark = fg[0] + fg[1] + fg[2] > 380;
+  const others = insts.filter((n) => n !== FOCUS && n !== 'Peers').sort(d3.ascending);
+  const css = (c) => `rgb(${c.map(Math.round).join(',')})`;
+  return new Map([[FOCUS, css(rgbOf(el, dash.colors[0]))], ['Peers', css(rgbOf(el, 'var(--color-fg-muted)'))], ...others.map((n, i) => {
+    const c = d3.hcl(95 + (i * 255) / Math.max(1, others.length - (others.length > 1 ? 1 : 0)), 52, dark ? 70 : 58).rgb();
+    return [n, css([c.r, c.g, c.b])];
+  })]);
+}
+const OV_VIEWS = ['bar', 'heat', 'bump', 'small'];
+const ovView = (p) => (OV_VIEWS.includes(p.ovview) ? p.ovview : 'heat');
+const ovMsg = (el, text) => {
+  const m = document.createElement('p');
+  m.className = 'ux-ovmsg';
+  m.textContent = text;
+  el.replaceChildren(m);
+  el._3d = null;
+};
+const ovStrong = (n) => n === FOCUS || OV_BOLD.has(n);
+
+dash.draw('ov-3d', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const s = ovSeries(el.dataset.field, p);
+  const view = ovView(p);
+  if (view === 'bar') return ovBars(el, s);
+  el._3d = null;
+  if (!s.bars.length) return ovMsg(el, s.emptyMsg);
+  if (view !== 'heat' && s.years.length < 2) {
+    return ovMsg(el, `${s.name} has one year only, so there's nothing to follow over time. Pick another number in Chart shows, or the Heatmap or 3D bars.`);
+  }
+  ({ heat: ovHeat, bump: ovBump, small: ovSmall })[view](el, s);
 });
+
+function ovBars(el, s) {
+  const st = el._3d && el.contains(el._3d.canvas) ? el._3d : build3d(el, OV_VIEW3D, OV_START3D);
+  st.canvas.setAttribute('aria-label', `3D bar chart of ${s.name} for ${s.insts.join(', ')}, ${shortYear(s.years[0] ?? FIRST)} to ${shortYear(s.years.at(-1) ?? FIRST)}. Drag or use the arrow keys to rotate.`);
+  st.tipFor = (bar, color) => ({ head: `${bar.name} · ${shortYear(bar.year)}`, lines: s.tipLines(bar, color) });
+  scene3d(el, st, { bars: s.bars, insts: s.insts, years: s.years, heads: s.heads, slantNames: true, emptyMsg: s.emptyMsg });
+}
+
+// Heatmap: a row per university, a column per year; the colour is the value (green up / red down for changes,
+// one blue scale otherwise). Every cell shows its figure when there's room.
+function ovHeat(el, s) {
+  const W = Math.max(320, el.clientWidth);
+  const nameW = 104, top = 26, rowH = 30, legendH = 46;
+  const H = top + s.insts.length * rowH + legendH;
+  const { svg, tip } = svgIn(el, W, H);
+  svg.attr('role', 'img').attr('aria-label', `Heatmap of ${s.name}: ${s.insts.join(', ')} by year.`);
+  const cw = (W - nameW) / s.years.length;
+  const css = (c) => `rgb(${c.map(Math.round).join(',')})`;
+  const panel = css(rgbOf(el, 'var(--color-panel)')), fg = css(rgbOf(el, 'var(--color-fg)'));
+  const [lo, hi] = d3.extent(s.bars, (b) => b.v);
+  let color, ticks;
+  if (s.signed) {
+    const m = Math.max(Math.abs(lo), Math.abs(hi)) || 1;
+    const down = d3.interpolateLab(panel, css(rgbOf(el, 'var(--color-bad)')));
+    const up = d3.interpolateLab(panel, css(rgbOf(el, 'var(--color-ok)')));
+    color = (v) => (v < 0 ? down(Math.min(1, -v / m) * 0.9) : up(Math.min(1, v / m) * 0.9));
+    ticks = [-m, 0, m];
+  } else {
+    const blue = d3.interpolateLab(panel, css(rgbOf(el, dash.colors[1])));
+    const span = hi - lo || 1;
+    color = (v) => blue(0.06 + ((v - lo) / span) * 0.9);
+    ticks = [lo, (lo + hi) / 2, hi];
+  }
+  const ink = (bg) => {
+    const c = d3.rgb(bg);
+    return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b > 150 ? '#1f1e1b' : '#f5f4ef';
+  };
+  const short = s.heads
+    ? (v) => (Math.abs(v) < 1000 ? d3.format(s.signed ? '+,' : ',')(v) : (v > 0 && s.signed ? '+' : '') + compact.format(v))
+    : (v) => d3.format(s.signed ? '+.0%' : hi < 0.1 ? '.1%' : '.0%')(v);
+  // Year labels across the top; every other one when they'd crowd.
+  const every = cw < 44 ? 2 : 1;
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(s.years).join('text')
+    .attr('x', (y, j) => nameW + j * cw + cw / 2).attr('y', top - 9).attr('text-anchor', 'middle')
+    .attr('class', (y) => (y === s.years.at(-1) ? 'is-on' : null))
+    .text((y, j) => ((s.years.length - 1 - j) % every === 0 ? shortYear(y) : ''));
+  const colors = ovColors(el, s.insts);
+  s.insts.forEach((n, i) => {
+    svg.append('text').attr('x', nameW - 8).attr('y', top + i * rowH + rowH / 2).attr('dy', '0.35em').attr('text-anchor', 'end')
+      .attr('fill', n === 'Peers' ? 'var(--color-fg-muted)' : 'var(--color-fg)')
+      .attr('font-weight', ovStrong(n) ? 600 : 400).attr('font-size', 13).text(n);
+  });
+  const cells = svg.append('g').selectAll('g').data(s.bars).join('g')
+    .attr('transform', (b) => `translate(${nameW + b.j * cw},${top + b.i * rowH})`);
+  cells.append('rect').attr('width', Math.max(1, cw - 2)).attr('height', rowH - 2).attr('rx', 3).attr('fill', (b) => color(b.v));
+  if (cw >= 30) {
+    cells.append('text').attr('x', (cw - 2) / 2).attr('y', (rowH - 2) / 2).attr('dy', '0.35em').attr('text-anchor', 'middle')
+      .attr('font-size', 11).attr('fill', (b) => ink(color(b.v))).attr('pointer-events', 'none').text((b) => short(b.v));
+  }
+  // York's row outlined, so it's easy to find.
+  const yi = s.insts.indexOf(FOCUS);
+  if (yi >= 0) {
+    svg.append('rect').attr('x', nameW - 2).attr('y', top + yi * rowH - 2).attr('width', W - nameW + 2).attr('height', rowH + 2)
+      .attr('rx', 4).attr('fill', 'none').attr('stroke', colors.get(FOCUS)).attr('stroke-width', 2).attr('pointer-events', 'none');
+  }
+  cells.on('pointermove', (e, b) => {
+    cells.select('rect').attr('stroke', (d) => (d === b ? fg : null)).attr('stroke-width', 1.5);
+    showTip(el, tip, e, `${b.name} · ${shortYear(b.year)}`, s.tipLines(b, colors.get(b.name)));
+  }).on('pointerleave', () => {
+    cells.select('rect').attr('stroke', null);
+    tip.hidden = true;
+  });
+  // Legend: the colour scale with its ends (and 0 for changes).
+  const lw = Math.min(260, W - nameW), lx = nameW, ly = top + s.insts.length * rowH + 12;
+  const gid = 'ovheat-' + el.dataset.field;
+  const grad = svg.append('defs').append('linearGradient').attr('id', gid);
+  d3.range(21).forEach((k) => grad.append('stop').attr('offset', k / 20).attr('stop-color', color(ticks[0] + (k / 20) * (ticks[2] - ticks[0]))));
+  svg.append('rect').attr('x', lx).attr('y', ly).attr('width', lw).attr('height', 10).attr('rx', 2).attr('fill', `url(#${gid})`);
+  const tf = s.heads ? (v) => (s.signed ? d3.format('+,')(Math.round(v)) : fmtN(Math.round(v))) : s.fmt;
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(ticks).join('text')
+    .attr('x', (t, k) => lx + (k * lw) / 2).attr('y', ly + 24).attr('text-anchor', (t, k) => ['start', 'middle', 'end'][k]).text((t) => tf(t));
+}
+
+// Bump chart: each university's rank on the number, year by year (1 at the top). Years where every value is the same
+// (the 2012-13 change, which is 0 for all) are left out, since they rank nobody.
+function ovBump(el, s) {
+  const bars = s.bars.filter((b) => b.rank != null);
+  const years = s.years.filter((y) => new Set(bars.filter((b) => b.year === y).map((b) => b.v)).size > 1);
+  const insts = s.insts.filter((n) => n !== 'Peers');
+  if (years.length < 2) return ovMsg(el, 'Not enough years to rank.');
+  const nR = d3.max(bars, (b) => b.of);
+  const W = Math.max(320, el.clientWidth), rowH = 30, top = 14, bottom = 30;
+  const H = top + (nR - 1) * rowH + bottom + 10;
+  const { svg, tip } = svgIn(el, W, H);
+  svg.attr('role', 'img').attr('aria-label', `Rank of each university on ${s.name}, ${shortYear(years[0])} to ${shortYear(years.at(-1))}. 1 is the highest.`);
+  const colors = ovColors(el, insts);
+  const lastOf = new Map(bars.filter((b) => b.year === years.at(-1)).map((b) => [b.name, b]));
+  const firstOf = new Map(bars.filter((b) => b.year === years[0]).map((b) => [b.name, b]));
+  const lw = measure(svg, insts.map((n) => `${n} 10`)) + 16;
+  const x = d3.scalePoint(years, [lw, W - lw]);
+  const y = (r) => top + (r - 1) * rowH;
+  // Faint guide per rank.
+  svg.append('g').selectAll('line').data(d3.range(1, nR + 1)).join('line')
+    .attr('x1', lw).attr('x2', W - lw).attr('y1', y).attr('y2', y).attr('stroke', 'var(--color-border-line)').attr('stroke-dasharray', '2 4');
+  svg.append('g').attr('class', 'ux-tick').selectAll('text').data(years).join('text')
+    .attr('x', (d) => x(d)).attr('y', H - 8).attr('text-anchor', 'middle')
+    .attr('class', (d) => (d === years.at(-1) ? 'is-on' : null))
+    .text((d, j) => (x.step() >= 44 || (years.length - 1 - j) % 2 === 0 ? shortYear(d) : ''));
+  const series = insts.map((n) => ({ n, pts: years.map((yy) => bars.find((b) => b.name === n && b.year === yy)).filter(Boolean) }));
+  series.sort((a, b) => (a.n === FOCUS) - (b.n === FOCUS)); // York drawn last, on top
+  const line = d3.line().x((b) => x(b.year)).y((b) => y(b.rank)).curve(d3.curveMonotoneX);
+  const groups = svg.append('g').selectAll('g').data(series).join('g').style('cursor', 'pointer');
+  groups.append('path').attr('d', (d) => line(d.pts)).attr('fill', 'none').attr('stroke', (d) => colors.get(d.n))
+    .attr('stroke-width', (d) => (d.n === FOCUS ? 4 : 2.5));
+  // A wide invisible stroke so the line is easy to hover.
+  groups.append('path').attr('d', (d) => line(d.pts)).attr('fill', 'none').attr('stroke', 'transparent').attr('stroke-width', 14);
+  groups.selectAll('circle').data((d) => d.pts.map((b) => ({ b, n: d.n }))).join('circle')
+    .attr('cx', (d) => x(d.b.year)).attr('cy', (d) => y(d.b.rank)).attr('r', (d) => (d.n === FOCUS ? 5 : 3.5)).attr('fill', (d) => colors.get(d.n));
+  for (const side of ['l', 'r']) {
+    const at = side === 'r' ? lastOf : firstOf;
+    groups.append('text')
+      .attr('x', side === 'r' ? W - lw + 10 : lw - 10).attr('y', (d) => y(at.get(d.n)?.rank ?? 0)).attr('dy', '0.35em')
+      .attr('text-anchor', side === 'r' ? 'start' : 'end').attr('font-size', 12).attr('fill', (d) => colors.get(d.n))
+      .attr('font-weight', (d) => (ovStrong(d.n) ? 600 : 400))
+      .text((d) => { const b = at.get(d.n); return !b ? '' : side === 'r' ? `${b.rank} ${d.n}` : `${d.n} ${b.rank}`; });
+  }
+  // Hover a line to bring it forward and read its figures at the nearest year.
+  groups.on('pointermove', (e, d) => {
+    groups.attr('opacity', (o) => (o === d ? 1 : 0.15));
+    const [mx] = d3.pointer(e, svg.node());
+    const near = d3.least(d.pts, (b) => Math.abs(x(b.year) - mx));
+    showTip(el, tip, e, `${d.n} · ${shortYear(near.year)}`, s.tipLines(near, colors.get(d.n)));
+  }).on('pointerleave', () => {
+    groups.attr('opacity', 1);
+    tip.hidden = true;
+  });
+}
+
+// Small multiples: one small line chart per university on a shared scale, with York's line dashed grey behind each
+// for reference. Each panel's heading gives the latest figure.
+function ovSmall(el, s) {
+  const W = Math.max(320, el.clientWidth);
+  const cols = Math.max(1, Math.min(4, Math.floor(W / 190)));
+  const pw = W / cols, ph = 150, gap = 16;
+  const H = Math.ceil(s.insts.length / cols) * ph;
+  const { svg, tip } = svgIn(el, W, H);
+  svg.attr('role', 'img').attr('aria-label', `Small charts of ${s.name}, one per university, ${shortYear(s.years[0])} to ${shortYear(s.years.at(-1))}.`);
+  const colors = ovColors(el, s.insts);
+  let [lo, hi] = d3.extent(s.bars, (b) => b.v);
+  if (s.signed || s.heads) { lo = Math.min(0, lo); hi = Math.max(0, hi); }
+  const innerL = 40, innerT = 22, innerB = 40;
+  const x = d3.scalePoint(s.years, [innerL, pw - gap]);
+  const y = d3.scaleLinear([lo, hi || 1], [ph - innerB, innerT]).nice(3);
+  const tf = s.heads ? (v) => compact.format(v) : d3.format(hi - lo < 0.1 ? '.1%' : '.0%');
+  const yorkPts = s.bars.filter((b) => b.name === FOCUS);
+  const line = d3.line().x((b) => x(b.year)).y((b) => y(b.v));
+  s.insts.forEach((n, k) => {
+    const g = svg.append('g').attr('transform', `translate(${(k % cols) * pw},${Math.floor(k / cols) * ph})`);
+    const pts = s.bars.filter((b) => b.name === n);
+    const last = pts.at(-1);
+    g.append('text').attr('x', innerL).attr('y', 12).attr('font-size', 12).attr('fill', colors.get(n))
+      .attr('font-weight', ovStrong(n) ? 600 : 500).text(n);
+    if (last) {
+      g.append('text').attr('x', pw - gap).attr('y', 12).attr('text-anchor', 'end').attr('font-size', 12)
+        .attr('fill', s.signed ? (last.v < 0 ? 'var(--color-bad)' : 'var(--color-ok)') : 'var(--color-fg)').text(s.fmt(last.v));
+    }
+    const ax = g.append('g').attr('class', 'ux-tick');
+    y.ticks(3).forEach((t) => {
+      ax.append('line').attr('x1', innerL).attr('x2', pw - gap).attr('y1', y(t)).attr('y2', y(t))
+        .attr('stroke', 'var(--color-border-line)').attr('stroke-width', t === 0 && lo < 0 ? 1.5 : 1);
+      ax.append('text').attr('x', innerL - 5).attr('y', y(t)).attr('dy', '0.35em').attr('text-anchor', 'end').text(tf(t));
+    });
+    ax.append('text').attr('x', innerL).attr('y', ph - 24).text(shortYear(s.years[0]));
+    ax.append('text').attr('x', pw - gap).attr('y', ph - 24).attr('text-anchor', 'end').text(shortYear(s.years.at(-1)));
+    if (n !== FOCUS && yorkPts.length) {
+      g.append('path').attr('d', line(yorkPts)).attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)')
+        .attr('stroke-opacity', 0.55).attr('stroke-width', 1.5).attr('stroke-dasharray', '3 2');
+    }
+    g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', colors.get(n)).attr('stroke-width', n === FOCUS ? 2.6 : 2);
+    const dot = g.append('circle').attr('r', 3.5).attr('fill', colors.get(n)).attr('visibility', 'hidden');
+    g.append('rect').attr('x', innerL).attr('y', innerT).attr('width', pw - gap - innerL).attr('height', ph - innerB - innerT)
+      .attr('fill', 'transparent')
+      .on('pointermove', (e) => {
+        const [mx] = d3.pointer(e, g.node());
+        const b = d3.least(pts, (q) => Math.abs(x(q.year) - mx));
+        if (!b) return;
+        dot.attr('cx', x(b.year)).attr('cy', y(b.v)).attr('visibility', 'visible');
+        const yb = yorkPts.find((q) => q.year === b.year);
+        showTip(el, tip, e, `${n} · ${shortYear(b.year)}`, [...s.tipLines(b, colors.get(n)),
+          ...(n !== FOCUS && yb ? [{ name: 'York (dashed)', value: s.fmt(yb.v), color: colors.get(FOCUS) }] : [])]);
+      })
+      .on('pointerleave', () => {
+        dot.attr('visibility', 'hidden');
+        tip.hidden = true;
+      });
+  });
+}
 // The chart's heading: the number and the years it covers.
 dash.draw('ov-3d-title', (el) => {
   const p = P();

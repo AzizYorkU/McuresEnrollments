@@ -244,3 +244,8 @@
 .ux-gwarn { padding: var(--cds-pad-sm) var(--cds-pad-md); border-style: solid; border-color: var(--color-bad); color: var(--color-fg); font-size: var(--cds-font-size-caption); }
 [data-draw="gf-warn"]:empty { display: none; }
 
+.ux-ovchart-ctl { display: flex; flex-wrap: wrap; align-items: end; gap: var(--cds-gap-xs) var(--cds-gap-lg); }
+.ux-ovchart-ctl .ux-ovcol-field { flex: 0 1 18rem; }
+.ux-ovview { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs) var(--cds-gap-md); padding-bottom: 6px; font-size: var(--cds-font-size-body); }
+.ux-3d-box { position: relative; }
+.ux-ovmsg { color: var(--color-fg-muted); padding: var(--cds-pad-md) 0; }

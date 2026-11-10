@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value", "ov3col": "value"}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value", "ov3col": "value", "ovview": "heat"}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -207,6 +207,8 @@ def ov_detail(f, title, last, extra):
     """An Overview tab: one panel showing a single number column, with that column as 3D bars beside it."""
     options = [("from", "Initial Heads"), ("to", "Selected Year Heads"), ("change", "Change in Heads"), ("value", last)]
     opts = "".join(f'<option value="{v}">{n}</option>' for v, n in options)
+    views = "".join(f'<label class="ux-gtoggle"><input type="radio" name="ovview-{f}" value="{v}"{" checked" if v == "heat" else ""}> {n}</label>'
+                    for v, n in [("bar", "3D bars"), ("heat", "Heatmap"), ("bump", "Bump (rank)"), ("small", "Small multiples")])
     no_intl = '\n          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>' if f == "intl_share" else ""
     return f"""
       <div class="ux-ovd" data-ovpanel="{f}" hidden>
@@ -219,14 +221,17 @@ def ov_detail(f, title, last, extra):
         </div>
         <div class="ux-card ux-ovd-chart" id="chart-{f}">
           <h3 data-draw="ov-3d-title" data-field="{f}">—</h3>
-          <label class="ux-field ux-ovcol-field">Chart shows <select class="ux-ov3col">{opts}</select></label>
-          <p class="ux-note">One row of bars per year, universities in the table's order: sort the table and the bars follow. Initial Heads has only the 2012-13 row, since it doesn't change by year. Drag the chart or use the arrow keys to rotate it; hover a bar for its figure.{extra}</p>
+          <div class="ux-ovchart-ctl">
+            <label class="ux-field ux-ovcol-field">Chart shows <select class="ux-ov3col">{opts}</select></label>
+            <div class="ux-ovview" role="radiogroup" aria-label="Chart type">{views}</div>
+          </div>
+          <p class="ux-note"><span data-ovv="heat">A row per university and a column per year; the colour shows the number, and York's row is outlined. </span><span data-ovv="bump">Each university's rank on the number, year by year (1 is the highest). Hover a line to pick it out. </span><span data-ovv="small">One small chart per university, all on the same scale; the dashed grey line is York, for comparison. </span><span data-ovv="bar">One row of bars per year. Drag the chart or use the arrow keys to rotate it. </span><span data-ovv="heat bar small">Universities are in the table's order: sort the table and the chart follows. </span>Initial Heads has only 2012-13, since it doesn't change by year. Hover for figures.{extra}</p>
           <div class="ux-3d-box dash-skeleton" data-draw="ov-3d" data-field="{f}" data-source="totals group_totals peer_groups"></div>
         </div>
       </div>"""
 
 
-PEERS_NOTE = " Peers appears in the chart only for the % column, because its heads are the whole group’s total."
+PEERS_NOTE = " Peers is shown only for the % column, because its heads are the whole group’s total."
 ov_details = (ov_detail("headcount", "Headcount", "Share of Students", "")
               + ov_detail("change_base", "Growth since 2012-13", "Growth Rate", PEERS_NOTE)
               + ov_detail("intl_share", "International share", "Intl Share", " Heads count international students only." + PEERS_NOTE))
