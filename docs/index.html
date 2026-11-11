@@ -28,22 +28,28 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
 .ux-note-below { margin-top: var(--cds-gap-sm); }
 .ux-msg { margin: 0; padding: var(--cds-pad-md) var(--cds-pad-lg); border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); color: var(--color-fg-muted); }
 
-.ux-filters { display: grid; gap: var(--cds-gap-sm); max-width: 72rem; }
-.ux-frow { display: grid; grid-template-columns: 5rem repeat(4, minmax(0, 1fr)); gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: end; }
-.ux-frow + .ux-frow { border-top: 1px solid var(--color-border-line); padding-top: var(--cds-gap-sm); }
-.ux-frow-h { margin: 0; align-self: center; padding-top: 1.1rem; font-size: var(--cds-font-size-caption); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--color-fg-muted); }
+/* Filters: two compact rows (Year, Compare with, Study level, Credential, Year of study, Field of study | Citizenship, Gender, Reset). */
+.ux-filters { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: end; max-width: 84rem; }
+.ux .ux-filters .ux-field { gap: 2px; }
 .ux .ux-filters select { width: 100%; max-width: none; }
 .ux-reset-cell { justify-items: start; }
-.ux-field-wide { grid-column: 2 / -1; }
-.ux-frow-h { grid-row: 1; }
+.ux-field-wide { grid-column: span 2; }
+/* Summary bar: a zero-height sticky holder so showing the bar never shifts the page. */
+.ux-fbar-wrap { position: sticky; top: 0; height: 0; z-index: 20; margin-top: calc(-1 * var(--cds-gap-lg)); }
+.ux-fbar { display: flex; align-items: center; gap: var(--cds-gap-md); padding: var(--cds-pad-xs) var(--cds-pad-sm); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 0 0 var(--cds-radius) var(--cds-radius); box-shadow: 0 2px 8px rgb(0 0 0 / .12); }
+.ux-fbar[hidden] { display: none; }
+.ux-fbar-t { margin: 0; flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 2px var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg); }
+.ux-fbar-i { white-space: nowrap; }
+.ux-fbar-i small { font-size: inherit; color: var(--color-fg-muted); margin-right: .3em; }
+.ux-fbar-i.is-set { font-weight: 600; }
+.ux-fbar-go { flex: none; font-size: var(--cds-font-size-caption); }
 .ux-field:has(select:disabled) { opacity: .45; cursor: not-allowed; }
 .ux .ux-filters select:disabled { cursor: not-allowed; }
 @media (max-width: 48rem) {
-  .ux-frow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ux-frow-h { grid-column: 1 / -1; padding-top: 0; }
+  .ux-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ux-field-wide { grid-column: 1 / -1; }
 }
-@media (max-width: 30rem) { .ux-frow { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 30rem) { .ux-filters { grid-template-columns: minmax(0, 1fr); } }
 .ux-field { display: grid; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); min-width: 0; }
 .ux select, .ux .ux-search { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); max-width: 100%; }
 .ux-btn, .ux-tab { font: inherit; font-size: var(--cds-font-size-body); color: var(--color-fg); background: transparent; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); cursor: pointer; }
@@ -304,31 +310,24 @@ window.DASH_PARAMS = {"group": "Large universities", "level": "All levels", "yea
     </header>
 
     <div class="ux-filters" id="filters">
-      <div class="ux-frow" role="group" aria-labelledby="fh-view">
-        <p class="ux-frow-h" id="fh-view">View</p>
-        <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
-        <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
-        <div class="ux-field ux-reset-cell"><button class="ux-btn ux-reset" type="button">Reset</button></div>
-      </div>
-      <div class="ux-frow" role="group" aria-labelledby="fh-program">
-        <p class="ux-frow-h" id="fh-program">Program</p>
-        <label class="ux-field">Study level
-          <select id="f-level" class="ux-level">
-            <option>All levels</option>
-            <option>Undergraduate</option>
-            <option>Graduate</option>
-          </select>
-        </label>
-        <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
-        <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
-        <label class="ux-field ux-field-wide">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
-      </div>
-      <div class="ux-frow" role="group" aria-labelledby="fh-student">
-        <p class="ux-frow-h" id="fh-student">Student</p>
-        <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
-        <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
-      </div>
+      <label class="ux-field">Year <select id="f-year" data-draw="year-select" data-source="totals"></select></label>
+      <label class="ux-field">Compare with <select id="f-group" data-draw="group-select" data-source="peer_groups"></select></label>
+      <label class="ux-field">Study level
+        <select id="f-level" class="ux-level">
+          <option>All levels</option>
+          <option>Undergraduate</option>
+          <option>Graduate</option>
+        </select>
+      </label>
+      <label class="ux-field">Credential <select id="f-credential" class="ux-subset" data-draw="subset-select" data-subset="credential" data-source="totals"></select></label>
+      <label class="ux-field">Year of study <select id="f-studyyear" class="ux-subset" data-draw="subset-select" data-subset="studyyear" data-source="totals"></select></label>
+      <label class="ux-field ux-field-wide">Field of study <select id="f-field" class="ux-field-select" data-draw="field-select" data-source="totals group_totals"></select></label>
+      <label class="ux-field">Citizenship <select id="f-citizen" class="ux-subset" data-draw="subset-select" data-subset="citizen" data-source="totals"></select></label>
+      <label class="ux-field">Gender <select id="f-gender" class="ux-subset" data-draw="subset-select" data-subset="gender" data-source="totals"></select></label>
+      <div class="ux-field ux-reset-cell"><button class="ux-btn ux-reset" type="button">Reset</button></div>
     </div>
+    <!-- Slim bar that stays at the top once the filters scroll out of view: the current selection + a way back. -->
+    <div class="ux-fbar-wrap"><div class="ux-fbar" hidden><p class="ux-fbar-t"></p><button class="ux-btn ux-fbar-go" type="button">Change filters ↑</button></div></div>
 
     <section class="ux-page" data-page="overview" id="overview" hidden>
       <div class="ux-tabs ux-ovtabs" role="group" aria-label="Overview view">
@@ -3942,6 +3941,37 @@ document.addEventListener('change', (e) => {
   document.addEventListener('focusout', (e) => { if (dd && e.target === dd.sel) close(); });
   addEventListener('resize', () => dd && place());
   addEventListener('scroll', (e) => { if (dd && !dd.box.contains(e.target)) place(); }, true);
+})();
+
+// Summary bar: once the filters scroll out of view, a slim bar at the top lists the current selection
+// (greyed-out filters left out; anything other than the default in bold) with a button back to the filters.
+(() => {
+  const f = document.querySelector('.ux #filters');
+  const bar = document.querySelector('.ux .ux-fbar');
+  if (!f || !bar || !('IntersectionObserver' in window)) return;
+  const fill = () => {
+    const items = [...f.querySelectorAll('select')].filter((s) => !s.disabled).map((s) => {
+      const lab = s.closest('label')?.firstChild?.textContent.trim() ?? '';
+      const val = (s.selectedOptions[0]?.textContent ?? '').split('  ·  ')[0];
+      const set = s.id === 'f-year' || s.id === 'f-group' ? false : s.selectedIndex > 0;
+      const sp = document.createElement('span');
+      sp.className = 'ux-fbar-i' + (set ? ' is-set' : '');
+      const sm = document.createElement('small');
+      sm.textContent = lab;
+      sp.append(sm, val);
+      return sp;
+    });
+    bar.querySelector('.ux-fbar-t').replaceChildren(...items);
+  };
+  new IntersectionObserver(([e]) => {
+    const show = !e.isIntersecting && e.boundingClientRect.top < 0;
+    if (show) fill();
+    bar.hidden = !show;
+  }).observe(f);
+  bar.querySelector('.ux-fbar-go').addEventListener('click', () => {
+    f.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    f.querySelector('select:not(:disabled)')?.focus({ preventScroll: true });
+  });
 })();
 
 </script>

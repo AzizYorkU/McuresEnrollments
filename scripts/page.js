@@ -2681,3 +2681,34 @@ document.addEventListener('change', (e) => {
   addEventListener('resize', () => dd && place());
   addEventListener('scroll', (e) => { if (dd && !dd.box.contains(e.target)) place(); }, true);
 })();
+
+// Summary bar: once the filters scroll out of view, a slim bar at the top lists the current selection
+// (greyed-out filters left out; anything other than the default in bold) with a button back to the filters.
+(() => {
+  const f = document.querySelector('.ux #filters');
+  const bar = document.querySelector('.ux .ux-fbar');
+  if (!f || !bar || !('IntersectionObserver' in window)) return;
+  const fill = () => {
+    const items = [...f.querySelectorAll('select')].filter((s) => !s.disabled).map((s) => {
+      const lab = s.closest('label')?.firstChild?.textContent.trim() ?? '';
+      const val = (s.selectedOptions[0]?.textContent ?? '').split('  ·  ')[0];
+      const set = s.id === 'f-year' || s.id === 'f-group' ? false : s.selectedIndex > 0;
+      const sp = document.createElement('span');
+      sp.className = 'ux-fbar-i' + (set ? ' is-set' : '');
+      const sm = document.createElement('small');
+      sm.textContent = lab;
+      sp.append(sm, val);
+      return sp;
+    });
+    bar.querySelector('.ux-fbar-t').replaceChildren(...items);
+  };
+  new IntersectionObserver(([e]) => {
+    const show = !e.isIntersecting && e.boundingClientRect.top < 0;
+    if (show) fill();
+    bar.hidden = !show;
+  }).observe(f);
+  bar.querySelector('.ux-fbar-go').addEventListener('click', () => {
+    f.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    f.querySelector('select:not(:disabled)')?.focus({ preventScroll: true });
+  });
+})();
