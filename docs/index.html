@@ -1752,6 +1752,9 @@ dash.draw('sel-field', (el) => {
 // Field list: fields with York students first, with York's headcount and York's growth in the field since 2012-13
 // against the comparison group's combined growth, the same figures as the Growth list and chart
 // (green when York grew faster, red when slower).
+// Temporary (2026-11-11, user request): plain field list, just "52 Business and management", no York count,
+// growth suffix or colour. Set to false to bring them back.
+const FIELD_PLAIN = true;
 dash.draw('field-select', (sel) => {
   const t = dash.data('totals');
   const g = dash.data('group_totals');
@@ -1781,6 +1784,7 @@ dash.draw('field-select', (sel) => {
   const at = fields.filter((f) => count(f) > 0);
   const not = fields.filter((f) => !(count(f) > 0));
   const option = (f, withCount) => {
+    if (FIELD_PLAIN) withCount = false;
     const r = growth(f);
     const chg = r ? `  ·  since 2012-13: York ${fmtD(r.y)} vs peers ${fmtD(r.pc)}` : '';
     const o = new Option(withCount ? `${fieldName(f)}  ·  York ${fmtN(count(f))}${chg}` : fieldName(f), f);
@@ -1793,13 +1797,13 @@ dash.draw('field-select', (sel) => {
     og.append(...list.map((f) => option(f, withCount)));
     return og;
   };
-  const head = p.year === FIRST ? `Fields with York students (${at.length})` : `Fields with York students (${at.length}): growth since 2012-13, York vs ${p.group}`;
+  const head = FIELD_PLAIN ? `Fields with York students (${at.length})` : p.year === FIRST ? `Fields with York students (${at.length})` : `Fields with York students (${at.length}): growth since 2012-13, York vs ${p.group}`;
   // Fields without York students aren't listed, unless one is already picked.
   const picked = not.filter((f) => f === fieldOf(p));
   sel.replaceChildren(new Option(ALL_F), group(head, at, true), ...picked.map((f) => option(f, false)));
   sel.value = fieldCode(p) ? fieldOf(p) : ALL_F;
   sel.classList.remove('is-above', 'is-below');
-  const cur = fieldCode(p) && count(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
+  const cur = !FIELD_PLAIN && fieldCode(p) && count(fieldOf(p)) > 0 ? tone(fieldOf(p)) : '';
   if (cur) sel.classList.add(cur);
 });
 dash.draw('members', (el) => {
