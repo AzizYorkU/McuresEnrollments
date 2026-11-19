@@ -36,7 +36,9 @@ dash.calc('totals', {
   },
 });
 
-dash.calc('group_totals', {
+const CALC = {}; // calc id -> fn, so a narrowed group can be recomputed (see dash.data below)
+const calcDef = (id, def) => { CALC[id] = def.fn; dash.calc(id, def); };
+calcDef('group_totals', {
   inputs: ['totals', 'peer_groups'],
   title: 'Comparison groups combined',
   description: 'Each comparison group’s members added together, for all fields and each field of study: headcount, international share, and change from the previous year and from 2012-13.',
@@ -67,7 +69,7 @@ dash.calc('group_totals', {
   },
 });
 
-dash.calc('york_standing', {
+calcDef('york_standing', {
   inputs: ['totals', 'peer_groups'],
   title: 'York’s rank in each comparison group',
   description: 'York’s place among itself and the group’s members on headcount, growth, international share and share of Ontario (1 = highest), for all fields and each field of study.',
@@ -113,6 +115,30 @@ dash.calc('york_ontario', {
     });
   },
 });
+
+// "All other Ontario universities" can be narrowed to the universities ticked in its submenu in Compare with
+// (param excl: the unticked ones, comma-separated; empty = all). The group's members, its combined totals and
+// York's rank in it then follow that pick; the other groups are untouched.
+const OTHERS = 'All other Ontario universities';
+const exclOf = (p) => new Set((p.excl || '').split(',').filter(Boolean));
+const DATA = dash.data;
+let narrowed = null; // { excl, src, tot, peer_groups, group_totals, york_standing }
+dash.data = (id) => {
+  const res = DATA(id);
+  const excl = dash.params().excl || '';
+  if (!excl || res.status !== 'ok' || !(id === 'peer_groups' || id in CALC)) return res;
+  const pg = DATA('peer_groups'), tot = DATA('totals');
+  if (!narrowed || narrowed.excl !== excl || narrowed.src !== pg.data || narrowed.tot !== tot.data) {
+    const out = exclOf({ excl });
+    narrowed = { excl, src: pg.data, tot: tot.data,
+      peer_groups: { ...pg, data: pg.data.filter((r) => !(r.group === OTHERS && out.has(r.institution))) } };
+  }
+  if (!narrowed[id]) {
+    const mine = narrowed.peer_groups.data.filter((r) => r.group === OTHERS);
+    narrowed[id] = { ...res, data: [...res.data.filter((r) => r.group !== OTHERS), ...CALC[id](tot.data, mine)] };
+  }
+  return narrowed[id];
+};
 
 const FOCUS = 'York';
 const FIRST = '2012-2013';
@@ -555,7 +581,14 @@ dash.draw('group-select', (sel) => {
   const names = g.status === 'ok'
     ? [...new Set(g.data.slice().sort((a, b) => Number(a.order) - Number(b.order)).map((r) => r.group))]
     : [p.group];
-  sel.replaceChildren(...names.map((n) => new Option(n)));
+  // The last group opens a submenu of its universities (see the filter dropdowns); the count shows a partial pick.
+  const all = g.status === 'ok' ? DATA('peer_groups').data.filter((r) => r.group === OTHERS).length : 0;
+  const out = exclOf(p).size;
+  sel.replaceChildren(...names.map((n) => {
+    const o = new Option(n === OTHERS && out ? `${n} (${all - out} of ${all})` : n, n);
+    if (n === OTHERS) o.dataset.sub = '1';
+    return o;
+  }));
   sel.value = p.group;
   sel.onchange = () => dash.setParams({ group: sel.value });
 });
@@ -2342,7 +2375,7 @@ const fcClamp = (f) => ({ mean: f.mean.map((v) => Math.max(0, v)), sd: f.sd });
 
 // Histories for York, each group member and the group combined, for the level and field (Year filter not used).
 function fcData(p) {
-  const key = [p.group, p.level, fieldOf(p), fcModel(p), p.fmeasure, p.fhold].join('|');
+  const key = [p.group, p.excl, p.level, fieldOf(p), fcModel(p), p.fmeasure, p.fhold].join('|');
   if (fcCache.has(key)) return fcCache.get(key);
   const totals = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
   const years = [...new Set(totals.map((r) => r.year))].sort(d3.ascending);
@@ -2539,7 +2572,7 @@ document.addEventListener('change', (e) => {
 // source of truth: the list is drawn from its options, and choosing sets its value and fires its change event.
 (() => {
   const FILTER = '.ux .ux-filters select, .ux .ux-ovcol, .ux .ux-ov3col, .ux .ux-fmodel';
-  let dd = null; // the open list: { sel, box, start, obs }
+  let dd = null; // the open list: { sel, box, start, obs, sub, pending }
   let typed = '', typedAt = 0;
 
   function row(o, inGroup) {
@@ -2548,6 +2581,15 @@ document.addEventListener('change', (e) => {
     d.setAttribute('role', 'option');
     d.dataset.value = o.value;
     d.textContent = o.text;
+    if (o.dataset.sub) {
+      // Opens the submenu of the group's universities (hover, click or the right arrow key).
+      d.classList.add('ux-dd-hassub');
+      d.setAttribute('aria-haspopup', 'true');
+      const arrow = document.createElement('span');
+      arrow.className = 'ux-dd-arrow';
+      arrow.textContent = '›';
+      d.append(arrow);
+    }
     return d;
   }
   function render() {
@@ -2563,6 +2605,7 @@ document.addEventListener('change', (e) => {
     }
     box.replaceChildren(...out);
     mark();
+    if (dd.sub) placeSub();
   }
   function mark() {
     for (const d of dd.box.querySelectorAll('.ux-dd-o')) {
@@ -2582,6 +2625,115 @@ document.addEventListener('change', (e) => {
     box.style.top = up ? '' : r.bottom + 2 + 'px';
     box.style.bottom = up ? innerHeight - r.top + 2 + 'px' : '';
     box.style.left = Math.max(8, Math.min(r.left, innerWidth - 8 - box.offsetWidth)) + 'px';
+    if (dd.sub) placeSub();
+  }
+
+  // Submenu of "All other Ontario universities": a checkbox per university (all ticked by default), seven rows
+  // tall with a scroll bar. Each tick applies straight away; with none ticked nothing is applied until one is.
+  function subNames() {
+    // The raw dataset: the narrowed one leaves out the unticked universities.
+    const g = DATA('peer_groups');
+    const rows = g.status === 'ok' ? g.data : [];
+    return rows.filter((r) => r.group === OTHERS).map((r) => r.institution).sort((a, b) => a.localeCompare(b));
+  }
+  function openSub(focus) {
+    if (!dd.sub) {
+      const names = subNames();
+      if (!names.length) return;
+      const box = document.createElement('div');
+      box.className = 'ux-dd ux-dd-sub';
+      box.setAttribute('role', 'group');
+      box.setAttribute('aria-label', 'Universities in ' + OTHERS);
+      const item = (text, value) => {
+        const l = document.createElement('label');
+        l.className = 'ux-dd-c';
+        const c = document.createElement('input');
+        c.type = 'checkbox';
+        if (value == null) c.dataset.all = '1';
+        else c.value = value;
+        l.append(c, text);
+        return l;
+      };
+      const head = item('All universities', null);
+      head.classList.add('ux-dd-call');
+      const list = document.createElement('div');
+      list.className = 'ux-dd-cl';
+      list.append(...names.map((n) => item(n, n)));
+      const hint = document.createElement('div');
+      hint.className = 'ux-dd-hint';
+      hint.textContent = 'Tick at least one university';
+      hint.hidden = true;
+      box.append(head, list, hint);
+      box.addEventListener('change', onTick);
+      box.addEventListener('keydown', onSubKey);
+      box.addEventListener('focusout', (e) => {
+        if (dd && !box.contains(e.relatedTarget) && e.relatedTarget !== dd.sel) close();
+      });
+      dd.box.parentNode.append(box);
+      dd.sub = box;
+      dd.pending = false;
+      syncSub();
+    }
+    placeSub();
+    if (focus) dd.sub.querySelector('.ux-dd-cl input')?.focus();
+  }
+  function closeSub() {
+    if (!dd?.sub) return;
+    dd.sub.remove();
+    dd.sub = null;
+    dd.box.querySelector('.ux-dd-hassub')?.classList.remove('is-open');
+  }
+  function syncSub() {
+    const box = dd.sub;
+    const boxes = [...box.querySelectorAll('.ux-dd-cl input')];
+    if (!dd.pending) {
+      const out = exclOf(P());
+      for (const c of boxes) c.checked = !out.has(c.value);
+    }
+    const n = boxes.filter((c) => c.checked).length;
+    const all = box.querySelector('[data-all]');
+    all.checked = n === boxes.length;
+    all.indeterminate = n > 0 && n < boxes.length;
+    box.querySelector('.ux-dd-hint').hidden = n > 0;
+  }
+  function onTick(e) {
+    const boxes = [...dd.sub.querySelectorAll('.ux-dd-cl input')];
+    if (e.target.dataset.all) for (const c of boxes) c.checked = e.target.checked;
+    const out = boxes.filter((c) => !c.checked).map((c) => c.value);
+    dd.pending = out.length === boxes.length;
+    if (!dd.pending) {
+      dd.start = OTHERS; // Esc keeps the pick
+      dash.setParams({ group: OTHERS, excl: out.join(',') });
+    }
+    syncSub();
+  }
+  function onSubKey(e) {
+    const boxes = [...dd.sub.querySelectorAll('input')];
+    const i = boxes.indexOf(e.target);
+    const go = (j) => { e.preventDefault(); boxes[Math.max(0, Math.min(boxes.length - 1, j))].focus(); };
+    if (e.key === 'ArrowDown') go(i + 1);
+    else if (e.key === 'ArrowUp') go(i - 1);
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(boxes.length - 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'Escape') {
+      e.preventDefault();
+      dd.sel.focus();
+      closeSub();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      dd.sel.focus();
+      close();
+    }
+  }
+  function placeSub() {
+    const box = dd.sub, row = dd.box.querySelector('.ux-dd-hassub');
+    if (!row) return closeSub();
+    const m = dd.box.getBoundingClientRect(), r = row.getBoundingClientRect();
+    const w = box.offsetWidth, h = box.offsetHeight;
+    const right = m.right - 2;
+    box.style.left = (right + w <= innerWidth - 8 ? right : Math.max(8, m.left - w + 2)) + 'px';
+    box.style.top = Math.max(8, Math.min(r.top - 5, innerHeight - 8 - h)) + 'px';
+    row.classList.add('is-open');
   }
   function open(sel) {
     if (sel.disabled) return;
@@ -2601,6 +2753,7 @@ document.addEventListener('change', (e) => {
   }
   function close() {
     if (!dd) return;
+    closeSub();
     dd.obs.disconnect();
     dd.box.remove();
     dd.sel.setAttribute('aria-expanded', 'false');
@@ -2611,6 +2764,7 @@ document.addEventListener('change', (e) => {
     if (sel.value === value) return;
     sel.value = value;
     sel.dispatchEvent(new Event('change', { bubbles: true }));
+    if (value !== OTHERS) closeSub();
     mark();
   }
   function step(n) {
@@ -2641,9 +2795,12 @@ document.addEventListener('change', (e) => {
       return;
     }
     if (dd && e.target.closest?.('.ux-dd')) {
-      e.preventDefault(); // keep focus on the select
+      e.preventDefault(); // keep focus on the select (a click still ticks a checkbox)
       const o = e.target.closest('.ux-dd-o');
-      if (o) {
+      if (o?.classList.contains('ux-dd-hassub')) {
+        choose(o.dataset.value);
+        openSub(false);
+      } else if (o) {
         choose(o.dataset.value);
         close();
       }
@@ -2664,7 +2821,8 @@ document.addEventListener('change', (e) => {
       return;
     }
     const keys = { ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10, Home: -1e6, End: 1e6 };
-    if (e.key in keys && !e.altKey) step(keys[e.key]);
+    if (e.key === 'ArrowRight' && sel.selectedOptions[0]?.dataset.sub) openSub(true);
+    else if (e.key in keys && !e.altKey) step(keys[e.key]);
     else if (e.key === 'Enter' || e.key === ' ' || e.key === 'F4' || (e.altKey && e.key === 'ArrowUp')) close();
     else if (e.key === 'Escape') {
       choose(dd.start);
@@ -2677,9 +2835,16 @@ document.addEventListener('change', (e) => {
     e.preventDefault();
   }, true);
 
-  document.addEventListener('focusout', (e) => { if (dd && e.target === dd.sel) close(); });
+  // Hovering the submenu's row opens it; hovering another row closes it.
+  document.addEventListener('mouseover', (e) => {
+    const o = dd && e.target.closest?.('.ux-dd-o');
+    if (!o || !dd.box.contains(o)) return;
+    if (o.classList.contains('ux-dd-hassub')) openSub(false);
+    else closeSub();
+  });
+  document.addEventListener('focusout', (e) => { if (dd && e.target === dd.sel && !dd.sub?.contains(e.relatedTarget)) close(); });
   addEventListener('resize', () => dd && place());
-  addEventListener('scroll', (e) => { if (dd && !dd.box.contains(e.target)) place(); }, true);
+  addEventListener('scroll', (e) => { if (dd && !dd.box.contains(e.target) && !dd.sub?.contains(e.target)) place(); }, true);
 })();
 
 // Summary bar: once the filters scroll out of view, a slim bar at the top lists the current selection

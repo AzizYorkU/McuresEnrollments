@@ -190,6 +190,16 @@
 .ux-dd-o.is-hi { background: color-mix(in srgb, var(--color-fg) 12%, transparent); font-weight: 600; }
 .ux-dd-o.is-above { color: var(--color-ok); }
 .ux-dd-o.is-below { color: var(--color-bad); }
+.ux-dd-o.ux-dd-hassub { display: flex; align-items: center; gap: 16px; }
+.ux-dd-arrow { margin-left: auto; font-size: 1.15em; line-height: 1; color: var(--color-fg-muted); }
+.ux-dd-o.ux-dd-hassub.is-open { background: color-mix(in srgb, var(--color-fg) 9%, transparent); }
+.ux-dd-sub { min-width: 15rem; overflow: visible; }
+.ux-dd-c { display: flex; align-items: center; gap: 8px; height: 2rem; box-sizing: border-box; padding: 0 12px; white-space: nowrap; cursor: pointer; }
+.ux-dd-c:hover { background: color-mix(in srgb, var(--color-fg) 6%, transparent); }
+.ux-dd-c input { margin: 0; cursor: pointer; }
+.ux-dd-call { font-weight: 600; border-bottom: 1px solid var(--color-border-line); }
+.ux-dd-cl { max-height: 14rem; overflow-y: auto; }
+.ux-dd-hint { padding: 6px 12px 2px; font-size: var(--cds-font-size-caption); color: var(--color-bad); }
 /* Ranking page: rotatable 3D bars. */
 .ux-rank-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-lg); align-items: center; margin-bottom: var(--cds-gap-sm); }
 .ux-rview-tabs { padding-right: var(--cds-gap-lg); border-right: 1px solid var(--color-border-line); }
