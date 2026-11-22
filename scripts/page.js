@@ -49,9 +49,10 @@ calcDef('group_totals', {
     for (const t of totals) {
       for (const group of groupsOf.get(t.institution) ?? []) {
         const key = `${group}|${t.field}|${t.level}|${t.year}`;
-        const s = by.get(key) ?? { key, group, field: t.field, level: t.level, year: t.year, headcount: 0, international: t.international == null ? null : 0, members: 0 };
+        const s = by.get(key) ?? { key, group, field: t.field, level: t.level, year: t.year, headcount: 0, international: t.international == null ? null : 0, ontario_share: t.ontario_share == null ? null : 0, members: 0 };
         s.headcount += t.headcount;
         if (s.international != null) s.international += t.international;
+        if (s.ontario_share != null) s.ontario_share = t.ontario_share == null ? null : s.ontario_share + t.ontario_share;
         s.members += 1;
         by.set(key, s);
       }
@@ -688,7 +689,7 @@ const rank = (f) => (el) => {
 // heads: the count behind the measure, shown as initial, selected year and change.
 // label: the % in the last column; value names its field and format when it isn't the list's own field.
 const LISTS = {
-  headcount: { fmt: fmtN, heads: 'headcount', label: 'Share of\nStudents', value: { field: 'ontario_share', fmt: fmtP } },
+  headcount: { fmt: fmtN, avg: true, peerRow: true, avgRow: true, heads: 'headcount', label: 'Share of\nStudents', value: { field: 'ontario_share', fmt: fmtP } },
   change_base: { fmt: fmtD, signed: true, comb: true, heads: 'headcount', label: 'Growth\nRate' },
   intl_share: { fmt: fmtP, comb: true, heads: 'international', label: 'Intl\nShare' },
 };
@@ -724,9 +725,16 @@ function ovRecords(f, p, sort) {
     .sort(cmpOn(sort.key, sort.dir));
   const gBy = byKeyRow(dash.data('group_totals').data);
   const comb = gBy.get(groupKey(p));
-  const combined = spec.comb && comb && comb[f] != null
+  const combined = (spec.comb || spec.peerRow) && comb && comb[f] != null
     ? record(comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'group_totals', 'Peers', null) : null;
-  return { records, combined };
+  // avgRow: the average university in the group too (each year's total over the members with figures that year).
+  const per = (r, k) => (r?.[k] == null || !r.members ? null : r[k] / r.members);
+  const average = spec.avgRow && combined ? (() => {
+    const from = per(combined.base, h), to = per(combined.row, h);
+    return { institution: 'Peers avg.', title: 'The average university in the group: each figure is the peers’ total divided by the number of universities.', rank: null, plain: true, from: from == null ? null : Math.round(from), to: to == null ? null : Math.round(to),
+      change: from == null || to == null ? null : Math.round(to) - Math.round(from), value: per(combined.row, vf) };
+  })() : null;
+  return { records, combined, average };
 }
 function drawOvList(el) {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
@@ -741,7 +749,7 @@ function drawOvList(el) {
   const h = spec.heads;
   const vf = spec.value?.field ?? f;
   const vfmt = spec.value?.fmt ?? spec.fmt;
-  const { records, combined } = ovRecords(f, p, sort);
+  const { records, combined, average } = ovRecords(f, p, sort);
   const span = (text, cls) => {
     const s = document.createElement('span');
     s.textContent = text;
@@ -784,11 +792,12 @@ function drawOvList(el) {
     const li = document.createElement('li');
     li.className = 'ux-li' + (cls ? ' ' + cls : '') + (OV_BOLD.has(d.institution) ? ' is-bold' : '');
     if (cls === 'is-york') li.style.setProperty('--york', dash.colors[0]);
-    const v = d.value == null ? span('—') : cite('span', vfmt(d.value), d.source, vf, 'key=' + enc(d.row.key));
+    if (d.title) li.title = d.title;
+    const v = d.value == null ? span('—') : d.plain ? span(vfmt(d.value)) : cite('span', vfmt(d.value), d.source, vf, 'key=' + enc(d.row.key));
     if (spec.signed) v.className = tone(d.value);
     const all = [
-      d.from == null ? span('—') : cite('span', fmtN(d.from), d.source, h, 'key=' + enc(d.base.key)),
-      d.to == null ? span('—') : cite('span', fmtN(d.to), d.source, h, 'key=' + enc(d.row.key)),
+      d.from == null ? span('—') : d.plain ? span(fmtN(d.from)) : cite('span', fmtN(d.from), d.source, h, 'key=' + enc(d.base.key)),
+      d.to == null ? span('—') : d.plain ? span(fmtN(d.to)) : cite('span', fmtN(d.to), d.source, h, 'key=' + enc(d.row.key)),
       span(d.change == null ? '—' : fmtHeadsChange(d.change), tone(d.change)),
       v,
     ];
@@ -799,6 +808,7 @@ function drawOvList(el) {
   };
   const items = records.map((d) => item(d, d.institution === FOCUS ? 'is-york' : ''));
   if (combined) items.push(item(combined, 'is-comb'));
+  if (average) items.push(item(average, 'is-comb is-avg'));
   el.replaceChildren(heading(), ...items);
 }
 dash.draw('ov-list', drawOvList);
@@ -812,9 +822,12 @@ dash.draw('ov-spark', (el) => {
   const york = { name: 'York', color: dash.colors[0],
     pts: dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.institution === FOCUS && r.level === p.level && r[f] != null) };
   const series = [york];
-  if (spec.comb) {
-    series.push({ name: 'Peers combined', color: dash.colors[1],
-      pts: dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level && r[f] != null) });
+  const gRows = () => dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level && r[f] != null);
+  if (spec.comb) series.push({ name: 'Peers combined', color: dash.colors[1], pts: gRows() });
+  // Headcount: the peers' total would flatten York's line, so plot the average university in the group instead.
+  if (spec.avg) {
+    series.push({ name: 'Peers average', color: dash.colors[1],
+      pts: gRows().filter((r) => r.members > 0).map((r) => ({ year: r.year, [f]: Math.round(r[f] / r.members) })) });
   }
   series.forEach((s) => s.pts.sort((a, b) => d3.ascending(a.year, b.year)));
   const years = [...new Set(series.flatMap((s) => s.pts.map((r) => r.year)))].sort(d3.ascending);
@@ -2013,7 +2026,7 @@ function ovSeries(f, p) {
     }
     return r[h] ?? null;
   };
-  const all = [...records.map((d) => d.institution), ...(pct && combined ? ['Peers'] : [])];
+  const all = [...records.map((d) => d.institution), ...(pct && combined && spec.comb ? ['Peers'] : [])];
   const bars = [];
   years.forEach((y, j) => {
     const yr = all.map((name) => ({ name, j, year: y, v: valueOf(name, y), n: rowOf(name, y)?.[h] })).filter((b) => b.v != null);

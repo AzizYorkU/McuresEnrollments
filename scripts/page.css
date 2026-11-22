@@ -176,6 +176,7 @@
 .ux-li.is-york { background: color-mix(in srgb, var(--york) 16%, transparent); border-radius: 4px; font-weight: 600; box-shadow: inset 3px 0 0 var(--york); }
 .ux-li.is-comb { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); margin-top: 2px; }
 .ux-li.is-comb .ux-li-v { color: var(--color-fg-muted); }
+.ux-li.is-comb.is-avg { border-top: 0; margin-top: 0; }
 .ux-spark { position: relative; min-height: 120px; margin-top: auto; padding-top: var(--cds-gap-xs); border-top: 1px solid var(--color-border-line); }
 .ux-field-select { max-width: 26rem; }
 .ux-field-select option.is-above, .ux-field-select.is-above { color: var(--color-ok); }
