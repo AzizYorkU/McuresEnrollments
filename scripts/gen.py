@@ -46,7 +46,7 @@ def w(op, collection, doc_id, **kw):
 
 writes = [
     w("update", "dash", "meta", data={"title": "York University vs Ontario Peers"}),
-    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "ovcol": "value", "ov3col": "value", "ovview": "heat", "fmeasure": "total", "fmodel": "damped", "fhold": "no", "excl": ""}),
+    w("set", "dash", "params", data={"group": "Large universities", "level": "All levels", "year": "2024-2025", "dim": "cip2", "metric": "change_base", "page": "overview", "field": "All fields", "rview": "bars", "gunit": "pct", "ovtab": "compact", "md": "out", "stu": "dom", "ovcol": "value", "ovview": "heat", "fmeasure": "total", "fmodel": "damped", "fhold": "no", "excl": ""}),
     w("set", "datasets", "cip2", data={
         "title": "Headcount by field of study",
         "description": "Headcount for each institution, study level and fiscal year (2012-13 to 2024-25) by 2-digit CIP series, rolled up from cip.sas7bdat's "
@@ -203,13 +203,23 @@ SHOWN = [x for x in DIMS if x[0] != "cip"]  # programs open inside the Field of 
 tabs = "\n".join(f'          <button class="ux-tab ux-dimtab" data-dim="{d}" aria-pressed="false">{tab}</button>' for d, tab, *_ in SHOWN)
 sections = "".join(section(*x) for x in SHOWN)
 
+GRAD_CTL = ('\n          <p class="ux-note ux-no-grad" hidden>Only available for all levels. Set Study level to All levels to see it.</p>'
+            '\n          <label class="ux-gtoggle ux-md-field" title="MD students and medical residents, which this data counts as undergraduates"><input type="checkbox" class="ux-md"> Include medical students (MD and residents)</label>'
+            '\n          <p class="ux-note ux-no-md" hidden>Medical students can only be taken out for all students or a field of study, not with this filter.</p>')
+
+STU_CTL = ('\n          <div class="ux-stu" role="radiogroup" aria-label="Students">'
+           '<label class="ux-gtoggle"><input type="radio" name="stu-{n}" value="dom" checked> Domestic</label>'
+           '<label class="ux-gtoggle"><input type="radio" name="stu-{n}" value="intl"> International</label></div>'
+           '\n          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>'
+           '\n          <p class="ux-note ux-first-year" hidden>Growth starts in 2013-14. Pick a later year to see it.</p>')
+
 def ov_detail(f, title, last, extra):
     """An Overview tab: one panel showing a single number column, with that column as 3D bars beside it."""
-    options = [("from", "Initial Heads"), ("to", "Selected Year Heads"), ("change", "Change in Heads"), ("value", last)]
+    options = [("from", "Initial Heads"), ("to", "Selected Year Heads"), ("change", "Change in Heads")] + ([("total", "All Students")] if f == "grad_share" else []) + [("value", last)]
     opts = "".join(f'<option value="{v}">{n}</option>' for v, n in options)
     views = "".join(f'<label class="ux-gtoggle"><input type="radio" name="ovview-{f}" value="{v}"{" checked" if v == "heat" else ""}> {n}</label>'
                     for v, n in [("bar", "3D bars"), ("heat", "Heatmap"), ("bump", "Bump (rank)"), ("small", "Small multiples")])
-    no_intl = '\n          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>' if f == "intl_share" else ""
+    no_intl = '\n          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>' if f == "intl_share" else GRAD_CTL if f == "grad_share" else STU_CTL.format(n="tab") if f == "dom_growth" else ""
     return f"""
       <div class="ux-ovd" data-ovpanel="{f}" hidden>
         <div class="ux-card ux-list-card" id="detail-{f}">
@@ -233,7 +243,8 @@ def ov_detail(f, title, last, extra):
 
 PEERS_NOTE = " Peers is shown only for the % column, because its heads are the whole group’s total."
 ov_details = (ov_detail("headcount", "Headcount", "Share of Students", "")
-              + ov_detail("change_base", "Growth since 2012-13", "Growth Rate", PEERS_NOTE)
+              + ov_detail("grad_share", "Graduate share", "Grad Share", " Heads count graduate students only." + PEERS_NOTE)
+              + ov_detail("dom_growth", "Domestic vs international growth", "Growth Rate", " Heads count domestic or international students, as picked. Peers is shown only for the Growth Rate column.")
               + ov_detail("intl_share", "International share", "Intl Share", " Heads count international students only." + PEERS_NOTE))
 
 html = f"""<meta name="dash-one-writer">
@@ -286,32 +297,38 @@ html = f"""<meta name="dash-one-writer">
       <div class="ux-tabs ux-ovtabs" role="group" aria-label="Overview view">
         <button class="ux-tab ux-ovtab" type="button" data-ovtab="compact" aria-pressed="true">Compact View</button>
         <button class="ux-tab ux-ovtab" type="button" data-ovtab="headcount" aria-pressed="false">Headcount</button>
-        <button class="ux-tab ux-ovtab" type="button" data-ovtab="change_base" aria-pressed="false">Growth since 2012-13</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="grad_share" aria-pressed="false">Graduate share</button>
+        <button class="ux-tab ux-ovtab" type="button" data-ovtab="dom_growth" aria-pressed="false">Domestic vs international growth</button>
         <button class="ux-tab ux-ovtab" type="button" data-ovtab="intl_share" aria-pressed="false">International share</button>
       </div>
       <div class="ux-ovcompact" data-ovpanel="compact">
-      <div class="ux-lists" id="figures">
-        <div class="ux-card ux-list-card" id="list-headcount">
-          <p class="ux-list-l">Headcount</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-headcount" data-source="york_standing">—</b></h3>
-          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="headcount" data-source="totals group_totals peer_groups"></ol>
-          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="headcount" data-source="totals group_totals"></div>
+      <div class="ux-glance" id="figures">
+        <div class="ux-card" id="glance-card">
+          <h2>Where York stands</h2>
+          <div class="ux-glance-ctl">
+            <label class="ux-gtoggle ux-md-field" title="MD students and medical residents, which this data counts as undergraduates"><input type="checkbox" class="ux-md"> Include medical students in graduate share</label>
+            <div class="ux-stu" role="radiogroup" aria-label="Growth of"><span class="ux-stu-l">Growth of</span><label class="ux-gtoggle"><input type="radio" name="stu-glance" value="dom" checked> Domestic</label><label class="ux-gtoggle"><input type="radio" name="stu-glance" value="intl"> International</label></div>
+          </div>
+          <p class="ux-note">Each dot is a university in the comparison; York is orange and the black tick is the median (York included). York’s rank is on the right, red when it’s in the bottom half. Hover a dot for its university. Selected year and study level.</p>
+          <div class="ux-strips dash-skeleton" data-draw="ov-strips" data-source="totals group_totals peer_groups"></div>
         </div>
-        <div class="ux-card ux-list-card" id="list-change_base">
-          <p class="ux-list-l">Growth since 2012-13</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-change_base" data-source="york_standing">—</b></h3>
-          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="change_base" data-source="totals group_totals peer_groups"></ol>
-          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="change_base" data-source="totals group_totals"></div>
-        </div>
-        <div class="ux-card ux-list-card" id="list-intl_share">
-          <p class="ux-list-l">International share</p>
-          <h3 class="ux-rank">York ranks <b data-draw="r-intl_share" data-source="york_standing">—</b></h3>
-          <p class="ux-note ux-no-intl" hidden>Only available for all students. Clear the filters to see it.</p>
-          <ol class="ux-list dash-skeleton" data-draw="ov-list" data-field="intl_share" data-source="totals group_totals peer_groups"></ol>
-          <div class="ux-spark dash-skeleton" data-draw="ov-spark" data-field="intl_share" data-source="totals group_totals"></div>
+        <div class="ux-card" id="glance-table-card">
+          <h2>All measures by university</h2>
+          <p class="ux-note">Each figure with its rank in the comparison (#). Click a heading to sort. Peers (combined): the group’s members added together, not ranked. Growth is since 2012-13; domestic is all students less international. Graduate share, growth and international share are only available for all students, so they show — with a filter.</p>
+          <div class="ux-scroll ux-scroll-tall">
+            <table class="ux-table ux-glance-table" id="table-glance" data-rows="glance-rows" data-default-sort="headcount" data-source="totals group_totals peer_groups">
+              <thead><tr>
+                <th data-field="institution"><button class="ux-sort" data-sort="institution">University</button></th>
+                <th class="ux-num" data-glance="headcount" data-label="Headcount"><button class="ux-sort" data-sort="headcount">Headcount</button></th>
+                <th class="ux-num" data-glance="grad" data-label="Grad share"><button class="ux-sort" data-sort="grad">Grad share</button></th>
+                <th class="ux-num" data-glance="growth" data-label="Growth"><button class="ux-sort" data-sort="growth">Domestic growth</button></th>
+                <th class="ux-num" data-glance="intl" data-label="Intl share"><button class="ux-sort" data-sort="intl">Intl share</button></th>
+              </tr></thead>
+              <tbody data-draw="glance-rows"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <p class="ux-note">Selected year and study level, highest first. Click any column heading to sort; # stays each university’s rank on that table’s measure. York is highlighted. Peers: the group’s members added together, not ranked; on Headcount, Peers avg. is the average university in the group (the total divided by the number of universities). Initial heads are 2012-13; change in heads is the selected year minus 2012-13. Share of students: each institution’s share of all Ontario university students, which ranks the same as headcount. In the International share list, heads count international students only. Small charts: York (orange) and the peers (blue) each year from 2012-13; on Headcount the blue line is the average university in the group, elsewhere the peers combined. In the Field of study list, each field shows York’s headcount and its growth in that field since 2012-13 against the comparison group’s combined growth: green where York grew faster, red where slower. Each chart has its own page in the menu.</p>
       </div>{ov_details}
     </section>
 
@@ -434,7 +451,7 @@ print("page bytes:", len(html.encode()), "writes:", len(writes))
 import shutil
 SITE = os.path.join(os.path.dirname(HERE), "docs")
 os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
-ids = ["status", "peer_groups"] + [d for d, *_ in DIMS]
+ids = ["status", "peer_groups", "medical"] + [d for d, *_ in DIMS]
 for i in ids:
     shutil.copyfile(os.path.join(HERE, "out", f"{i}.csv"), os.path.join(SITE, "data", f"{i}.csv"))
 for f in ["dash.js", "theme.css", "d3.min.js"]:

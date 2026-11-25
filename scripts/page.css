@@ -144,7 +144,8 @@
 }
 
 /* Overview: ranked lists, one per measure */
-.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24.6rem), 1fr)); gap: var(--cds-gap-md); align-items: stretch; }
+/* Four cards: two per row (each at least half the width), one per row when narrow. */
+.ux-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, max(24.6rem, calc(50% - var(--cds-gap-md)))), 1fr)); gap: var(--cds-gap-md); align-items: stretch; }
 .ux-list-card { display: flex; flex-direction: column; gap: var(--cds-gap-xs); padding: var(--cds-pad-lg) var(--cds-pad-md); }
 .ux-list-l { margin: 0; font-size: var(--cds-font-size-body); color: var(--color-fg-muted); }
 .ux-rank { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); }
@@ -168,6 +169,10 @@
 .ux-ovcompact { display: grid; gap: var(--cds-gap-md); }
 .ux-ovd { display: grid; grid-template-columns: minmax(20rem, 1fr) minmax(0, 2fr); gap: var(--cds-gap-md); align-items: stretch; }
 .ux-ovcol-field { margin-top: var(--cds-gap-xs); }
+.ux-list-total .ux-li { grid-template-columns: 1.1rem 5.2rem repeat(5, minmax(0, 1fr)); column-gap: 7px; font-size: 0.8rem; }
+.ux-list-total .ux-li.is-head { font-size: 0.72rem; }
+.ux-list-total .ux-li-sort { white-space: pre-line; }
+.ux-list-rate .ux-li { grid-template-columns: 1.1rem 5.6rem repeat(3, minmax(3.6rem, 1fr)); }
 .ux-list-one .ux-li { grid-template-columns: 1.4rem minmax(0, 1fr) minmax(7rem, auto); column-gap: 8px; }
 @container (max-width: 60rem) { .ux-ovd { grid-template-columns: minmax(0, 1fr); } }
 .ux-li-rank { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); text-align: right; }
@@ -230,6 +235,7 @@
 .ux [data-gunit][hidden] { display: none; }
 .ux-gtoggle { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); cursor: pointer; white-space: nowrap; }
 .ux-gtoggle input { margin: 0; accent-color: var(--color-fg); }
+.ux-stu { display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; }
 .ux .ux-gpick b { font-weight: 600; }
 .ux-gwrap { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr); }
 .ux-gside { display: grid; gap: var(--cds-gap-md); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(12rem, 15rem); min-width: 0; align-content: start; }
@@ -278,3 +284,14 @@
 .ux-fc-table tr.is-comb td { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); }
 .ux-fc-table tr.is-picked td:first-child { box-shadow: inset 3px 0 0 var(--color-fg); }
 .ux-fc-table tbody tr:hover td { background: color-mix(in srgb, var(--color-fg) 5%, transparent); }
+
+/* Compact View: Where York stands (dot strips) + all measures by university. */
+.ux-glance { display: grid; gap: var(--cds-gap-md); }
+.ux-glance-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 2rem; }
+.ux-stu-l { color: var(--color-fg-muted); }
+.ux-strips { position: relative; min-height: 280px; }
+.ux-glance-table .ux-rk { display: inline-block; min-width: 2.4em; margin-left: 0.4em; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); text-align: left; }
+.ux-glance-table tr.is-picked td { background: var(--cds-chart-grid); font-weight: 600; }
+.ux-glance-table tr.is-picked td:first-child { box-shadow: inset 3px 0 0 var(--york); }
+.ux-glance-table tr.is-bold td:first-child { font-weight: 600; }
+.ux-glance-table tr.is-comb td { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); }

@@ -55,3 +55,13 @@ insts = sorted(set(load("status").Institution) - {"York"})
 rows = [(i, g, m) for i, (g, ms) in enumerate(GROUPS, 1) for m in (ms or insts)]
 pd.DataFrame(rows, columns=["order", "group", "institution"]).to_csv(os.path.join(OUT, "peer_groups.csv"), index=False, lineterminator=NL)
 print("peer_groups", len(rows))
+
+# Medical students: MD (51.1201) and medical residents (60.02, 60.04, 60.05, 61.*), per 2-digit field and slice.
+# The data counts them as undergraduates, which lowers the graduate share at universities with a medical school.
+c = pd.read_csv(os.path.join(OUT, "cip.csv"), dtype={"category": str})
+code = c.category.str.split(" ").str[0]
+m = c[code.str.match(r"^(51\.1201|60\.0[245]|61\.)")].copy()
+m["category"] = m.category.str[:2].map(lambda k: k + " " + CIP2[k])
+m = m.groupby(["slice", "category"], as_index=False).headcount.sum()
+m.to_csv(os.path.join(OUT, "medical.csv"), index=False, encoding="utf-8", lineterminator="\n")
+print("medical", len(m))

@@ -1,9 +1,12 @@
 dash.calc('totals', {
-  inputs: ['status', 'cip2', 'gender', 'country', 'credential', 'studyyear'],
+  inputs: ['status', 'cip2', 'gender', 'country', 'credential', 'studyyear', 'medical'],
   title: 'Totals by institution, filter and year',
-  description: 'Headcount per institution, level and year: for all students (domestic plus international), and for each field of study, gender, country of citizenship, credential and year of study (each from its own file, so they don’t combine), with international share (all students only), share of all Ontario students, and change from the previous year and from 2012-13.',
-  fn: (status, cip2, gender, country, credential, studyyear) => {
+  description: 'Headcount per institution, level and year: for all students (domestic plus international), and for each field of study, gender, country of citizenship, credential and year of study (each from its own file, so they don’t combine), with international share (all students only), graduate share with and without medical students (all levels only), share of all Ontario students, and change from the previous year and from 2012-13.',
+  fn: (status, cip2, gender, country, credential, studyyear, medical) => {
     const by = new Map();
+    // Medical students (MD and medical residents) per field|slice, All fields being their sum; the data counts them as undergraduates.
+    const med = new Map();
+    for (const r of medical) for (const f of [r.category, 'All fields']) med.set(f + '|' + r.slice, (med.get(f + '|' + r.slice) ?? 0) + Number(r.headcount));
     const add = (field, slice, n, intl) => {
       const key = field + '|' + slice;
       const t = by.get(key) ?? { key, field, slice, headcount: 0, international: field === 'All fields' ? 0 : null };
@@ -31,17 +34,40 @@ dash.calc('totals', {
         change_prev: prev ? t.headcount / prev.headcount - 1 : null,
         change_base: base && year !== '2012-2013' ? t.headcount / base.headcount - 1 : null,
       });
+      // Graduate share: graduate students out of all levels, so only on the All levels rows. Medical students can be told
+      // apart for all students or a field of study (plain). The data records nearly all of them as undergraduates; the few
+      // recorded as graduates (McMaster, Queen's to 2017-18, Western) are counted as undergraduates too, so every
+      // university follows one rule. The _xmd figures leave medical students out of both counts.
+      const allLv = level === 'All levels';
+      const plain = allLv && (t.field === 'All fields' || /^\d\d /.test(t.field));
+      const mAll = med.get(`${t.field}|${institution}|All levels|${year}`) ?? 0, mGrad = med.get(`${t.field}|${institution}|Graduate|${year}`) ?? 0;
+      t.graduate = allLv ? (by.get(`${t.field}|${institution}|Graduate|${year}`)?.headcount ?? 0) - (plain ? mGrad : 0) : null;
+      t.grad_share = t.graduate == null || !t.headcount ? null : t.graduate / t.headcount;
+      t.graduate_xmd = plain ? t.graduate : null;
+      t.headcount_xmd = plain ? t.headcount - mAll : null;
+      t.grad_share_xmd = t.graduate_xmd == null || !t.headcount_xmd ? null : t.graduate_xmd / t.headcount_xmd;
+      // Domestic and international growth since 2012-13: the status file is the only one split that way, so all students only.
+      growthByStatus(t, base, year);
     }
     return rows;
   },
 });
+
+// domestic = all students less international; dom_growth / intl_growth = change in each since 2012-13 (none in 2012-13).
+function growthByStatus(t, base, year) {
+  const dom = (r) => (r?.international == null ? null : r.headcount - r.international);
+  const g = (now, then) => (now == null || !then || year === '2012-2013' ? null : now / then - 1);
+  t.domestic = dom(t);
+  t.dom_growth = g(t.domestic, dom(base));
+  t.intl_growth = g(t.international, base?.international);
+}
 
 const CALC = {}; // calc id -> fn, so a narrowed group can be recomputed (see dash.data below)
 const calcDef = (id, def) => { CALC[id] = def.fn; dash.calc(id, def); };
 calcDef('group_totals', {
   inputs: ['totals', 'peer_groups'],
   title: 'Comparison groups combined',
-  description: 'Each comparison group’s members added together, for all fields and each field of study: headcount, international share, and change from the previous year and from 2012-13.',
+  description: 'Each comparison group’s members added together, for all fields and each field of study: headcount, international share, graduate share, and change from the previous year and from 2012-13.',
   fn: (totals, peer_groups) => {
     const groupsOf = new Map();
     for (const g of peer_groups) groupsOf.set(g.institution, [...(groupsOf.get(g.institution) ?? []), g.group]);
@@ -49,9 +75,10 @@ calcDef('group_totals', {
     for (const t of totals) {
       for (const group of groupsOf.get(t.institution) ?? []) {
         const key = `${group}|${t.field}|${t.level}|${t.year}`;
-        const s = by.get(key) ?? { key, group, field: t.field, level: t.level, year: t.year, headcount: 0, international: t.international == null ? null : 0, ontario_share: t.ontario_share == null ? null : 0, members: 0 };
+        const s = by.get(key) ?? { key, group, field: t.field, level: t.level, year: t.year, headcount: 0, international: t.international == null ? null : 0, graduate: t.graduate == null ? null : 0, graduate_xmd: t.graduate_xmd == null ? null : 0, headcount_xmd: t.headcount_xmd == null ? null : 0, ontario_share: t.ontario_share == null ? null : 0, members: 0 };
         s.headcount += t.headcount;
         if (s.international != null) s.international += t.international;
+        for (const k of ['graduate', 'graduate_xmd', 'headcount_xmd']) if (s[k] != null) s[k] = t[k] == null ? null : s[k] + t[k];
         if (s.ontario_share != null) s.ontario_share = t.ontario_share == null ? null : s.ontario_share + t.ontario_share;
         s.members += 1;
         by.set(key, s);
@@ -63,6 +90,9 @@ calcDef('group_totals', {
       const prev = by.get(`${s.group}|${s.field}|${s.level}|${y - 1}-${y}`);
       const base = by.get(`${s.group}|${s.field}|${s.level}|2012-2013`);
       s.intl_share = s.international == null ? null : s.international / s.headcount;
+      s.grad_share = s.graduate == null || !s.headcount ? null : s.graduate / s.headcount;
+      s.grad_share_xmd = s.graduate_xmd == null || !s.headcount_xmd ? null : s.graduate_xmd / s.headcount_xmd;
+      growthByStatus(s, base, s.year);
       s.change_prev = prev ? s.headcount / prev.headcount - 1 : null;
       s.change_base = base && s.year !== '2012-2013' ? s.headcount / base.headcount - 1 : null;
     }
@@ -73,7 +103,7 @@ calcDef('group_totals', {
 calcDef('york_standing', {
   inputs: ['totals', 'peer_groups'],
   title: 'York’s rank in each comparison group',
-  description: 'York’s place among itself and the group’s members on headcount, growth, international share and share of Ontario (1 = highest), for all fields and each field of study.',
+  description: 'York’s place among itself and the group’s members on headcount, growth, international share, graduate share and share of Ontario (1 = highest), for all fields and each field of study.',
   fn: (totals, peer_groups) => {
     const slices = new Map();
     for (const t of totals) {
@@ -90,7 +120,7 @@ calcDef('york_standing', {
         const pool = list.filter((t) => t.institution === 'York' || members.has(t.institution));
         const [field, level, year] = k.split('|');
         const r = { key: `${group}|${k}`, group, field, level, year };
-        for (const f of ['headcount', 'change_prev', 'change_base', 'intl_share', 'ontario_share']) {
+        for (const f of ['headcount', 'change_prev', 'change_base', 'intl_share', 'grad_share', 'grad_share_xmd', 'dom_growth', 'intl_growth', 'ontario_share']) {
           const vals = pool.filter((t) => t[f] != null);
           r['rank_' + f] = york[f] == null ? null : 1 + vals.filter((t) => t[f] > york[f]).length;
           r['n_' + f] = york[f] == null ? null : vals.length;
@@ -148,11 +178,20 @@ const gpick = { kind: null, inst: null, field: null, prog: null, allProgs: false
 const gHeads = (p) => p.gunit === 'heads'; // the Growth page's radio; up here because onData reads it
 // Overview tabs: the compact three panels, or one panel with a 3D chart (the tab is the panel's field).
 // ovcol is the single number column those panels show. Up here because onData reads them.
-const OV_TABS = ['compact', 'headcount', 'change_base', 'intl_share'];
+const OV_TABS = ['compact', 'headcount', 'grad_share', 'dom_growth', 'intl_share'];
+// Graduate share's Include medical students box (param md): unticked, the card reads the figures without them.
+// Domestic vs international growth's radio (param stu: dom | intl) picks which of the two the card shows.
+const ovKey = (f, p = dash.params()) => (f === 'grad_share' && p.md === 'out' ? 'grad_share_xmd' : f === 'dom_growth' && p.stu === 'intl' ? 'intl_growth' : f);
 const ovTab = (p) => (OV_TABS.includes(p.ovtab) ? p.ovtab : 'compact');
-const OV_COLS = ['from', 'to', 'change', 'value'];
-const ovCol = (p) => (OV_COLS.includes(p.ovcol) ? p.ovcol : 'value');
-const ov3Col = (p) => (OV_COLS.includes(p.ov3col) ? p.ov3col : 'value'); // the chart's own pick, beside the chart
+const OV_COLS = ['from', 'to', 'change', 'total', 'value'];
+// total (All Students) exists only on lists whose spec names it (Graduate share), so other tabs fall back to value.
+const OV_TOTAL = new Set(['grad_share', 'grad_share_xmd']); // up here, not read from LISTS: onData runs before LISTS exists
+// rate lists (none at present; retention was one) have no heads: their columns are the 2012 rate, the change and the rate, so to/total fall back too.
+const OV_RATE = new Set([]);
+const ovColOk = (c, f) => (OV_COLS.includes(c) && (c !== 'total' || !f || OV_TOTAL.has(f)) && !(OV_RATE.has(f) && (c === 'to' || c === 'total')) ? c : 'value');
+const ovCol = (p, f) => ovColOk(p.ovcol, f);
+// The chart's Chart shows and the table's Column shown are one setting (user request, 2026-11-25): picking either sets both.
+const ov3Col = (p, f) => ovCol(p, f);
 const fmtN = d3.format(',');
 const fmtP = d3.format('.1%');
 const fmtD = d3.format('+.1%');
@@ -406,7 +445,9 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('change', (e) => {
   if (e.target.matches('.ux .ux-ovcol')) dash.setParams({ ovcol: e.target.value });
-  if (e.target.matches('.ux .ux-ov3col')) dash.setParams({ ov3col: e.target.value });
+  if (e.target.matches('.ux .ux-md')) dash.setParams({ md: e.target.checked ? 'in' : 'out' });
+  if (e.target.matches('.ux .ux-stu input')) dash.setParams({ stu: e.target.value });
+  if (e.target.matches('.ux .ux-ov3col')) dash.setParams({ ovcol: e.target.value });
   if (e.target.matches('.ux .ux-ovview input')) dash.setParams({ ovview: e.target.value });
   if (e.target.matches('.ux .ux-level')) {
     // Year of study is undergraduate-only, so moving to Graduate clears it.
@@ -479,8 +520,9 @@ dash.onData(() => {
   const ot = ovTab(p);
   document.querySelectorAll('.ux .ux-ovtab').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.ovtab === ot)));
   document.querySelectorAll('.ux [data-ovpanel]').forEach((c) => { c.hidden = c.dataset.ovpanel !== ot; });
-  document.querySelectorAll('.ux .ux-ovcol').forEach((s) => { s.value = ovCol(p); });
-  document.querySelectorAll('.ux .ux-ov3col').forEach((s) => { s.value = ov3Col(p); });
+  const panelOf = (s) => s.closest('[data-ovpanel]')?.dataset.ovpanel;
+  document.querySelectorAll('.ux .ux-ovcol').forEach((s) => { s.value = ovCol(p, panelOf(s)); });
+  document.querySelectorAll('.ux .ux-ov3col').forEach((s) => { s.value = ov3Col(p, panelOf(s)); });
   // The chart type radio, and the note sentences for that type.
   const ovv = ['bar', 'heat', 'bump', 'small'].includes(p.ovview) ? p.ovview : 'heat';
   document.querySelectorAll('.ux .ux-ovview input').forEach((r) => { r.checked = r.value === ovv; });
@@ -488,6 +530,11 @@ dash.onData(() => {
   document.querySelectorAll('.ux .ux-first-year').forEach((n) => { n.hidden = p.year !== FIRST; });
   const filtered = fieldOf(p) !== ALL_F;
   document.querySelectorAll('.ux .ux-no-intl').forEach((n) => { n.hidden = !filtered; });
+  document.querySelectorAll('.ux .ux-no-grad').forEach((n) => { n.hidden = p.level === 'All levels'; });
+  document.querySelectorAll('.ux .ux-no-fy').forEach((n) => { n.hidden = !(filtered || p.level === 'Graduate'); });
+  document.querySelectorAll('.ux .ux-md').forEach((c) => { c.checked = p.md !== 'out'; });
+  document.querySelectorAll('.ux .ux-stu input').forEach((r) => { r.checked = r.value === (p.stu === 'intl' ? 'intl' : 'dom'); });
+  document.querySelectorAll('.ux .ux-no-md').forEach((n) => { n.hidden = !(p.md === 'out' && p.level === 'All levels' && subsetOf(fieldOf(p))); });
   document.querySelectorAll('.ux .ux-field-off').forEach((n) => { n.hidden = !filtered; });
   if (p.dim === 'cip') { dash.setParams({ dim: 'cip2' }); return; } // Detailed programs now open inside Field of study
   const d = dash.data('cmp_' + p.dim);
@@ -655,7 +702,7 @@ const SOURCES = {
   york_standing: { index: byKeyRow, key: groupKey, col: 'key' },
   york_ontario: { index: byKeyRow, key: (p) => `${fieldOf(p)}|${p.level}|${p.year}`, col: 'key' },
 };
-const rowOf = (id) => SOURCES[id].index(dash.data(id).data).get(SOURCES[id].key(P()));
+const rowOf = (id, p = P()) => SOURCES[id].index(dash.data(id).data).get(SOURCES[id].key(p));
 const figure = (id, field, fmt, colored) => (el) => {
   if (!gate(el, [id])) return;
   const r = rowOf(id);
@@ -672,9 +719,10 @@ dash.draw('lede-york-chg', figure('totals', 'change_base', fmtD));
 dash.draw('lede-peer-chg', figure('group_totals', 'change_base', fmtD));
 dash.draw('o-base', figure('york_ontario', 'change_base', fmtPt, true));
 // "2 of 10": York's rank and how many were ranked.
-const rank = (f) => (el) => {
+const rank = (f0) => (el) => {
+  const f = ovKey(f0);
   if (!gate(el, ['york_standing'])) return;
-  const r = rowOf('york_standing');
+  const r = rowOf('york_standing', ovP(f, P()));
   if (!r || r['rank_' + f] == null) {
     el.replaceChildren('—');
     return;
@@ -683,14 +731,17 @@ const rank = (f) => (el) => {
   el.replaceChildren(cite('span', String(r['rank_' + f]), 'york_standing', 'rank_' + f, where), ' of ',
     cite('span', String(r['n_' + f]), 'york_standing', 'n_' + f, where));
 };
-['headcount', 'change_base', 'change_prev', 'intl_share', 'ontario_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
+['headcount', 'change_base', 'change_prev', 'intl_share', 'grad_share', 'dom_growth', 'ontario_share'].forEach((f) => dash.draw('r-' + f, rank(f)));
 
 // Overview: one ranked list per measure, York highlighted, peers combined at the foot.
 // heads: the count behind the measure, shown as initial, selected year and change.
 // label: the % in the last column; value names its field and format when it isn't the list's own field.
 const LISTS = {
   headcount: { fmt: fmtN, avg: true, peerRow: true, avgRow: true, heads: 'headcount', label: 'Share of\nStudents', value: { field: 'ontario_share', fmt: fmtP } },
-  change_base: { fmt: fmtD, signed: true, comb: true, heads: 'headcount', label: 'Growth\nRate' },
+  grad_share: { fmt: fmtP, comb: true, heads: 'graduate', total: 'headcount', label: 'Grad\nShare' },
+  grad_share_xmd: { fmt: fmtP, comb: true, heads: 'graduate_xmd', total: 'headcount_xmd', label: 'Grad\nShare' },
+  dom_growth: { fmt: fmtD, comb: true, signed: true, heads: 'domestic', label: 'Domestic\nGrowth' },
+  intl_growth: { fmt: fmtD, comb: true, signed: true, heads: 'international', label: 'Intl\nGrowth' },
   intl_share: { fmt: fmtP, comb: true, heads: 'international', label: 'Intl\nShare' },
 };
 const fmtHeadsChange = (v) => (v === 0 ? '0' : d3.format('+,')(v));
@@ -698,16 +749,35 @@ const fmtHeadsChange = (v) => (v === 0 ? '0' : d3.format('+,')(v));
 const OV_SORT_DEFAULT = { key: 'value', dir: 'desc' };
 const OV_BOLD = new Set(['York', 'Ottawa', 'Western']);
 const OV_LEFT_COLS = new Set(['rank', 'institution']); // lowest or A-Z on the first click
-const OV_COL_NAMES = { from: 'Initial Heads', to: 'Selected Year Heads', change: 'Change in Heads' };
-const ovColName = (f, col) => OV_COL_NAMES[col] ?? LISTS[f].label.replace('\n', ' ');
+const OV_COL_NAMES = { from: 'Initial Heads', to: 'Selected Year Heads', change: 'Change in Heads', total: 'All Students' };
+// A rate list shows the latest year at or before the Year filter (CUDO lags about two years) in which York and, when
+// it's in the comparison, Toronto both have figures: without Toronto the comparison isn't worth showing (user's call;
+// CUDO lists Toronto's fall 2021 and 2022 rates as 0.9, so they're dropped). Its charts stop at that year too.
+const RATE_NEEDS = ['Toronto'];
+const rateNeed = (p) => [FOCUS, ...RATE_NEEDS.filter((n) => membersOf(p.group).includes(n))];
+const rateYear = (f, p) => {
+  const need = rateNeed(p);
+  const has = new Map();
+  for (const r of dash.data('totals').data) {
+    if (r.field !== ALL_F || r.level !== p.level || r[f] == null || r.year > p.year || !need.includes(r.institution)) continue;
+    has.set(r.year, (has.get(r.year) ?? 0) + 1);
+  }
+  const ys = [...has].filter(([, n]) => n === need.length).map(([y]) => y).sort(d3.ascending);
+  return ys.length ? ys[ys.length - 1] : p.year;
+};
+const ovP = (f, p) => (LISTS[f]?.rate ? { ...p, year: rateYear(f, p) } : p);
+const fmtRatePts = (v) => fmtPt(v * 100);
+const RATE_NAMES = { from: 'Fall 2012 retention', change: 'Change since fall 2012 (pts)' };
+const ovColName = (f, col) => (LISTS[f].rate && RATE_NAMES[col] ? RATE_NAMES[col] : col === 'total' && LISTS[f].totalLabel ? LISTS[f].totalLabel.replace('\n', ' ') : OV_COL_NAMES[col] ?? LISTS[f].label.replace('\n', ' '));
 // A tab's table shows one number column, so its sort falls back to that column when it sorted on one now hidden.
 function ovDetailSort(f, p) {
-  const col = ovCol(p);
+  const col = ovCol(p, f);
   const s = sortBy.get('ovd-' + f);
   return s && (OV_LEFT_COLS.has(s.key) || s.key === col) ? s : { key: col, dir: 'desc' };
 }
 // One list's rows, sorted, plus the group's members added together (not ranked), for the table and its 3D chart.
 function ovRecords(f, p, sort) {
+  p = ovP(f, p);
   const spec = LISTS[f];
   const h = spec.heads;
   const vf = spec.value?.field ?? f;
@@ -716,7 +786,8 @@ function ovRecords(f, p, sort) {
   const tBy = byKeyRow(totals);
   const record = (row, base, source, institution, rank) => {
     const from = base?.[h] ?? null, to = row[h] ?? null;
-    return { row, base, source, institution, rank, from, to, change: from == null || to == null ? null : to - from, value: row[vf] ?? null };
+    return { row, base, source, institution, rank, from, to, change: from == null || to == null ? null : to - from,
+      total: spec.total ? row[spec.total] ?? null : null, value: row[vf] ?? null };
   };
   const records = totals
     .filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution) && r[f] != null)
@@ -726,7 +797,7 @@ function ovRecords(f, p, sort) {
   const gBy = byKeyRow(dash.data('group_totals').data);
   const comb = gBy.get(groupKey(p));
   const combined = (spec.comb || spec.peerRow) && comb && comb[f] != null
-    ? record(comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'group_totals', 'Peers', null) : null;
+    ? record(comb, gBy.get(`${p.group}|${fieldOf(p)}|${p.level}|${FIRST}`), 'group_totals', spec.rate ? 'Peers avg.' : 'Peers', null) : null;
   // avgRow: the average university in the group too (each year's total over the members with figures that year).
   const per = (r, k) => (r?.[k] == null || !r.members ? null : r[k] / r.members);
   const average = spec.avgRow && combined ? (() => {
@@ -739,11 +810,11 @@ function ovRecords(f, p, sort) {
 function drawOvList(el) {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
-  const f = el.dataset.field;
+  const f = ovKey(el.dataset.field);
   const spec = LISTS[f];
   // data-one: a tab's table, showing only the column picked in its dropdown.
   const one = 'one' in el.dataset;
-  const col = ovCol(p);
+  const col = ovCol(p, f);
   const sortId = (one ? 'ovd-' : 'ov-') + f;
   const sort = one ? ovDetailSort(f, p) : sortBy.get(sortId) ?? OV_SORT_DEFAULT;
   const h = spec.heads;
@@ -765,8 +836,15 @@ function drawOvList(el) {
       { key: 'from', label: 'Initial\nHeads', name: 'Initial heads', title: `Heads in ${shortYear(FIRST)}. ` },
       { key: 'to', label: 'Selected\nYear Heads', name: 'Selected year heads', title: `Heads in ${shortYear(p.year)}. ` },
       { key: 'change', label: 'Change\nin Heads', name: 'Change in heads' },
+      ...(spec.total ? [{ key: 'total', label: spec.totalLabel ?? 'All\nStudents', name: ovColName(f, 'total'), title: `${spec.totalTitle ? spec.totalTitle(shortYear(p.year)) : `Every student at the university in ${shortYear(p.year)}, all levels`}; the share's denominator. ` }] : []),
       { key: 'value', label: spec.label, name: spec.label.replace('\n', ' ') },
-    ].filter((c) => !one || OV_LEFT_COLS.has(c.key) || c.key === col);
+    ].filter((c) => !one || OV_LEFT_COLS.has(c.key) || c.key === col)
+      .filter((c) => !spec.rate || (c.key !== 'to' && c.key !== 'total'))
+      .map((c) => (!spec.rate ? c : { ...c, ...{
+        from: { label: 'Fall\n2012', name: 'Fall 2012 retention', title: 'Share of fall 2012 entrants back the next fall. ' },
+        change: { label: 'Change\n(pts)', name: 'Change since fall 2012', title: 'Percentage points since fall 2012. ' },
+        value: { label: `Fall\n${rateYear(f, p).slice(0, 4)}`, name: 'Retention', title: `Share of fall ${rateYear(f, p).slice(0, 4)} entrants back the next fall. ` },
+      }[c.key] }));
     li.append(...cols.map((c) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -795,13 +873,16 @@ function drawOvList(el) {
     if (d.title) li.title = d.title;
     const v = d.value == null ? span('—') : d.plain ? span(vfmt(d.value)) : cite('span', vfmt(d.value), d.source, vf, 'key=' + enc(d.row.key));
     if (spec.signed) v.className = tone(d.value);
+    const hf = spec.rate ? fmtP : fmtN; // a rate list's from/to are rates, its change percentage points
     const all = [
-      d.from == null ? span('—') : d.plain ? span(fmtN(d.from)) : cite('span', fmtN(d.from), d.source, h, 'key=' + enc(d.base.key)),
+      d.from == null ? span('—') : d.plain ? span(hf(d.from)) : cite('span', hf(d.from), d.source, h, 'key=' + enc(d.base.key)),
       d.to == null ? span('—') : d.plain ? span(fmtN(d.to)) : cite('span', fmtN(d.to), d.source, h, 'key=' + enc(d.row.key)),
-      span(d.change == null ? '—' : fmtHeadsChange(d.change), tone(d.change)),
+      span(d.change == null ? '—' : spec.rate ? fmtRatePts(d.change) : fmtHeadsChange(d.change), tone(d.change)),
+      d.total == null ? span('—') : d.plain ? span(fmtN(d.total)) : cite('span', fmtN(d.total), d.source, spec.total, 'key=' + enc(d.row.key)),
       v,
     ];
-    const cells = one ? [all[OV_COLS.indexOf(col)]] : all;
+    const keep = (k) => (k !== 'total' || spec.total) && (k !== 'to' || !spec.rate);
+    const cells = one ? [all[OV_COLS.indexOf(col)]] : all.filter((c, i) => keep(OV_COLS[i]));
     cells.forEach((c) => c.classList.add('ux-li-v'));
     li.append(span(d.rank == null ? '' : String(d.rank), 'ux-li-rank'), span(d.institution, 'ux-li-name'), ...cells);
     return li;
@@ -809,6 +890,8 @@ function drawOvList(el) {
   const items = records.map((d) => item(d, d.institution === FOCUS ? 'is-york' : ''));
   if (combined) items.push(item(combined, 'is-comb'));
   if (average) items.push(item(average, 'is-comb is-avg'));
+  el.classList.toggle('ux-list-total', !!spec.total && !one);
+  el.classList.toggle('ux-list-rate', !!spec.rate && !one);
   el.replaceChildren(heading(), ...items);
 }
 dash.draw('ov-list', drawOvList);
@@ -817,13 +900,14 @@ dash.draw('ov-list', drawOvList);
 dash.draw('ov-spark', (el) => {
   if (!gate(el, ['totals', 'group_totals'], true)) return;
   const p = P();
-  const f = el.dataset.field;
+  const f = ovKey(el.dataset.field);
   const spec = LISTS[f];
   const york = { name: 'York', color: dash.colors[0],
     pts: dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.institution === FOCUS && r.level === p.level && r[f] != null) };
+  if (spec.rate) { const last = ovP(f, p).year; york.pts = york.pts.filter((r) => r.year <= last); }
   const series = [york];
   const gRows = () => dash.data('group_totals').data.filter((r) => r.group === p.group && r.field === fieldOf(p) && r.level === p.level && r[f] != null);
-  if (spec.comb) series.push({ name: 'Peers combined', color: dash.colors[1], pts: gRows() });
+  if (spec.comb) series.push({ name: spec.rate ? 'Peers average' : 'Peers combined', color: dash.colors[1], pts: gRows().filter((r) => !spec.rate || r.year <= ovP(f, p).year) });
   // Headcount: the peers' total would flatten York's line, so plot the average university in the group instead.
   if (spec.avg) {
     series.push({ name: 'Peers average', color: dash.colors[1],
@@ -847,7 +931,8 @@ dash.draw('ov-spark', (el) => {
   svg.append('g').selectAll('path').data(series.slice().reverse()).join('path').attr('d', (s) => line(s.pts))
     .style('fill', 'none').style('stroke', (s) => s.color).attr('stroke-width', (s) => (s === york ? 2 : 1.5))
     .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-  const sel = york.pts.find((r) => r.year === p.year);
+  const selYear = ovP(f, p).year;
+  const sel = york.pts.find((r) => r.year === selYear);
   if (sel) svg.append('circle').attr('r', 3).attr('cx', x(sel.year)).attr('cy', y(sel[f])).style('fill', york.color);
   const rule = svg.append('line').attr('class', 'ux-rule').attr('y1', 4).attr('y2', H - 18).attr('opacity', 0);
   svg.append('rect').attr('width', W).attr('height', H).style('fill', 'transparent')
@@ -2002,12 +2087,13 @@ dash.draw('bars3d', draw3d);
 const OV_VIEW3D = { yaw: 2.6, pitch: 0.5 }; // the latest years at the back, so the tall recent bars don't hide the rest
 const OV_START3D = { ...OV_VIEW3D };
 function ovSeries(f, p) {
-  const col = ov3Col(p);
+  p = ovP(f, p); // a rate list's charts stop at its year
+  const col = ov3Col(p, f);
   const pct = col === 'value';
   const spec = LISTS[f];
   const h = spec.heads;
   const vf = spec.value?.field ?? f;
-  const fmt = pct ? spec.value?.fmt ?? spec.fmt : col === 'change' ? fmtHeadsChange : fmtN;
+  const fmt = spec.rate ? (col === 'change' ? fmtRatePts : fmtP) : pct ? spec.value?.fmt ?? spec.fmt : col === 'change' ? fmtHeadsChange : fmtN;
   const signed = col === 'change' || (pct && !!spec.signed);
   const { records, combined } = ovRecords(f, p, ovDetailSort(f, p));
   const totals = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level);
@@ -2020,6 +2106,7 @@ function ovSeries(f, p) {
     const r = rowOf(inst, y);
     if (!r) return null;
     if (pct) return r[vf] ?? null;
+    if (col === 'total') return r[spec.total] ?? null;
     if (col === 'change') {
       const b = rowOf(inst, FIRST);
       return r[h] == null || b?.[h] == null ? null : r[h] - b[h];
@@ -2042,9 +2129,13 @@ function ovSeries(f, p) {
   const tipLines = (b, color) => [
     { name, value: fmt(b.v), color },
     ...(b.rank == null ? [] : [{ name: 'Rank that year', value: `${b.rank} of ${b.of}` }]),
-    ...(pct && b.n != null ? [{ name: h === 'international' ? 'International heads' : 'Heads', value: fmtN(b.n) }] : []),
+    ...(pct && !spec.rate && b.n != null ? [{ name: h === 'international' ? 'International heads' : h === 'domestic' ? 'Domestic heads' : h.startsWith('graduate') ? 'Graduate heads' : 'Heads', value: fmtN(b.n) }] : []),
   ];
-  const emptyMsg = f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.' : 'No figures for this selection.';
+  const emptyMsg = f === 'intl_share' && fieldOf(p) !== ALL_F ? 'International share is only available for all students.'
+    : f.startsWith('grad_share') && p.level !== 'All levels' ? 'Graduate share is only available for all levels.'
+    : (f === 'dom_growth' || f === 'intl_growth') && fieldOf(p) !== ALL_F ? 'Domestic and international growth are only available for all students.'
+    : (f === 'dom_growth' || f === 'intl_growth') && p.year === FIRST ? 'Growth starts in 2013-14; pick a later year.'
+    : f === 'grad_share_xmd' && subsetOf(fieldOf(p)) ? 'Medical students can only be taken out for all students or a field of study.' : 'No figures for this selection.';
   return { col, pct, signed, fmt, years: shownYears, insts, bars, name, tipLines, emptyMsg, heads: !pct };
 }
 // One colour per university, the same as the 3D chart's: York orange, Peers muted, the others evenly spaced hues by name.
@@ -2072,7 +2163,7 @@ const ovStrong = (n) => n === FOCUS || OV_BOLD.has(n);
 dash.draw('ov-3d', (el) => {
   if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
   const p = P();
-  const s = ovSeries(el.dataset.field, p);
+  const s = ovSeries(ovKey(el.dataset.field, p), p);
   const view = ovView(p);
   if (view === 'bar') return ovBars(el, s);
   el._3d = null;
@@ -2094,9 +2185,10 @@ function ovBars(el, s) {
 // one blue scale otherwise). Every cell shows its figure when there's room.
 function ovHeat(el, s) {
   const W = Math.max(320, el.clientWidth);
-  const nameW = 104, top = 26, rowH = 30, legendH = 46;
+  const top = 26, rowH = 30, legendH = 46;
   const H = top + s.insts.length * rowH + legendH;
   const { svg, tip } = svgIn(el, W, H);
+  const nameW = Math.max(104, Math.min(W * 0.32, measure(svg, s.insts) + 16)); // room for the longest name
   svg.attr('role', 'img').attr('aria-label', `Heatmap of ${s.name}: ${s.insts.join(', ')} by year.`);
   const cw = (W - nameW) / s.years.length;
   const css = (c) => `rgb(${c.map(Math.round).join(',')})`;
@@ -2226,24 +2318,30 @@ function ovSmall(el, s) {
   const W = Math.max(320, el.clientWidth);
   const cols = Math.max(1, Math.min(4, Math.floor(W / 190)));
   const pw = W / cols, ph = 150, gap = 16;
-  const H = Math.ceil(s.insts.length / cols) * ph;
+  const padT = 6; // room above the first row for York's frame
+  const H = Math.ceil(s.insts.length / cols) * ph + padT;
   const { svg, tip } = svgIn(el, W, H);
   svg.attr('role', 'img').attr('aria-label', `Small charts of ${s.name}, one per university, ${shortYear(s.years[0])} to ${shortYear(s.years.at(-1))}.`);
   const colors = ovColors(el, s.insts);
   let [lo, hi] = d3.extent(s.bars, (b) => b.v);
   if (s.signed || s.heads) { lo = Math.min(0, lo); hi = Math.max(0, hi); }
-  const innerL = 40, innerT = 22, innerB = 40;
+  const innerL = 48, innerT = 22, innerB = 40; // 48: the axis labels clear York's frame
   const x = d3.scalePoint(s.years, [innerL, pw - gap]);
   const y = d3.scaleLinear([lo, hi || 1], [ph - innerB, innerT]).nice(3);
   const tf = s.heads ? (v) => compact.format(v) : d3.format(hi - lo < 0.1 ? '.1%' : '.0%');
   const yorkPts = s.bars.filter((b) => b.name === FOCUS);
   const line = d3.line().x((b) => x(b.year)).y((b) => y(b.v));
   s.insts.forEach((n, k) => {
-    const g = svg.append('g').attr('transform', `translate(${(k % cols) * pw},${Math.floor(k / cols) * ph})`);
+    const g = svg.append('g').attr('transform', `translate(${(k % cols) * pw},${Math.floor(k / cols) * ph + padT})`);
     const pts = s.bars.filter((b) => b.name === n);
+    // York's chart always has a frame in its colour, so it stands out wherever the sort puts it.
+    if (n === FOCUS) {
+      g.append('rect').attr('class', 'ux-small-york').attr('x', 1).attr('y', 1 - padT).attr('width', pw - gap / 2 - 2).attr('height', ph - 9)
+        .attr('rx', 6).attr('fill', 'none').attr('stroke', colors.get(n)).attr('stroke-width', 1.5);
+    }
     const last = pts.at(-1);
     g.append('text').attr('x', innerL).attr('y', 12).attr('font-size', 12).attr('fill', colors.get(n))
-      .attr('font-weight', ovStrong(n) ? 600 : 500).text(n);
+      .attr('font-weight', ovStrong(n) ? 600 : 500).text(fit(svg, n, pw - gap - innerL - 52)).append('title').text(n);
     if (last) {
       g.append('text').attr('x', pw - gap).attr('y', 12).attr('text-anchor', 'end').attr('font-size', 12)
         .attr('fill', s.signed ? (last.v < 0 ? 'var(--color-bad)' : 'var(--color-ok)') : 'var(--color-fg)').text(s.fmt(last.v));
@@ -2279,11 +2377,148 @@ function ovSmall(el, s) {
       });
   });
 }
+// Compact View: "Where York stands". One dot strip per measure (every university in the comparison is a dot, York
+// orange, the median marked) and one table with all four measures side by side, so the view stays the same height
+// whatever the comparison group. The graduate share follows the medical box (md), growth the Domestic | International
+// radio (stu), as on their own tabs.
+const GLANCE = [
+  { key: 'headcount', f: () => 'headcount', name: () => 'Headcount', log: true },
+  { key: 'grad', f: (p) => ovKey('grad_share', p), name: (p) => 'Graduate share' + (p.md === 'out' ? '' : ' (incl. medical)') },
+  { key: 'growth', f: (p) => ovKey('dom_growth', p), name: (p) => (p.stu === 'intl' ? 'International' : 'Domestic') + ' growth since 2012-13', signed: true },
+  { key: 'intl', f: () => 'intl_share', name: () => 'International share' },
+];
+const glanceFmt = (f) => (f === 'headcount' ? fmtN : LISTS[f].fmt);
+// The comparison's rows (York and the group's members) for the selected filters, and each measure's rank.
+function glanceData(p) {
+  const pool = new Set([FOCUS, ...membersOf(p.group)]);
+  const rows = dash.data('totals').data.filter((r) => r.field === fieldOf(p) && r.level === p.level && r.year === p.year && pool.has(r.institution));
+  const out = rows.map((r) => ({ institution: r.institution, row: r }));
+  for (const m of GLANCE) {
+    const f = m.f(p);
+    const has = out.filter((d) => d.row[f] != null);
+    for (const d of out) {
+      d[m.key] = d.row[f] ?? null;
+      d['rank_' + m.key] = d[m.key] == null ? null : 1 + has.filter((o) => o.row[f] > d[m.key]).length;
+      d['n_' + m.key] = has.length;
+    }
+  }
+  return out;
+}
+dash.draw('ov-strips', (el) => {
+  if (!gate(el, ['totals', 'group_totals', 'peer_groups'], true)) return;
+  const p = P();
+  const data = glanceData(p);
+  const york = data.find((d) => d.institution === FOCUS);
+  const W = Math.max(320, el.clientWidth);
+  const narrow = W < 640;
+  const labelW = narrow ? 0 : 230, rankW = narrow ? 0 : 90, rowH = narrow ? 92 : 70;
+  const H = GLANCE.length * rowH;
+  const { svg, tip } = svgIn(el, W, H);
+  svg.attr('role', 'img').attr('aria-label', 'York against each university in the comparison on four measures: ' + GLANCE.map((m) => {
+    const y = york?.[m.key];
+    return `${m.name(p)}: ${y == null ? 'not available' : glanceFmt(m.f(p))(y) + `, ${york['rank_' + m.key]} of ${york['n_' + m.key]}`}`;
+  }).join('; ') + '.');
+  const x0 = labelW + 14, x1 = W - rankW - 14;
+  const orange = dash.colors[0];
+  GLANCE.forEach((m, i) => {
+    const f = m.f(p), fmt = glanceFmt(f);
+    const g = svg.append('g').attr('transform', `translate(0,${i * rowH})`);
+    const top = narrow ? 20 : 0, mid = top + (rowH - top) / 2 + 2;
+    const pts = data.filter((d) => d[m.key] != null);
+    if (i) g.append('line').attr('x1', 0).attr('x2', W).attr('y1', 0.5).attr('y2', 0.5).attr('stroke', 'var(--color-border-line)');
+    // Label, and York's rank (red when in the bottom half).
+    g.append('text').attr('x', 0).attr('y', narrow ? 14 : mid + 4).attr('font-size', 13).attr('font-weight', 600).attr('fill', 'var(--color-fg)').text(m.name(p));
+    if (m.log && !narrow) g.append('text').attr('x', 0).attr('y', mid + 20).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text('log scale');
+    const rk = york?.['rank_' + m.key], n = york?.['n_' + m.key];
+    g.append('text').attr('x', W).attr('y', narrow ? 14 : mid + 4).attr('text-anchor', 'end').attr('font-size', 13).attr('font-weight', 600)
+      .attr('fill', rk == null ? 'var(--color-fg-muted)' : rk > n / 2 ? 'var(--color-bad)' : 'var(--color-ok)')
+      .text(rk == null ? '—' : `#${rk} of ${n}`);
+    if (pts.length < 2) {
+      g.append('text').attr('x', (x0 + x1) / 2).attr('y', mid + 4).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--color-fg-muted)')
+        .text(fieldOf(p) !== ALL_F ? 'Not available with this filter' : p.year === FIRST && m.signed ? 'Growth starts in 2013-14' : 'Not available for this selection');
+      return;
+    }
+    let [lo, hi] = d3.extent(pts, (d) => d[m.key]);
+    if (m.signed) { lo = Math.min(0, lo); hi = Math.max(0, hi); }
+    const x = m.log ? d3.scaleLog([Math.max(1, lo), Math.max(2, hi)], [x0, x1]) : d3.scaleLinear([lo, hi === lo ? lo + 1 : hi], [x0, x1]);
+    g.append('line').attr('x1', x0).attr('x2', x1).attr('y1', mid).attr('y2', mid).attr('stroke', 'var(--color-border-line)');
+    if (m.signed && lo < 0) g.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', mid - 10).attr('y2', mid + 10)
+      .attr('stroke', 'var(--color-fg-muted)').attr('stroke-dasharray', '2 2');
+    // Ends of the scale, unless York's label sits there.
+    const yx0 = york?.[m.key] == null ? null : x(york[m.key]);
+    if (yx0 == null || yx0 > x0 + 110) g.append('text').attr('class', 'ux-tick').attr('x', x0).attr('y', mid + 24).text(fmt(x.domain()[0]));
+    if (yx0 == null || yx0 < x1 - 110) g.append('text').attr('class', 'ux-tick').attr('x', x1).attr('y', mid + 24).attr('text-anchor', 'end').text(fmt(x.domain()[1]));
+    // Median of the comparison (York included).
+    const med = d3.median(pts, (d) => d[m.key]);
+    g.append('line').attr('x1', x(med)).attr('x2', x(med)).attr('y1', mid - 12).attr('y2', mid + 12).attr('stroke', 'var(--color-fg)').attr('stroke-width', 2);
+    g.append('text').attr('class', 'ux-tick').attr('x', x(med)).attr('y', mid - 16).attr('text-anchor', 'middle').text('median ' + fmt(med));
+    const dots = g.append('g');
+    pts.filter((d) => d.institution !== FOCUS).forEach((d) => {
+      dots.append('circle').attr('cx', x(d[m.key])).attr('cy', mid).attr('r', 5).attr('fill', MUTED).attr('fill-opacity', 0.75)
+        .attr('stroke', 'var(--color-panel)').attr('stroke-width', 1);
+    });
+    if (york?.[m.key] != null) {
+      const yx = x(york[m.key]);
+      dots.append('circle').attr('cx', yx).attr('cy', mid).attr('r', 7).attr('fill', orange).attr('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+      g.append('text').attr('x', yx).attr('y', mid + 24).attr('text-anchor', yx < x0 + 60 ? 'start' : yx > x1 - 60 ? 'end' : 'middle')
+        .attr('font-size', 12).attr('font-weight', 600).attr('fill', orange).text('York ' + fmt(york[m.key]));
+    }
+    const ring = g.append('circle').attr('r', 8).attr('fill', 'none').attr('stroke', 'var(--color-fg)').attr('stroke-width', 1.5).attr('visibility', 'hidden');
+    g.append('rect').attr('x', x0 - 8).attr('y', top).attr('width', x1 - x0 + 16).attr('height', rowH - top).attr('fill', 'transparent')
+      .on('pointermove', (e) => {
+        const [mx] = d3.pointer(e, g.node());
+        const d = d3.least(pts, (q) => Math.abs(x(q[m.key]) - mx));
+        ring.attr('cx', x(d[m.key])).attr('cy', mid).attr('visibility', 'visible');
+        showTip(el, tip, e, d.institution, [{ name: m.name(p), value: fmt(d[m.key]), color: d.institution === FOCUS ? orange : MUTED },
+          { name: 'Rank', value: `${d['rank_' + m.key]} of ${d['n_' + m.key]}` }]);
+      })
+      .on('pointerleave', () => { ring.attr('visibility', 'hidden'); tip.hidden = true; });
+  });
+});
+dash.draw('glance-rows', (tb) => {
+  const table = tb.closest('table');
+  if (!gateRows(tb, ['totals', 'group_totals', 'peer_groups'], 5)) return;
+  const p = P();
+  table.querySelectorAll('th[data-glance]').forEach((th) => {
+    th.querySelector('.ux-sort').textContent = th.dataset.glance === 'growth' ? (p.stu === 'intl' ? 'Intl growth' : 'Domestic growth') : th.dataset.label;
+  });
+  const list = glanceData(p);
+  sortRows(list, table);
+  const cell = (d, m) => {
+    const v = d[m.key];
+    const c = td('', 'ux-num' + (m.signed ? ' ' + tone(v) : ''));
+    if (v == null) { c.textContent = '—'; return c; }
+    c.append(cite('span', glanceFmt(m.f(p))(v), d.source ?? 'totals', m.f(p), 'key=' + enc(d.row.key)));
+    if (d['rank_' + m.key] != null) {
+      const r = document.createElement('span');
+      r.className = 'ux-rk';
+      r.textContent = '#' + d['rank_' + m.key];
+      c.append(r);
+    }
+    return c;
+  };
+  const rowEl = (d, cls) => {
+    const tr = document.createElement('tr');
+    if (cls) tr.className = cls;
+    if (cls === 'is-picked') tr.style.setProperty('--york', dash.colors[0]);
+    tr.append(td(d.institution), ...GLANCE.map((m) => cell(d, m)));
+    return tr;
+  };
+  const trs = list.map((d) => rowEl(d, d.institution === FOCUS ? 'is-picked' : OV_BOLD.has(d.institution) ? 'is-bold' : ''));
+  const comb = byKeyRow(dash.data('group_totals').data).get(groupKey(p));
+  if (comb) {
+    const d = { institution: 'Peers (combined)', row: comb, source: 'group_totals' };
+    for (const m of GLANCE) d[m.key] = comb[m.f(p)] ?? null;
+    trs.push(rowEl(d, 'is-comb'));
+  }
+  tb.replaceChildren(...trs);
+});
 // The chart's heading: the number and the years it covers.
 dash.draw('ov-3d-title', (el) => {
-  const p = P();
-  const f = el.dataset.field;
-  const col = ov3Col(p);
+  let p = P();
+  const f = ovKey(el.dataset.field);
+  const col = ov3Col(p, f);
+  p = ovP(f, p);
   const span = p.year === FIRST ? shortYear(FIRST) : `${shortYear(FIRST)} to ${shortYear(p.year)}`;
   el.textContent = `${ovColName(f, col)} by university and year, ${col === 'from' ? shortYear(FIRST) : span}`;
 });
