@@ -300,7 +300,7 @@ const cmpOn = (key, dir) => (a, b) => {
   return dir === 'asc' ? d3.ascending(x, y) : d3.descending(x, y);
 };
 function sortRows(list, table) {
-  const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
+  const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: table.dataset.defaultDir || 'desc' };
   list.sort(cmpOn(s.key, s.dir));
   table.querySelectorAll('th').forEach((th) => {
     const b = th.querySelector('.ux-sort');
@@ -397,7 +397,7 @@ document.addEventListener('click', (e) => {
   const sort = e.target.closest('.ux .ux-sort');
   if (sort) {
     const table = sort.closest('table');
-    const cur = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
+    const cur = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: table.dataset.defaultDir || 'desc' };
     const key = sort.dataset.sort;
     const text = key === 'category' || key === 'institution';
     const dir = cur.key === key ? (cur.dir === 'asc' ? 'desc' : 'asc') : text ? 'asc' : 'desc';
@@ -464,13 +464,16 @@ document.addEventListener('input', (e) => {
 const SHOW_BREAKDOWNS = false;
 const BREAKDOWN_PAGES = ['mix', 'gains', 'table'];
 // 'share' (Share of Ontario) was removed at the user's request; old links fall back to the overview.
-const PAGES = ['overview', 'growth', 'ranking', 'institutions', 'forecast', ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
+// The pages this build has: gen.py sets window.DASH_PAGES (the basic site has fewer than the advanced one).
+const PAGES = [...(window.DASH_PAGES ?? ['overview', 'growth', 'ranking', 'institutions', 'forecast']), ...(SHOW_BREAKDOWNS ? BREAKDOWN_PAGES : [])];
 const pageOf = (p) => (PAGES.includes(p.page) ? p.page : 'overview');
 if (!SHOW_BREAKDOWNS) {
   document.querySelectorAll('.ux .ux-nav-breakdowns').forEach((el) => { el.hidden = true; });
 }
 
 // Filters that change nothing on the open page are disabled, with the reason as a tooltip.
+// Pages added by other builds can name a reason the one-file filters don't apply to them.
+const IDLE_SUBSETS = {};
 function idleFilters(p) {
   const page = pageOf(p);
   const off = {};
@@ -482,6 +485,8 @@ function idleFilters(p) {
     for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = 'The breakdowns aren’t cross-tabulated with this filter, so it doesn’t change them.';
     off['f-field'] = 'The breakdowns aren’t cross-tabulated with this filter. To see a field’s programs, open it in the Field of study tab.';
   }
+  if (IDLE_SUBSETS[page])
+    for (const id of ['f-credential', 'f-studyyear', 'f-citizen', 'f-gender']) off[id] = IDLE_SUBSETS[page];
   if (p.level === 'Graduate' && !off['f-studyyear']) off['f-studyyear'] = 'Year of study is reported for undergraduates only.';
   return off;
 }
@@ -1719,7 +1724,7 @@ dash.draw('dim-rows', (tb) => {
   if (id === TREE) {
     // Both levels sort by the chosen header; a search opens the fields whose programs match.
     sortRows([], table);
-    const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: 'desc' };
+    const s = sortBy.get(table.id) ?? { key: table.dataset.defaultSort || 'headcount', dir: table.dataset.defaultDir || 'desc' };
     list = treeRows(cmpOn(s.key, s.dir), { keep: q ? match : null });
   } else {
     list = selRows(id);

@@ -7,3 +7,6 @@ scripts/docs/
 __pycache__/
 *.pyc
 
+
+# advanced dashboard (own repo later; never pushed here)
+advanced/

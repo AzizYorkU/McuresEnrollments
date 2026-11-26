@@ -295,3 +295,5 @@
 .ux-glance-table tr.is-picked td:first-child { box-shadow: inset 3px 0 0 var(--york); }
 .ux-glance-table tr.is-bold td:first-child { font-weight: 600; }
 .ux-glance-table tr.is-comb td { color: var(--color-fg-muted); border-top: 1px dashed var(--color-border-line); }
+
+.ux-sort.ux-nosort { display: block; cursor: default; }

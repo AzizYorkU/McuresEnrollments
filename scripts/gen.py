@@ -247,6 +247,8 @@ ov_details = (ov_detail("headcount", "Headcount", "Share of Students", "")
               + ov_detail("dom_growth", "Domestic vs international growth", "Growth Rate", " Heads count domestic or international students, as picked. Peers is shown only for the Growth Rate column.")
               + ov_detail("intl_share", "International share", "Intl Share", " Heads count international students only." + PEERS_NOTE))
 
+# Advanced pages live outside this repo's published code (advanced/src, git-ignored); here they're placeholders.
+adv_nav, adv_sections = "@@ADV_NAV@@", "@@ADV_SECTIONS@@"
 html = f"""<meta name="dash-one-writer">
 <style>
 {css}
@@ -260,7 +262,7 @@ html = f"""<meta name="dash-one-writer">
     <p class="ux-nav-h">Against the group</p>
     <button class="ux-navlink" type="button" data-page="ranking">Ranking</button>
     <button class="ux-navlink" type="button" data-page="institutions">Institutions</button>
-    <p class="ux-nav-h">Looking ahead</p>
+{adv_nav}    <p class="ux-nav-h">Looking ahead</p>
     <button class="ux-navlink" type="button" data-page="forecast">Forecast</button>
     <p class="ux-nav-h ux-nav-breakdowns">Breakdowns</p>
     <button class="ux-navlink ux-nav-breakdowns" type="button" data-page="mix">York’s mix</button>
@@ -404,7 +406,7 @@ html = f"""<meta name="dash-one-writer">
         </div>
       </div>
     </section>
-
+{adv_sections}
     <section class="ux-page" data-page="forecast" id="forecast" hidden>
       <div class="ux-card" id="fc-card">
         <h2 data-draw="fc-title" data-source="totals peer_groups">Forecast</h2>
@@ -440,37 +442,61 @@ html = f"""<meta name="dash-one-writer">
 {js}
 </script>
 """
+# Two builds from the same page:
+#   basic    -> repo-root docs/ (GitHub Pages): Overview, Growth, Ranking, Forecast
+#   advanced -> advanced/site/ (git-ignored, for a separate repo later): every page, plus the pages in advanced/src
+BASIC_PAGES = ["overview", "growth", "ranking", "forecast"]
+ALL_PAGES = ["overview", "growth", "ranking", "institutions", "forecast"]
+ROOT = os.path.dirname(HERE)
+ADV = os.path.join(ROOT, "advanced", "src")
+
+
+def strip_pages(h, keep):
+    """Drops the nav buttons and page sections of pages not in keep (the hidden breakdown pages stay)."""
+    import re
+    for pg in re.findall(r'<section class="ux-page" data-page="([a-z]+)"', h):
+        if pg in keep:
+            continue
+        h = re.sub(r'\n    <button class="ux-navlink" type="button" data-page="%s">[^<]*</button>' % pg, "", h)
+        h = re.sub(r'\n    <section class="ux-page" data-page="%s".*?\n    </section>\n' % pg, "\n", h, flags=re.S)
+    return h
+
+
+basic_html = strip_pages(html.replace(adv_nav, "").replace(adv_sections, ""), BASIC_PAGES)
 with open(os.path.join(OUT, "index.json"), "w", encoding="utf-8") as f:
-    json.dump({"text": html}, f, ensure_ascii=False)
+    json.dump({"text": basic_html}, f, ensure_ascii=False)
 writes.append(w("set", "files", "index.html", file_path=os.path.abspath(os.path.join(OUT, "index.json"))))
 with open(os.path.join(OUT, "writes.json"), "w", encoding="utf-8") as f:
     json.dump(writes, f, ensure_ascii=False, indent=1)
-print("page bytes:", len(html.encode()), "writes:", len(writes))
+print("page bytes:", len(basic_html.encode()), "writes:", len(writes))
 
-# Static site for GitHub Pages (repo-root docs/): same page, a small runtime stand-in (site/dash.js), CSVs alongside.
 import shutil
-SITE = os.path.join(os.path.dirname(HERE), "docs")
-os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
 ids = ["status", "peer_groups", "medical"] + [d for d, *_ in DIMS]
-for i in ids:
-    shutil.copyfile(os.path.join(HERE, "out", f"{i}.csv"), os.path.join(SITE, "data", f"{i}.csv"))
-for f in ["dash.js", "theme.css", "d3.min.js"]:
-    shutil.copyfile(os.path.join(HERE, "site", f), os.path.join(SITE, f))
-open(os.path.join(SITE, ".nojekyll"), "w").close()
 params = next(e["data"] for e in writes if e["collection"] == "dash" and e["doc_id"] == "params")
-body = html.replace('<meta name="dash-one-writer">\n', "")
-page = f"""<!doctype html>
+
+
+def write_site(site, h, pages, prm, title):
+    """A static site: the page, a small runtime stand-in (site/dash.js), CSVs alongside."""
+    os.makedirs(os.path.join(site, "data"), exist_ok=True)
+    for i in ids:
+        shutil.copyfile(os.path.join(HERE, "out", f"{i}.csv"), os.path.join(site, "data", f"{i}.csv"))
+    for f in ["dash.js", "theme.css", "d3.min.js"]:
+        shutil.copyfile(os.path.join(HERE, "site", f), os.path.join(site, f))
+    open(os.path.join(site, ".nojekyll"), "w").close()
+    body = h.replace('<meta name="dash-one-writer">\n', "")
+    page = f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>York University vs Ontario Peers</title>
+<title>{title}</title>
 <meta name="description" content="How York University's enrolment compares with other Ontario universities, 2012-13 to 2024-25.">
 <link rel="stylesheet" href="theme.css">
 <script src="d3.min.js"></script>
 <script>
 window.DASH_SOURCES = {json.dumps({i: f"data/{i}.csv" for i in ids})};
-window.DASH_PARAMS = {json.dumps(params)};
+window.DASH_PARAMS = {json.dumps(prm)};
+window.DASH_PAGES = {json.dumps(pages)};
 </script>
 <script src="dash.js"></script>
 </head>
@@ -481,6 +507,24 @@ window.DASH_PARAMS = {json.dumps(params)};
 </body>
 </html>
 """
-with open(os.path.join(SITE, "index.html"), "w", encoding="utf-8") as f:
-    f.write(page)
-print("site:", SITE, "files:", sorted(os.listdir(SITE)))
+    with open(os.path.join(site, "index.html"), "w", encoding="utf-8") as f:
+        f.write(page)
+    print("site:", site, "pages:", ", ".join(pages))
+
+
+write_site(os.path.join(ROOT, "docs"), basic_html, BASIC_PAGES, params, "York University vs Ontario Peers")
+
+# Advanced: only when its source is here (advanced/src: advanced.js, advanced.css, sections.py).
+if os.path.isdir(ADV):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("adv_sections", os.path.join(ADV, "sections.py"))
+    adv = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(adv)
+    a_css = open(os.path.join(ADV, "advanced.css"), encoding="utf-8").read()
+    a_js = open(os.path.join(ADV, "advanced.js"), encoding="utf-8").read()
+    h = html.replace(adv_nav, adv.NAV).replace(adv_sections, adv.SECTIONS)
+    h = h.replace("\n</style>", "\n" + a_css + "\n</style>", 1)
+    k = h.rindex("\n</script>")
+    h = h[:k] + "\n" + a_js + h[k:]
+    pages = ALL_PAGES[:4] + adv.PAGES + ALL_PAGES[4:]
+    write_site(os.path.join(ROOT, "advanced", "site"), h, pages, {**params, **adv.PARAMS}, "York University vs Ontario Peers (advanced)")
